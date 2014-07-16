@@ -24,8 +24,19 @@ class Reader {
   def FS(r: Regex) = { fs = r; update(); this }
   def RS(r: Regex) = { rs = r; update(); this }
 
-  def FS(s: String) = { fs = s.er; update(); this }
-  def RS(s: String) = { rs = s.er; update(); this }
+  private val matchNothing = """(?!.).""".r
+
+  def FS(s: String) = {
+    fs = if (s.isEmpty) matchNothing else s.er
+    update()
+    this
+  }
+
+  def RS(s: String) = {
+    rs = if (s.isEmpty) matchNothing else s.er
+    update()
+    this
+  }
 
   def FQ(q: QuoteOption) = { fq = q; update(); this }
 

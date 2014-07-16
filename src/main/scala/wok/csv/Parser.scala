@@ -115,7 +115,7 @@ class Parser(FS: Regex, RS: Regex, FQ: QuoteOption) extends RegexParsers {
   Larger than zero.
    */
   def non_quoted: Parser[String] =
-    s"""((?!$FS)(?!$RS).)*""".r
+    s"""((?!$FS)(?!$RS)(?s).)*""".r
 
   def EOF: Regex = """\z""".r
 

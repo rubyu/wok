@@ -10,6 +10,8 @@ version := "0.0.0"
 scalaVersion := "2.10.4"
 
 libraryDependencies ++= Seq(
+    "com.github.scala-incubator.io" % "scala-io-core_2.10" % "0.4.3",
+    "com.github.scala-incubator.io" % "scala-io-file_2.10" % "0.4.3",
     "org.specs2" % "specs2_2.10" % "2.3.12" % "test"
   )
 

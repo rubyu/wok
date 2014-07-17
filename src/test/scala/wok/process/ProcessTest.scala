@@ -2,79 +2,61 @@
 package wok.process
 
 import org.specs2.mutable._
-import java.nio.charset.StandardCharsets
-import java.io.{BufferedOutputStream, PrintStream, ByteArrayOutputStream}
+import Helpers._
 
 
 class ProcessTest extends SpecificationWithJUnit {
   "Process.exec" should {
-    "redirect stderr output" in {
-      val outStream = new ByteArrayOutputStream
-      val out = new PrintStream(new BufferedOutputStream(outStream), true, "utf-8")
-      Console.withErr(out) {
-        new Process(Seq("python", "-c", "import sys; sys.stderr.write('a')"))
-          .exec()
-      }
-      outStream.toByteArray mustEqual "a".getBytes(StandardCharsets.UTF_8)
-    }
-
     "throw IllegalArgumentException when commandStrings is '|'" in {
       new Process(Seq("|"))
-        .exec() must throwAn[IllegalArgumentException]
+        .exec must throwAn[IllegalArgumentException]
     }
 
     "throw IllegalArgumentException when commandStrings starts with '|'" in {
       new Process(Seq("|", "a"))
-        .exec() must throwAn[IllegalArgumentException]
+        .exec must throwAn[IllegalArgumentException]
     }
 
     "throw IllegalArgumentException when commandStrings ends with '|'" in {
       new Process(Seq("a", "|"))
-        .exec() must throwAn[IllegalArgumentException]
+        .exec must throwAn[IllegalArgumentException]
     }
 
     "throw IllegalArgumentException when commandStrings is empty" in {
       new Process(Seq())
-        .exec() must throwAn[IllegalArgumentException]
+        .exec must throwAn[IllegalArgumentException]
     }
 
-    "call windows programs" in {
-      new Process(Seq("cmd", "/c", "echo", "a"))
-        .exec() mustEqual "a\r\n".getBytes(StandardCharsets.UTF_8)
-    }
-
-    "call cygwin programs" in {
+    "call a program" in {
       new Process(Seq("echo", "a"))
-        .exec() mustEqual "a\n".getBytes(StandardCharsets.UTF_8)
+        .exec.string mustEqual "a\n"
     }
 
-    "call programs with arguments" in {
+    "call a program with arguments" in {
       new Process(Seq("cat", "./src/test/scala/wok/process/resources/angel.txt"))
-        .exec() mustEqual "angel\r\néindʒəl\r\n".getBytes(StandardCharsets.UTF_8)
+        .exec.string mustEqual "angel\r\néindʒəl\r\n"
     }
 
-    "call programs with unicode encoded arguments" in {
+    "call a program with unicode encoded arguments" in {
       new Process(Seq("cat", "./src/test/scala/wok/process/resources/angel.txt",
-        "|",
-        "grep", "éindʒəl"))
-        .exec() mustEqual "éindʒəl\n".getBytes(StandardCharsets.UTF_8)
+        "|", "grep", "éindʒəl"))
+        .exec.string mustEqual "éindʒəl\n"
     }
 
-    "call programs with standard input" in {
+    "call a program with standard input" in {
       new Process(Seq("cat", "./src/test/scala/wok/process/resources/angel.txt", "-"))
-        .exec("stdin-data".getBytes(StandardCharsets.UTF_8)) mustEqual "angel\r\néindʒəl\r\nstdin-data".getBytes(StandardCharsets.UTF_8)
+        .exec("stdin-data").string mustEqual "angel\r\néindʒəl\r\nstdin-data"
     }
 
-    "call programs with unicode encoded standard input" in {
+    "call a program with unicode encoded standard input" in {
       new Process(Seq("cat", "./src/test/scala/wok/process/resources/angel.txt", "-"))
-        .exec("éindʒəl".getBytes(StandardCharsets.UTF_8)) mustEqual "angel\r\néindʒəl\r\néindʒəl".getBytes(StandardCharsets.UTF_8)
+        .exec("éindʒəl").string mustEqual "angel\r\néindʒəl\r\néindʒəl"
     }
 
     "connect programs" in {
       new Process(Seq("cat", "./src/test/scala/wok/process/resources/angel.txt",
-        "|",
-        "grep", "an"))
-        .exec() mustEqual "angel\n".getBytes(StandardCharsets.UTF_8)
+        "|", "grep", "an"))
+        .exec.string mustEqual "angel\n"
     }
   }
 }

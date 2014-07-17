@@ -1,10 +1,11 @@
 
 package wok.process
 
-import java.io.InputStream
+import java.io.ByteArrayInputStream
 import scala.sys.process._
 import annotation.tailrec
 import concurrent.SyncVar
+import scalax.io.{Codec, Resource}
 
 
 class Process(commandStrings: Seq[String]) {
@@ -23,41 +24,31 @@ class Process(commandStrings: Seq[String]) {
 
   def exec() = executeCommands()
   def exec(bytes: Array[Byte]) = executeCommands(bytes)
+  def exec(s: String)(implicit cd: Codec = Codec.default) = executeCommands(cd.encode(s))
 
-  private def streamToBytes(in: InputStream) = Stream.continually(in.read()).takeWhile(-1 !=).map(_.toByte).toArray
-
-  private def executeCommands(input: Array[Byte] = Array[Byte]()): Array[Byte] = {
-    def execute(input: Array[Byte], command: Seq[String]): Array[Byte] = {
-      val in = new SyncVar[Unit]
-      val out = new SyncVar[Array[Byte]]
-      val err = new SyncVar[Array[Byte]]
+  private def executeCommands(input: Array[Byte] = Array[Byte]()): Result = {
+    def execute(input: Array[Byte], command: Seq[String]): Result = {
+      val out, err = new SyncVar[Array[Byte]]
 
       val p = command.run(new ProcessIO(
-        stdin => { try { in put stdin.write(input) } finally { stdin.close() } },
-        stdout => { try { out put streamToBytes(stdout) } finally { stdout.close() } },
-        stderr => { try { err put streamToBytes(stderr) } finally { stderr.close() } }
-      ))
+        stdin => { try stdin.write(input) finally stdin.close() },
+        stdout => { try out put Resource.fromInputStream(stdout).byteArray finally stdout.close() },
+        stderr => { try err put Resource.fromInputStream(stderr).byteArray finally stderr.close() }))
+
       try {
-        in.get
-        p.exitValue() match {
-          case code if code != 0 => throw new RuntimeException(s"process returns non zero exit code: ${code}")
-          case _ =>
-        }
-        err.get match {
-          case bytes if bytes.size > 0 => Console.err.write(bytes)
-          case _ =>
-        }
-        out.get
+        Result(p.exitValue(),
+          Resource.fromInputStream(new ByteArrayInputStream(out.get)),
+          Resource.fromInputStream(new ByteArrayInputStream(err.get)))
       } finally {
         p.destroy()
       }
     }
 
     @tailrec
-    def executeSeq(input: Array[Byte], commands: Seq[Seq[String]]): Array[Byte] = {
+    def executeSeq(input: Array[Byte], commands: Seq[Seq[String]]): Result = {
       commands match {
         case head :: Nil => execute(input, head)
-        case head :: tail => executeSeq(execute(input, head), tail)
+        case head :: tail => executeSeq(execute(input, head).out.byteArray, tail)
       }
     }
     executeSeq(input, parse(commandStrings))

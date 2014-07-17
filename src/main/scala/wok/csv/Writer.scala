@@ -1,7 +1,7 @@
 
 package wok.csv
 
-import java.io.PrintStream
+import java.io.OutputStream
 import java.nio.charset.{Charset, StandardCharsets}
 import wok.core.Helpers._
 
@@ -59,12 +59,16 @@ class Writer {
   private var escape = _escape
   private def update(): Unit = escape = _escape
 
-  def write(out: PrintStream, x: Any) {
+  def write(x: Any)(implicit out: OutputStream = System.out) {
     val str = x match {
       case x: Seq[_] => x.map { x => escape(x.toString) } mkString(OFS)
       case x => escape(x.toString)
     }
     out.write(str.getBytes(ocd))
+  }
+
+  def writeln(x: Any)(implicit out: OutputStream = System.out) {
+    write(x)(out)
     out.write(ors.getBytes(ocd))
   }
 }

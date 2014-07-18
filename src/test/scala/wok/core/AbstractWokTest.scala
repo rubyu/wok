@@ -19,7 +19,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       val reader = new Reader()
     }
 
-    "support accesses for Parser's parameters" in {
+    "support accesses for Reader's parameters" in {
       "FS" in {
         val wok = new Wok()
         wok.FS.toString mustEqual "\\s+"
@@ -46,6 +46,32 @@ class AbstractWokTest extends SpecificationWithJUnit {
         val wok = new Wok()
         wok.CD mustEqual Codec.default
         wok.CD(Codec.ISO8859).CD mustEqual Codec.ISO8859
+      }
+    }
+
+    "support accesses for Writer's parameters" in {
+      "OFS" in {
+        val wok = new Wok()
+        wok.OFS mustEqual " "
+        wok.OFS("a").OFS mustEqual "a"
+      }
+
+      "ORS" in {
+        val wok = new Wok()
+        wok.ORS mustEqual "\n"
+        wok.ORS("a").ORS mustEqual "a"
+      }
+
+      "OFQ" in {
+        val wok = new Wok()
+        wok.OFQ mustEqual QuoteOption()
+        wok.OFQ(QuoteOption().All()).OFQ mustEqual QuoteOption().All()
+      }
+
+      "OCD" in {
+        val wok = new Wok()
+        wok.OCD mustEqual Codec.default
+        wok.OCD(Codec.ISO8859).OCD mustEqual Codec.ISO8859
       }
     }
 

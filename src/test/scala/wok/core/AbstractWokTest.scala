@@ -4,7 +4,7 @@ package wok.core
 import org.specs2.mutable._
 import org.specs2.specification.Scope
 import wok.csv.{Writer, Reader}
-import java.io.{File, BufferedOutputStream, PrintStream, ByteArrayOutputStream}
+import java.io.{BufferedOutputStream, PrintStream, ByteArrayOutputStream}
 import scalax.file.Path
 
 
@@ -21,7 +21,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.PrintablePath
 
       trait scope extends Scope {
-        val p = Path(File.createTempFile("test", "txt"))
+        val p = Path.createTempFile()
       }
 
       "Path.println to non-existing file" in {

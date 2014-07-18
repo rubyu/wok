@@ -3,8 +3,9 @@ package wok.core
 
 import util.matching.Regex
 import scalax.file.Path
-import wok.csv.{Row, Writer}
+import wok.csv.{Row, Reader, Writer}
 import scalax.io.Resource
+import java.io.{InputStream, FileNotFoundException}
 
 
 object Helpers {
@@ -26,6 +27,17 @@ object Helpers {
     def escaped(e: Char, t: String): String = str.escaped(e.toString, t)
     def escaped(e: String, t: String): String = str.escaped(e).replace(t, e + t)
     def escaped(e: String): String = str.replace(e, e + e)
+  }
+
+  implicit class OpenableInputStream(val in: InputStream) extends AnyVal {
+    def open()(implicit r: Reader): Iterator[Row] = r.open(in)
+  }
+
+  implicit class OpenablePath(val p: Path) extends AnyVal {
+    def open()(implicit r: Reader): Iterator[Row] = {
+      if (p.exists) r.open(Resource.fromFile(p.fileOption.get).inputStream.open().get)
+      else throw new FileNotFoundException()
+    }
   }
 
   implicit class PrintablePath(val p: Path) extends AnyVal {

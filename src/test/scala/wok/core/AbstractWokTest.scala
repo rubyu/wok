@@ -16,7 +16,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
     class Wok extends AbstractWok {
       val arg = List()
       implicit val writer = new Writer()
-      val reader = new Reader()
+      implicit val reader = new Reader()
     }
 
     "support accesses for Reader's parameters" in {
@@ -153,6 +153,41 @@ class AbstractWokTest extends SpecificationWithJUnit {
           }
         }
         result mustEqual "2"
+      }
+    }
+
+    "privide a function InputStream.open" in {
+      import Helpers.OpenableInputStream
+
+      "open an InputStream" in {
+        val in = new ByteArrayInputStream("".getBytes())
+        val wok = new Wok {
+          def open = in.open()
+        }
+        wok.open.toList mustEqual List()
+      }
+    }
+
+    "privide a function Path.open" in {
+      import Helpers.OpenablePath
+
+      trait scope extends Scope {
+        val p = Path.createTempFile()
+      }
+
+      "open a existent file" in new scope {
+        p.write("a b c")
+        val wok = new Wok {
+          def open = p.open()
+        }
+        wok.open.next().field mustEqual List("a", "b", "c")
+      }
+
+      "open a non-existent file" in new scope {
+        val wok = new Wok {
+          def open = Path("non-existent").open()
+        }
+        wok.open must throwA[FileNotFoundException]
       }
     }
 

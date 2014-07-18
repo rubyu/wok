@@ -12,7 +12,7 @@ trait AbstractWok {
   def print(x: Any)(implicit w: Writer): Unit = { w.write(Console.out, x) }
   def println(x: Any = "")(implicit w: Writer): Unit = { w.writeln(Console.out, x) }
 
-  val reader: Reader
+  implicit val reader: Reader
   implicit val writer: Writer
 
   def FS: Regex = reader.FS

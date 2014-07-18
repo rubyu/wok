@@ -24,12 +24,16 @@ class AbstractWokTest extends SpecificationWithJUnit {
         val wok = new Wok()
         wok.FS.toString mustEqual "\\s+"
         wok.FS("a".r).FS.toString mustEqual "a"
+        wok.FS("a").FS.toString mustEqual "a"
+        wok.FS("").FS.toString mustEqual "(?!.)."
       }
 
       "RS" in {
         val wok = new Wok()
         wok.RS.toString mustEqual "(\\r\\n|\\r|\\n)"
         wok.RS("a".r).RS.toString mustEqual "a"
+        wok.RS("a").RS.toString mustEqual "a"
+        wok.RS("").RS.toString mustEqual "(?!.)."
       }
 
       "FQ" in {

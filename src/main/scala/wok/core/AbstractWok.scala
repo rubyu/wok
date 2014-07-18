@@ -3,7 +3,6 @@ package wok.core
 
 import util.matching.Regex
 import wok.csv.{Writer, Reader, QuoteOption}
-import java.nio.charset.Charset
 import scalax.io.Codec
 
 
@@ -23,6 +22,8 @@ trait AbstractWok {
 
   def FS(r: Regex) = { reader.FS(r); this }
   def RS(r: Regex) = { reader.RS(r); this }
+  def FS(s: String) = { reader.FS(s); this }
+  def RS(s: String) = { reader.RS(s); this }
   def FQ(q: QuoteOption) = { reader.FQ(q); this }
   def CD(c: Codec) = { reader.CD(c); this }
 

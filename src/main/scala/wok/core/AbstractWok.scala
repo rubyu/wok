@@ -8,13 +8,13 @@ import scalax.io.Codec
 
 
 trait AbstractWok {
-  def arg: List[String]
+  val arg: List[String]
 
   def print(x: Any)(implicit w: Writer): Unit = { w.write(Console.out, x) }
   def println(x: Any = "")(implicit w: Writer): Unit = { w.writeln(Console.out, x) }
 
-  def reader: Reader
-  implicit def writer: Writer
+  val reader: Reader
+  implicit val writer: Writer
 
   def FS: Regex = reader.FS
   def RS: Regex = reader.RS
@@ -24,7 +24,7 @@ trait AbstractWok {
   def FS(r: Regex) = { reader.FS(r); this }
   def RS(r: Regex) = { reader.RS(r); this }
   def FQ(q: QuoteOption) = { reader.FQ(q); this }
-  def CD(c: Charset) = { reader.CD(c); this }
+  def CD(c: Codec) = { reader.CD(c); this }
 
   def OFS: String = writer.OFS
   def ORS: String = writer.ORS
@@ -34,5 +34,5 @@ trait AbstractWok {
   def OFS(s: String) = { writer.OFS(s); this }
   def ORS(s: String) = { writer.ORS(s); this }
   def OFQ(q: QuoteOption) = { writer.OFQ(q); this }
-  def OCD(c: Charset) = { writer.OCD(c); this }
+  def OCD(c: Codec) = { writer.OCD(c); this }
 }

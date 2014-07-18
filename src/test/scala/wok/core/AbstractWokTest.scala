@@ -3,19 +3,46 @@ package wok.core
 
 import org.specs2.mutable._
 import org.specs2.specification.Scope
-import wok.csv.{Writer, Reader}
+import wok.csv.{QuoteOption, Writer, Reader}
 import java.io._
 import scalax.file.Path
 import scala.Console
+import scalax.io.Codec
 
 
 class AbstractWokTest extends SpecificationWithJUnit {
   "AbstractWok" should {
 
     class Wok extends AbstractWok {
-      def arg = List()
-      implicit def writer = new Writer()
-      def reader = new Reader()
+      val arg = List()
+      implicit val writer = new Writer()
+      val reader = new Reader()
+    }
+
+    "support accesses for Parser's parameters" in {
+      "FS" in {
+        val wok = new Wok()
+        wok.FS.toString mustEqual "\\s+"
+        wok.FS("a".r).FS.toString mustEqual "a"
+      }
+
+      "RS" in {
+        val wok = new Wok()
+        wok.RS.toString mustEqual "(\\r\\n|\\r|\\n)"
+        wok.RS("a".r).RS.toString mustEqual "a"
+      }
+
+      "FQ" in {
+        val wok = new Wok()
+        wok.FQ mustEqual QuoteOption()
+        wok.FQ(QuoteOption().All()).FQ mustEqual QuoteOption().All()
+      }
+
+      "CD" in {
+        val wok = new Wok()
+        wok.CD mustEqual Codec.default
+        wok.CD(Codec.ISO8859).CD mustEqual Codec.ISO8859
+      }
     }
 
     "support Iterator[_] and Unit in the type of the result" in {

@@ -4,6 +4,7 @@ package wok.core
 import util.matching.Regex
 import wok.csv.{Writer, Reader, QuoteOption}
 import java.nio.charset.Charset
+import scalax.io.Codec
 
 
 trait AbstractWok {
@@ -18,7 +19,7 @@ trait AbstractWok {
   def FS: Regex = reader.FS
   def RS: Regex = reader.RS
   def FQ: QuoteOption = reader.FQ
-  def CD: Charset = reader.CD
+  def CD: Codec = reader.CD
 
   def FS(r: Regex) = { reader.FS(r); this }
   def RS(r: Regex) = { reader.RS(r); this }
@@ -28,7 +29,7 @@ trait AbstractWok {
   def OFS: String = writer.OFS
   def ORS: String = writer.ORS
   def OFQ: QuoteOption = writer.OFQ
-  def OCD: Charset = writer.OCD
+  def OCD: Codec = writer.OCD
 
   def OFS(s: String) = { writer.OFS(s); this }
   def ORS(s: String) = { writer.ORS(s); this }

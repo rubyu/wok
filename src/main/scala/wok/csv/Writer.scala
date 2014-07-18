@@ -2,15 +2,15 @@
 package wok.csv
 
 import java.io.OutputStream
-import java.nio.charset.{Charset, StandardCharsets}
 import wok.core.Helpers._
+import scalax.io.Codec
 
 
 class Writer {
   private var ofs = " "
   private var ors = "\n"
   private var ofq = QuoteOption()
-  private var ocd = StandardCharsets.UTF_8
+  private var ocd = Codec.default
 
   def OFS = ofs
   def ORS = ors
@@ -20,7 +20,7 @@ class Writer {
   def OFS(s: String) = { ofs = s; update(); this }
   def ORS(s: String) = { ors = s; update(); this }
   def OFQ(q: QuoteOption) = { ofq = q; update(); this }
-  def OCD(c: Charset) = { ocd = c; this }
+  def OCD(c: Codec) = { ocd = c; this }
 
   private def _escape: String => String = {
     ofq match {
@@ -64,11 +64,11 @@ class Writer {
       case x: Seq[_] => x.map { x => escape(x.toString) } mkString(OFS)
       case x => escape(x.toString)
     }
-    out.write(str.getBytes(ocd))
+    out.write(ocd.encode(str))
   }
 
   def writeln(out: OutputStream, x: Any) {
     write(out, x)
-    out.write(ors.getBytes(ocd))
+    out.write(ocd.encode(ors))
   }
 }

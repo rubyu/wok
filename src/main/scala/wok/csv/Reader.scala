@@ -3,15 +3,15 @@ package wok.csv
 
 import util.matching.Regex
 import wok.core.Helpers._
-import java.nio.charset.{Charset, StandardCharsets}
 import java.io.{InputStreamReader, BufferedReader, InputStream}
+import scalax.io.Codec
 
 
 class Reader {
   private var fs = """\s+""".r
   private var rs = """(\r\n|\r|\n)""".r
   private var fq = QuoteOption()
-  private var cd = StandardCharsets.UTF_8
+  private var cd = Codec.default
 
   private var parser = new Parser(fs, rs, fq)
 
@@ -42,8 +42,8 @@ class Reader {
   }
 
   def FQ(q: QuoteOption) = { fq = q; update(); this }
-  def CD(c: Charset) = { cd = c; this }
+  def CD(c: Codec) = { cd = c; this }
 
-  def open(in: InputStream) = new RowIterator(new BufferedReader(new InputStreamReader(in, cd)), this)
+  def open(in: InputStream) = new RowIterator(new BufferedReader(new InputStreamReader(in, cd.charSet)), this)
   def open(in: java.io.Reader) = new RowIterator(in, this)
 }

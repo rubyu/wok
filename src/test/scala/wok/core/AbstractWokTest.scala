@@ -191,14 +191,47 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide functions Path.print/Path.println" in {
+    "provide functions OutputStream.print/println" in {
+      import Helpers.PrintableOutputStream
+
+      trait scope extends Scope {
+        val out = new ByteArrayOutputStream()
+        def result = new String(out.toByteArray)
+      }
+
+      "println" in new scope {
+        new Wok {
+          out.println()
+          out.println()
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(x)" in new scope {
+        new Wok {
+          out.println("a")
+          out.println("b")
+        }
+        result mustEqual "a\nb\n"
+      }
+
+      "print(x)" in new scope {
+        new Wok {
+          out.print("a")
+          out.print("b")
+        }
+        result mustEqual "ab"
+      }
+    }
+
+    "provide functions Path.print/println" in {
       import Helpers.PrintablePath
 
       trait scope extends Scope {
         val p = Path.createTempFile()
       }
 
-      "Path.println to non-existing file" in {
+      "println to non-existing file" in {
         val p = Path("testoutput")
         new Wok {
           p.println("a")
@@ -209,7 +242,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         result mustEqual "a\nb\n"
       }
 
-      "Path.println()" in new scope {
+      "println" in new scope {
         new Wok {
           p.println()
           p.println()
@@ -217,7 +250,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         p.string mustEqual "\n\n"
       }
 
-      "Path.println(x)" in new scope {
+      "println(x)" in new scope {
         new Wok {
           p.println("a")
           p.println("b")
@@ -225,7 +258,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         p.string mustEqual "a\nb\n"
       }
 
-      "Path.print(x)" in new scope {
+      "print(x)" in new scope {
         new Wok {
           p.print("a")
           p.print("b")
@@ -234,7 +267,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide functions print/println" in {
+    "provide functions Wok.print/println" in {
 
       trait scope extends Scope {
         val outStream = new ByteArrayOutputStream

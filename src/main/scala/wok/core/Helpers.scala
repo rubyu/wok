@@ -5,7 +5,7 @@ import util.matching.Regex
 import scalax.file.Path
 import wok.csv.{Row, Reader, Writer}
 import scalax.io.Resource
-import java.io.{InputStream, FileNotFoundException}
+import java.io.{OutputStream, InputStream, FileNotFoundException}
 
 
 object Helpers {
@@ -38,6 +38,11 @@ object Helpers {
       if (p.exists) r.open(Resource.fromFile(p.fileOption.get).inputStream.open().get)
       else throw new FileNotFoundException()
     }
+  }
+
+  implicit class PrintableOutputStream(val out: OutputStream) extends AnyVal {
+    def print(x: Any)(implicit w: Writer): Unit = w.write(out, x)
+    def println(x: Any = "")(implicit w: Writer): Unit = w.writeln(out, x)
   }
 
   implicit class PrintablePath(val p: Path) extends AnyVal {

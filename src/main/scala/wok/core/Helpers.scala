@@ -3,7 +3,7 @@ package wok.core
 
 import util.matching.Regex
 import scalax.file.Path
-import wok.csv.Writer
+import wok.csv.{Row, Writer}
 import scalax.io.Resource
 
 
@@ -35,5 +35,12 @@ object Helpers {
     def println(x: Any = "")(implicit w: Writer): Unit =
       Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.writeln(_, x) }
   }
-}
 
+  implicit class CompletableUnit(val u: Any) extends AnyVal {
+    def complete(): Unit = {}
+  }
+
+  implicit class CompletableIterator(val itr: Iterator[_]) extends AnyVal {
+    def complete(): Unit = itr.foreach { x => }
+  }
+}

@@ -199,7 +199,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         def result = new String(out.toByteArray)
       }
 
-      "println" in new scope {
+      "println()" in new scope {
         new Wok {
           out.println()
           out.println()
@@ -222,6 +222,30 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
         result mustEqual "ab"
       }
+
+      "println() with Writer" in new scope {
+        new Wok {
+          out.println()(new Writer().OFQ(QuoteOption().All()))
+          out.println()(new Writer().OFQ(QuoteOption().All()))
+        }
+        result mustEqual "\"\"\n\"\"\n"
+      }
+
+      "println(x) with Writer" in new scope {
+        new Wok {
+          out.println("a")(new Writer().OFQ(QuoteOption().All()))
+          out.println("b")(new Writer().OFQ(QuoteOption().All()))
+        }
+        result mustEqual "\"a\"\n\"b\"\n"
+      }
+
+      "print(x) with Writer" in new scope {
+        new Wok {
+          out.print("a")(new Writer().OFQ(QuoteOption().All()))
+          out.print("b")(new Writer().OFQ(QuoteOption().All()))
+        }
+        result mustEqual "\"a\"\"b\""
+      }
     }
 
     "provide functions Path.print/println" in {
@@ -242,7 +266,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         result mustEqual "a\nb\n"
       }
 
-      "println" in new scope {
+      "println()" in new scope {
         new Wok {
           p.println()
           p.println()
@@ -264,6 +288,30 @@ class AbstractWokTest extends SpecificationWithJUnit {
           p.print("b")
         }
         p.string mustEqual "ab"
+      }
+
+      "println() with Writer" in new scope {
+        new Wok {
+          p.println()(new Writer().OFQ(QuoteOption().All()))
+          p.println()(new Writer().OFQ(QuoteOption().All()))
+        }
+        p.string mustEqual "\"\"\n\"\"\n"
+      }
+
+      "println(x) with Writer" in new scope {
+        new Wok {
+          p.println("a")(new Writer().OFQ(QuoteOption().All()))
+          p.println("b")(new Writer().OFQ(QuoteOption().All()))
+        }
+        p.string mustEqual "\"a\"\n\"b\"\n"
+      }
+
+      "print(x) with Writer" in new scope {
+        new Wok {
+          p.print("a")(new Writer().OFQ(QuoteOption().All()))
+          p.print("b")(new Writer().OFQ(QuoteOption().All()))
+        }
+        p.string mustEqual "\"a\"\"b\""
       }
     }
 
@@ -303,6 +351,37 @@ class AbstractWokTest extends SpecificationWithJUnit {
           }
         }
         result mustEqual "a\nb\n"
+      }
+
+
+      "print(x) with Writer" in new scope {
+        Console.withOut(out) {
+          new Wok {
+            print("a")(new Writer().OFQ(QuoteOption().All()))
+            print("b")(new Writer().OFQ(QuoteOption().All()))
+          }
+        }
+        result mustEqual "\"a\"\"b\""
+      }
+
+      "println() with Writer" in new scope {
+        Console.withOut(out) {
+          new Wok {
+            println()(new Writer().OFQ(QuoteOption().All()))
+            println()(new Writer().OFQ(QuoteOption().All()))
+          }
+        }
+        result mustEqual "\"\"\n\"\"\n"
+      }
+
+      "println(x) with Writer" in new scope {
+        Console.withOut(out) {
+          new Wok {
+            println("a")(new Writer().OFQ(QuoteOption().All()))
+            println("b")(new Writer().OFQ(QuoteOption().All()))
+          }
+        }
+        result mustEqual "\"a\"\n\"b\"\n"
       }
     }
   }

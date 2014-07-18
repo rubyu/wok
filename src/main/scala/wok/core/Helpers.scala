@@ -2,6 +2,9 @@
 package wok.core
 
 import util.matching.Regex
+import scalax.file.Path
+import wok.csv.Writer
+import scalax.io.Resource
 
 
 object Helpers {
@@ -23,6 +26,14 @@ object Helpers {
     def escaped(e: Char, t: String): String = str.escaped(e.toString, t)
     def escaped(e: String, t: String): String = str.escaped(e).replace(t, e + t)
     def escaped(e: String): String = str.replace(e, e + e)
+  }
+
+  implicit class PrintablePath(val p: Path) extends AnyVal {
+    def print(x: Any)(implicit w: Writer): Unit =
+      Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.write(_, x) }
+
+    def println(x: Any = "")(implicit w: Writer): Unit =
+      Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.writeln(_, x) }
   }
 }
 

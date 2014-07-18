@@ -59,7 +59,7 @@ class Writer {
   private var escape = _escape
   private def update(): Unit = escape = _escape
 
-  def write(x: Any)(implicit out: OutputStream = System.out) {
+  def write(out: OutputStream, x: Any) {
     val str = x match {
       case x: Seq[_] => x.map { x => escape(x.toString) } mkString(OFS)
       case x => escape(x.toString)
@@ -67,8 +67,8 @@ class Writer {
     out.write(str.getBytes(ocd))
   }
 
-  def writeln(x: Any)(implicit out: OutputStream = System.out) {
-    write(x)(out)
+  def writeln(out: OutputStream, x: Any) {
+    write(out, x)
     out.write(ors.getBytes(ocd))
   }
 }

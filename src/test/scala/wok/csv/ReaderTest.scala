@@ -7,6 +7,13 @@ import org.specs2.mutable._
 class ReaderTest extends SpecificationWithJUnit {
 
   "Reader" should {
+    "close io.Reader" in {
+      val in = new java.io.StringReader("")
+      val result = new Reader().open(in)
+      result.toList mustEqual List()
+      in.read() must throwAn[java.io.IOException]
+    }
+
     "return Row" in {
       val result = new Reader()
         .FS("""\t""".r)

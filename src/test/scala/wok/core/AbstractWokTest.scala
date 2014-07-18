@@ -19,7 +19,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
     }
 
     "support Iterator[_] and Unit in the type of the result" in {
-      import Helpers.{CompletableIterator, CompletableUnit}
+      import Helpers.{CompletableIterator, CompletableAny}
 
       "Unit" in {
         new Wok { reader.open(new StringReader("a")) foreach { row => } complete() }
@@ -38,7 +38,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
     }
 
     "provide variables for wok script's context" in {
-      import Helpers.{CompletableIterator, CompletableUnit}
+      import Helpers.{CompletableIterator, CompletableAny}
 
       trait scope extends Scope {
         val outStream = new ByteArrayOutputStream

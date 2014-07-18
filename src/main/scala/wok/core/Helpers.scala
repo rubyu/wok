@@ -36,7 +36,7 @@ object Helpers {
       Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.writeln(_, x) }
   }
 
-  implicit class CompletableUnit(val u: Any) extends AnyVal {
+  implicit class CompletableAny(val u: Any) extends AnyVal {
     def complete(): Unit = {}
   }
 

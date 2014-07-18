@@ -6,6 +6,30 @@ import Helpers._
 
 
 class ProcessTest extends SpecificationWithJUnit {
+
+  "Process.escape" should {
+    def python(s: String) =
+      new Process(Seq("python", "-c",  "\"import sys; sys.stdout.write(sys.argv[1])\"", s)).exec.string
+
+    def echo(s: String) =
+      new Process(Seq("echo", s)).exec.string.dropRight(1)
+
+    val patterns = Seq(
+      "",
+      "a",  //normal character
+      " ", "\t",  //spaces
+      "%DUMMY%", "%PATH%",   //windows environment parameters
+      "\\", "\"", "'", "^", "<", ">", "|", "[", "]", "&", "%" //windows cmd.exe's special characters
+    )
+
+    "escape given parameters" in {
+      patterns map { p =>
+        python(Process.escape(p)) mustEqual p
+        echo(Process.escape(p)) mustEqual p
+      }
+    }
+  }
+
   "Process.exec" should {
     "throw IllegalArgumentException when commandStrings is '|'" in {
       Seq("|")

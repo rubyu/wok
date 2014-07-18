@@ -6,6 +6,7 @@ import scala.sys.process._
 import annotation.tailrec
 import concurrent.SyncVar
 import scalax.io.{Codec, Resource}
+import wok.core.Helpers.{EscapedString, QuotedString}
 
 
 class Process(commandStrings: Seq[String]) {
@@ -53,4 +54,9 @@ class Process(commandStrings: Seq[String]) {
     }
     executeSeq(input, parse(commandStrings))
   }
+}
+
+
+object Process {
+  def escape(s: String) = s.escaped('\\', '"').quoted('"')
 }

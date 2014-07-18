@@ -160,11 +160,19 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.OpenableInputStream
 
       "open an InputStream" in {
-        val in = new ByteArrayInputStream("".getBytes())
+        val in = new ByteArrayInputStream("a b c".getBytes())
         val wok = new Wok {
           def open = in.open()
         }
-        wok.open.toList mustEqual List()
+        wok.open.next.field mustEqual List("a", "b", "c")
+      }
+
+      "open an InputStream with Reader" in {
+        val in = new ByteArrayInputStream("a-b-c".getBytes())
+        val wok = new Wok {
+          def open = in.open()(new Reader().FS("-"))
+        }
+        wok.open.next.field mustEqual List("a", "b", "c")
       }
     }
 
@@ -188,6 +196,14 @@ class AbstractWokTest extends SpecificationWithJUnit {
           def open = Path("non-existent").open()
         }
         wok.open must throwA[FileNotFoundException]
+      }
+
+      "open a existent file with Reader" in new scope {
+        p.write("a-b-c")
+        val wok = new Wok {
+          def open = p.open()(new Reader().FS("-"))
+        }
+        wok.open.next().field mustEqual List("a", "b", "c")
       }
     }
 

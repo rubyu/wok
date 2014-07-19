@@ -31,6 +31,10 @@ class Process(commandStrings: Seq[String]) {
     def execute(input: Array[Byte], command: Seq[String]): Result = {
       val out, err = new SyncVar[Array[Byte]]
 
+      /*
+      Here, ProcessIO.in need to be closed immediately so that it might be occurred that Process.exitValue() never
+      return especially in small inputs.
+       */
       val p = command.run(new ProcessIO(
         stdin => { try stdin.write(input) finally stdin.close() },
         stdout => { try out put Resource.fromInputStream(stdout).byteArray finally stdout.close() },

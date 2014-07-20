@@ -71,3 +71,7 @@ class Writer {
     out.write(ocd.encode(ors))
   }
 }
+
+object Writer {
+  def apply() = new Writer()
+}

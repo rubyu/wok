@@ -9,13 +9,13 @@ class ReaderTest extends SpecificationWithJUnit {
   "Reader" should {
     "close io.Reader" in {
       val in = new java.io.StringReader("")
-      val result = new Reader().open(in)
+      val result = Reader().open(in)
       result.toList mustEqual List()
       in.read() must throwAn[java.io.IOException]
     }
 
     "return Row" in {
-      val result = new Reader()
+      val result = Reader()
         .FS("""\t""".r)
         .RS("""(\r\n|\r|\n)""".r)
         .FQ(Quote() None())
@@ -26,7 +26,7 @@ class ReaderTest extends SpecificationWithJUnit {
     }
 
     "have a Regex does not match to any string as FS when a empty string given" in {
-      val result = new Reader()
+      val result = Reader()
         .FS("")
         .RS("""(\r\n|\r|\n)""".r)
         .FQ(Quote() None())
@@ -37,7 +37,7 @@ class ReaderTest extends SpecificationWithJUnit {
     }
 
     "have a Regex does not match to any string as RS when a empty string given" in {
-      val result = new Reader()
+      val result = Reader()
         .FS("""\t""".r)
         .RS("")
         .FQ(Quote() None())

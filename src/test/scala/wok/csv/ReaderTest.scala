@@ -18,7 +18,7 @@ class ReaderTest extends SpecificationWithJUnit {
       val result = new Reader()
         .FS("""\t""".r)
         .RS("""(\r\n|\r|\n)""".r)
-        .FQ(QuoteOption() None())
+        .FQ(Quote() None())
         .open(new java.io.StringReader("a1\ta2\ta3\nb1\tb2\tb3"))
       result.toList mustEqual List(
         Row(0, List("a1", "a2", "a3"), List("\t", "\t"), "\n", "a1\ta2\ta3\n"),
@@ -29,7 +29,7 @@ class ReaderTest extends SpecificationWithJUnit {
       val result = new Reader()
         .FS("")
         .RS("""(\r\n|\r|\n)""".r)
-        .FQ(QuoteOption() None())
+        .FQ(Quote() None())
         .open(new java.io.StringReader("a1\ta2\nb1\tb2"))
       result.toList mustEqual List(
         Row(0, List("a1\ta2"), Nil, "\n", "a1\ta2\n"),
@@ -40,7 +40,7 @@ class ReaderTest extends SpecificationWithJUnit {
       val result = new Reader()
         .FS("""\t""".r)
         .RS("")
-        .FQ(QuoteOption() None())
+        .FQ(Quote() None())
         .open(new java.io.StringReader("a1\ta2\nb1\tb2"))
       result.toList mustEqual List(
         Row(0, List("a1", "a2\nb1", "b2"), List("\t", "\t"), "", "a1\ta2\nb1\tb2"))

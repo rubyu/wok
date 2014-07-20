@@ -6,7 +6,7 @@ import util.parsing.combinator.RegexParsers
 import wok.core.Helpers._
 
 
-class Parser(FS: Regex, RS: Regex, FQ: QuoteOption) extends RegexParsers {
+class Parser(FS: Regex, RS: Regex, FQ: Quote) extends RegexParsers {
   override val skipWhitespace = false
 
   /*
@@ -69,12 +69,12 @@ class Parser(FS: Regex, RS: Regex, FQ: QuoteOption) extends RegexParsers {
   * Non-quoted fields may contain quote-characters.
    */
   lazy val field : Parser[String] = FQ match {
-    case QuoteOption(QuoteAll, Some(q), Some(e)) => quoted( q, text(q, e) )                 // quote all, and escape Q with E
-    case QuoteOption(QuoteAll, Some(q),    None) => quoted( q, text(q) )                    // quote all, and escape nothing
-    case QuoteOption(QuoteMin, Some(q), Some(e)) => quoted( q, text(q, e) ) | non_quoted(e) // quote if contains Q, and escape Q with E
-    case QuoteOption(QuoteMin, Some(q),    None) => quoted( q, text(q) )    | non_quoted    // quote if contains Q, and escape nothing
-    case QuoteOption(QuoteNone,      _, Some(e)) => non_quoted(e)                           // escape (E|FS|RS) with E
-    case QuoteOption(QuoteNone,      _,    None) => non_quoted                              // escape nothing
+    case Quote(Quote.Mode.All, Some(q), Some(e)) => quoted( q, text(q, e) )
+    case Quote(Quote.Mode.All, Some(q),    None) => quoted( q, text(q) )
+    case Quote(Quote.Mode.Min, Some(q), Some(e)) => quoted( q, text(q, e) ) | non_quoted(e)
+    case Quote(Quote.Mode.Min, Some(q),    None) => quoted( q, text(q) )    | non_quoted
+    case Quote(Quote.Mode.None,      _, Some(e)) => non_quoted(e)
+    case Quote(Quote.Mode.None,      _,    None) => non_quoted
   }
 
   /*

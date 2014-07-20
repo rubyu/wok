@@ -10,7 +10,7 @@ import scalax.io.Codec
 class Reader {
   private var fs = """\s+""".r
   private var rs = """(\r\n|\r|\n)""".r
-  private var fq = QuoteOption()
+  private var fq = Quote()
   private var cd = Codec.default
 
   private var parser = new Parser(fs, rs, fq)
@@ -41,7 +41,7 @@ class Reader {
     this
   }
 
-  def FQ(q: QuoteOption) = { fq = q; update(); this }
+  def FQ(q: Quote) = { fq = q; update(); this }
   def CD(c: Codec) = { cd = c; this }
 
   def open(in: InputStream) = new RowIterator(new BufferedReader(new InputStreamReader(in, cd.charSet)), this)

@@ -9,8 +9,8 @@ import scalax.io.Codec
 trait AbstractWok {
   val arg: List[String]
 
-  def print(x: Any)(implicit w: Writer): Unit = { w.write(Console.out, x) }
-  def println(x: Any = "")(implicit w: Writer): Unit = { w.writeln(Console.out, x) }
+  def print(x: Any *)(implicit w: Writer): Unit = { w.write(Console.out, x: _*) }
+  def println(x: Any *)(implicit w: Writer): Unit = { w.writeln(Console.out, x: _*) }
 
   implicit val reader: Reader
   implicit val writer: Writer

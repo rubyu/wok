@@ -41,16 +41,16 @@ object Helpers {
   }
 
   implicit class PrintableOutputStream(val out: OutputStream) extends AnyVal {
-    def print(x: Any)(implicit w: Writer): Unit = w.write(out, x)
-    def println(x: Any = "")(implicit w: Writer): Unit = w.writeln(out, x)
+    def print(x: Any *)(implicit w: Writer): Unit = w.write(out, x: _*)
+    def println(x: Any *)(implicit w: Writer): Unit = w.writeln(out, x: _*)
   }
 
   implicit class PrintablePath(val p: Path) extends AnyVal {
-    def print(x: Any)(implicit w: Writer): Unit =
-      Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.write(_, x) }
+    def print(x: Any *)(implicit w: Writer): Unit =
+      Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.write(_, x: _*) }
 
-    def println(x: Any = "")(implicit w: Writer): Unit =
-      Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.writeln(_, x) }
+    def println(x: Any *)(implicit w: Writer): Unit =
+      Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.writeln(_, x: _*) }
   }
 
   implicit class CompletableAny(val u: Any) extends AnyVal {

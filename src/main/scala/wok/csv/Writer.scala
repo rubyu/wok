@@ -59,16 +59,15 @@ class Writer {
   private var escape = _escape
   private def update(): Unit = escape = _escape
 
-  def write(out: OutputStream, x: Any) {
-    val str = x match {
-      case x: Seq[_] => x.map { x => escape(x.toString) } mkString(OFS)
-      case x => escape(x.toString)
-    }
-    out.write(ocd.encode(str))
+  def write(out: OutputStream, xs: Any *) {
+    out.write(ocd.encode(xs
+      .flatMap { case x: Seq[_] => x case x: Any => Seq(x) }
+      .map { s => escape(s.toString) }
+      .mkString(ofs)))
   }
 
-  def writeln(out: OutputStream, x: Any) {
-    write(out, x)
+  def writeln(out: OutputStream, xs: Any *) {
+    write(out, xs: _*)
     out.write(ocd.encode(ors))
   }
 }

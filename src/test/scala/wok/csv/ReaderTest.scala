@@ -21,8 +21,8 @@ class ReaderTest extends SpecificationWithJUnit {
         .FQ(QuoteOption() None())
         .open(new java.io.StringReader("a1\ta2\ta3\nb1\tb2\tb3"))
       result.toList mustEqual List(
-        Row(0, List("a1", "a2", "a3"), List("\t", "\t"), "\n"),
-        Row(1, List("b1", "b2", "b3"), List("\t", "\t"), ""))
+        Row(0, List("a1", "a2", "a3"), List("\t", "\t"), "\n", "a1\ta2\ta3\n"),
+        Row(1, List("b1", "b2", "b3"), List("\t", "\t"), "", "b1\tb2\tb3"))
     }
 
     "have a Regex does not match to any string as FS when a empty string given" in {
@@ -32,8 +32,8 @@ class ReaderTest extends SpecificationWithJUnit {
         .FQ(QuoteOption() None())
         .open(new java.io.StringReader("a1\ta2\nb1\tb2"))
       result.toList mustEqual List(
-        Row(0, List("a1\ta2"), Nil, "\n"),
-        Row(1, List("b1\tb2"), Nil, ""))
+        Row(0, List("a1\ta2"), Nil, "\n", "a1\ta2\n"),
+        Row(1, List("b1\tb2"), Nil, "", "b1\tb2"))
     }
 
     "have a Regex does not match to any string as RS when a empty string given" in {
@@ -43,7 +43,7 @@ class ReaderTest extends SpecificationWithJUnit {
         .FQ(QuoteOption() None())
         .open(new java.io.StringReader("a1\ta2\nb1\tb2"))
       result.toList mustEqual List(
-        Row(0, List("a1", "a2\nb1", "b2"), List("\t", "\t"), ""))
+        Row(0, List("a1", "a2\nb1", "b2"), List("\t", "\t"), "", "a1\ta2\nb1\tb2"))
     }
   }
 }

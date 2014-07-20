@@ -37,8 +37,8 @@ class RowIterator(in: io.Reader, parser: Reader) extends Iterator[Row] {
             */
             case x if x.successful && (reachEnd || !x.next.atEnd) =>
               resultId += 1
-              buffer = buffer.subSequence(x.next.offset, buffer.length)
-              Some(x.get.toRow(resultId))
+              try Some(x.get.toRow(resultId, buffer.subSequence(0, x.next.offset).toString))
+              finally buffer = buffer.subSequence(x.next.offset, buffer.length)
             case x if canBeLast =>
               throw new RuntimeException(s"""parse failed at line ${resultId + 2}, after ${buffer.subSequence(0, Math.max(buffer.length, 10))}""")
             case x =>

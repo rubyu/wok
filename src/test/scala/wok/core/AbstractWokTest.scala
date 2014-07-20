@@ -121,7 +121,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           new Wok {
             {
               var NF: Int = -1
-              val result = reader.open(new StringReader("a b c")) map { row => NF = row.field.size; row } map { row => print(NF) }
+              val result = reader.open(new StringReader("a b c")) map { row => NF = row.size; row } map { row => print(NF) }
               result.complete()
             }
           }
@@ -164,7 +164,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         val wok = new Wok {
           def open = in.open()
         }
-        wok.open.next.field mustEqual List("a", "b", "c")
+        wok.open.next mustEqual List("a", "b", "c")
       }
 
       "open an InputStream with Reader" in {
@@ -172,7 +172,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         val wok = new Wok {
           def open = in.open()(new Reader().FS("-"))
         }
-        wok.open.next.field mustEqual List("a", "b", "c")
+        wok.open.next mustEqual List("a", "b", "c")
       }
     }
 
@@ -188,7 +188,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         val wok = new Wok {
           def open = p.open()
         }
-        wok.open.next().field mustEqual List("a", "b", "c")
+        wok.open.next mustEqual List("a", "b", "c")
       }
 
       "open a non-existent file" in new scope {
@@ -203,7 +203,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         val wok = new Wok {
           def open = p.open()(new Reader().FS("-"))
         }
-        wok.open.next().field mustEqual List("a", "b", "c")
+        wok.open.next mustEqual List("a", "b", "c")
       }
     }
 

@@ -1,4 +1,4 @@
-package wok.core
+package wok.reflect
 
 import org.specs2.mutable._
 import java.io.{ByteArrayOutputStream, StringReader}

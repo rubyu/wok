@@ -1,5 +1,5 @@
 
-package wok.core
+package wok.reflect
 
 import util.matching.Regex
 import wok.csv.{Writer, Reader, Quote}

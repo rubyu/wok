@@ -1,5 +1,5 @@
 
-package wok.core
+package wok.reflect
 
 import scala.tools.nsc.{Global, Settings}
 import scala.tools.nsc.interpreter.AbstractFileClassLoader
@@ -38,9 +38,8 @@ class DynamicCompiler {
     """
       |package wok
       |
-      |import wok.core.AbstractWok
-      |import wok.core.Helpers.{OpenableReader, OpenableInputStream, OpenablePath,
-      |  PrintableOutputStream, PrintablePath, CompletableAny, CompletableIterator}
+      |import wok.reflect.AbstractWok
+      |import wok.reflect.Helpers._
       |
       |class Wok(val arg: List[String]) extends AbstractWok {
       |%s

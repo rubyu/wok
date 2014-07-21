@@ -33,6 +33,10 @@ object Helpers {
     def open()(implicit r: Reader): Iterator[Row] = r.open(in)
   }
 
+  implicit class OpenableReader(val reader: java.io.Reader) extends AnyVal {
+    def open()(implicit r: Reader): Iterator[Row] = r.open(reader)
+  }
+
   implicit class OpenablePath(val p: Path) extends AnyVal {
     def open()(implicit r: Reader): Iterator[Row] = {
       if (p.exists) Resource.fromFile(p.fileOption.get).inputStream.open().get.open()(r)

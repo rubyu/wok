@@ -15,8 +15,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
     class Wok extends AbstractWok {
       val arg = List()
-      implicit val writer = Writer()
-      implicit val reader = Reader()
     }
 
     "support accesses for Reader's parameters" in {
@@ -161,6 +159,26 @@ class AbstractWokTest extends SpecificationWithJUnit {
           }
         }
         result mustEqual "2"
+      }
+    }
+
+    "provide a function Reader.open" in {
+      import Helpers.OpenableReader
+
+      "open an InputStream" in {
+        val in = new StringReader("a b c")
+        val wok = new Wok {
+          def open = in.open()
+        }
+        wok.open.next mustEqual List("a", "b", "c")
+      }
+
+      "open an InputStream with Reader" in {
+        val in = new StringReader("a-b-c")
+        val wok = new Wok {
+          def open = in.open()(Reader().FS("-"))
+        }
+        wok.open.next mustEqual List("a", "b", "c")
       }
     }
 

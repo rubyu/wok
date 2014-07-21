@@ -14,8 +14,8 @@ trait AbstractWok {
   def print(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].print(x: _*)(w) }
   def println(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].println(x: _*)(w) }
 
-  implicit val reader: Reader
-  implicit val writer: Writer
+  implicit val reader = Reader()
+  implicit val writer = Writer()
 
   def FS: Regex = reader.FS
   def RS: Regex = reader.RS

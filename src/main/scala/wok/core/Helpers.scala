@@ -35,7 +35,7 @@ object Helpers {
 
   implicit class OpenablePath(val p: Path) extends AnyVal {
     def open()(implicit r: Reader): Iterator[Row] = {
-      if (p.exists) r.open(Resource.fromFile(p.fileOption.get).inputStream.open().get)
+      if (p.exists) Resource.fromFile(p.fileOption.get).inputStream.open().get.open()(r)
       else throw new FileNotFoundException()
     }
   }

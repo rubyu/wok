@@ -8,33 +8,27 @@ import scala.tools.nsc.reporters.ConsoleReporter
 import scala.reflect.internal.util.BatchSourceFile
 
 
-class DynamicCompiler {
-  private val virtualDirectory: VirtualDirectory = new VirtualDirectory("[memory]", None)
-  private val settings: Settings = new Settings
-  settings.deprecation.value = true
-  settings.unchecked.value = true
-  settings.outputDirs.setSingleOutput(virtualDirectory)
-  settings.bootclasspath.value = System.getProperty("java.class.path")
-  settings.classpath.value = settings.bootclasspath.value
+object DynamicCompiler {
 
-  private val global = new Global(settings, new ConsoleReporter(settings))
-  private val classLoader: AbstractFileClassLoader = new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader)
-
-  def compileClass(source: String) {
-    val compiler = new global.Run
-    compiler.compileSources(List(new BatchSourceFile("Wok.scala", source)))
+  private def compile(settings: Settings, source: String) {
+    val global = new Global(settings, new ConsoleReporter(settings))
+    new global.Run().compileSources(List(new BatchSourceFile("Wok.scala", source)))
   }
 
-  def compile(arg: List[String], before: List[String], process: String, after: List[String]): AbstractWok =
-    try {
-      compileClass(wrapScript(before, process, after))
-      classLoader.findClass("wok.Wok")
-        .getConstructor(classOf[List[String]])
-        .newInstance(arg)
-        .asInstanceOf[AbstractWok]
-    } finally virtualDirectory.clear
+  def compile(before: List[String], process: String, after: List[String]): DynamicClass = {
+    val virtualDirectory = new VirtualDirectory("[memory]", None)
+    val settings = new Settings
+    settings.deprecation.value = true
+    settings.unchecked.value = true
+    settings.outputDirs.setSingleOutput(virtualDirectory)
+    settings.bootclasspath.value = System.getProperty("java.class.path")
+    settings.classpath.value = settings.bootclasspath.value
 
-  def wrapScript(before: List[String], process: String, after: List[String]): String = {
+    compile(settings, source(before, process, after))
+    DynamicClass(new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader))
+  }
+
+  private def source(before: List[String], process: String, after: List[String]): String = {
     """
       |package wok
       |

@@ -10,7 +10,9 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       val out = new ByteArrayOutputStream()
       Console.withOut(out) {
         Console.withIn(new StringReader("a b c")) {
-          new DynamicCompiler().compile(Nil, Nil, " map { row => println(row) } ", Nil)
+          DynamicCompiler
+            .compile(Nil, " map { row => println(row) } ", Nil)
+            .create(Nil)
         }
       }
       new String(out.toByteArray) mustEqual "a b c\n"

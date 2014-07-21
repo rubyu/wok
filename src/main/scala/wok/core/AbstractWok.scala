@@ -4,13 +4,15 @@ package wok.core
 import util.matching.Regex
 import wok.csv.{Writer, Reader, Quote}
 import scalax.io.Codec
+import java.io.OutputStream
+import Helpers.PrintableOutputStream
 
 
 trait AbstractWok {
   val arg: List[String]
 
-  def print(x: Any *)(implicit w: Writer): Unit = { w.write(Console.out, x: _*) }
-  def println(x: Any *)(implicit w: Writer): Unit = { w.writeln(Console.out, x: _*) }
+  def print(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].print(x: _*)(w) }
+  def println(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].println(x: _*)(w) }
 
   implicit val reader: Reader
   implicit val writer: Writer

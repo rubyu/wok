@@ -4,7 +4,7 @@ package wok.core
 import util.matching.Regex
 import scalax.file.Path
 import wok.csv.{Row, Reader, Writer}
-import scalax.io.Resource
+import scalax.io.{Resource, StandardOpenOption}
 import java.io.{OutputStream, InputStream, FileNotFoundException}
 
 
@@ -47,10 +47,10 @@ object Helpers {
 
   implicit class PrintablePath(val p: Path) extends AnyVal {
     def print(x: Any *)(implicit w: Writer): Unit =
-      Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.write(_, x: _*) }
+      p.outputStream(StandardOpenOption.Append).acquireFor { _.print(x: _*)(w) }
 
     def println(x: Any *)(implicit w: Writer): Unit =
-      Resource.fromFile(p.fileOption.get).outputStream.acquireFor { w.writeln(_, x: _*) }
+      p.outputStream(StandardOpenOption.Append).acquireFor { _.println(x: _*)(w) }
   }
 
   implicit class CompletableAny(val u: Any) extends AnyVal {

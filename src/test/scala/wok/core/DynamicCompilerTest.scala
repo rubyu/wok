@@ -1,21 +1,126 @@
 package wok.reflect
 
 import org.specs2.mutable._
-import java.io.{ByteArrayOutputStream, StringReader}
+import org.specs2.specification.Scope
+import java.io.{BufferedOutputStream, PrintStream, ByteArrayOutputStream, StringReader}
 
 
 class DynamicCompilerTest extends SpecificationWithJUnit {
   "DynamicCompiler" should {
-    "compile" in {
-      val out = new ByteArrayOutputStream()
-      Console.withOut(out) {
-        Console.withIn(new StringReader("a b c")) {
-          DynamicCompiler
-            .compile(Nil, " map { row => println(row) } ", Nil)
-            .create(Nil)
+
+    trait scope extends Scope {
+      val outStream = new ByteArrayOutputStream
+      val out = new PrintStream(new BufferedOutputStream(outStream), true, "utf-8")
+      def result = new String(outStream.toByteArray, "utf-8")
+    }
+
+    "compile Wok" should {
+      "access to" in {
+
+        "Row" in new scope {
+          Console.withOut(out) {
+            Console.withIn(new StringReader("a b c")) {
+              DynamicCompiler
+                .compile(Nil, Some("foreach { row => print(row) }"), Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          result mustEqual "a b c"
+        }
+
+        "NF" in new scope {
+          Console.withOut(out) {
+            Console.withIn(new StringReader("a b c")) {
+              DynamicCompiler
+                .compile(Nil, Some("foreach { row => print(NF) }"), Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          result mustEqual "3"
+        }
+
+        "NR" in new scope {
+          Console.withOut(out) {
+            Console.withIn(new StringReader("a b c")) {
+              DynamicCompiler
+                .compile(Nil, Some("foreach { row => print(NR) }"), Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          result mustEqual "0"
+        }
+
+        "FT" in new scope {
+          Console.withOut(out) {
+            Console.withIn(new StringReader("a b c")) {
+              DynamicCompiler
+                .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(FT) }"), Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          result mustEqual "\" \" \" \""
+        }
+
+        "RT" in new scope {
+          Console.withOut(out) {
+            Console.withIn(new StringReader("a b c\n")) {
+              DynamicCompiler
+                .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(RT) }"), Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          result mustEqual "\"\n\""
+        }
+
+        "arg" in new scope {
+          Console.withOut(out) {
+            DynamicCompiler
+              .compile(List("print(arg)"), None, Nil)
+              .create(List("1", "2", "3"))
+              .runScript()
+          }
+          result mustEqual "1 2 3"
+        }
+
+        "Quote" in new scope {
+          Console.withOut(out) {
+            Console.withIn(new StringReader("a\\ b\\ c")) {
+              DynamicCompiler
+                .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), Some("foreach { row => print(row) }"), Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          result mustEqual "a\\ b\\ c"
+        }
+
+        "Reader" in new scope {
+          Console.withOut(out) {
+            Console.withIn(new StringReader("a b c")) {
+              DynamicCompiler
+                .compile(List("Console.in.open()(Reader()) foreach { row => print(row) }"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          result mustEqual "a b c"
+        }
+
+        "Writer" in new scope {
+          Console.withOut(out) {
+            DynamicCompiler
+              .compile(List("print(\"a\")"), None, Nil)
+              .create(Nil)
+              .runScript()
+          }
+          result mustEqual "a"
         }
       }
-      new String(out.toByteArray) mustEqual "a b c\n"
     }
   }
 }

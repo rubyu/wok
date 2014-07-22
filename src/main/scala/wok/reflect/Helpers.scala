@@ -35,12 +35,4 @@ object Helpers {
     def println(x: Any *)(implicit w: Writer): Unit =
       p.outputStream(StandardOpenOption.Append).acquireFor { _.println(x: _*)(w) }
   }
-
-  implicit class CompletableAny(val u: Any) extends AnyVal {
-    def complete(): Unit = {}
-  }
-
-  implicit class CompletableIterator(val itr: Iterator[_]) extends AnyVal {
-    def complete(): Unit = itr.foreach { x => }
-  }
 }

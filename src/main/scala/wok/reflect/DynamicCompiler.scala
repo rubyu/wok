@@ -15,7 +15,7 @@ object DynamicCompiler {
     new global.Run().compileSources(List(new BatchSourceFile("Wok.scala", source)))
   }
 
-  def compile(before: List[String], process: String, after: List[String]): DynamicClass = {
+  def compile(before: List[String], process: Option[String], after: List[String]): DynamicClass = {
     val virtualDirectory = new VirtualDirectory("[memory]", None)
     val settings = new Settings
     settings.deprecation.value = true
@@ -28,22 +28,46 @@ object DynamicCompiler {
     DynamicClass(new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader))
   }
 
-  private def source(before: List[String], process: String, after: List[String]): String = {
+  private def source(before: List[String], process: Option[String], after: List[String]): String = {
+
+    def indent(xs: List[String]) = xs.map { "    " + _ } .mkString("\n")
+
+    def script(str: Option[String]) = {
+      str match {
+        case Some(str) =>
+          """|      var currentRow = Row(0, Nil, Nil, "", "")
+            |      def NF = currentRow.size
+            |      def NR = currentRow.id
+            |      def FT = currentRow.sep
+            |      def RT = currentRow.term
+            |      Console.in.open().map { row => currentRow = row; row } %s
+          """.stripMargin.format(str)
+        case None => "// no script"
+      }
+    }
+
     """
       |package wok
       |
       |import wok.reflect.AbstractWok
       |import wok.reflect.Helpers._
+      |import wok.csv.{Quote, Reader, Row, Writer}
       |
       |class Wok(val arg: List[String]) extends AbstractWok {
+      |  def runScript() {
+      |
       |%s
-      |  {
-      |    val result = Console.in.open() %s
-      |    result.complete()
+      |
+      |    {
+      |
+      |%s
+      |
+      |    }
+      |
+      |%s
+      |
       |  }
-      |%s
       |}
-      |"""
-      .stripMargin.format(before.map { "  " + _ }.mkString("\n"), process, after.map { "  " + _ }.mkString("\n"))
+      |""".stripMargin.format(indent(before), script(process), indent(after))
   }
 }

@@ -15,12 +15,13 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
     class Wok extends AbstractWok {
       val arg = List()
+      def runScript(){}
     }
 
     "support accesses for Reader's parameters" in {
       "FS" in {
         val wok = new Wok()
-        wok.FS.toString mustEqual "\\s+"
+        wok.FS.toString mustEqual "[ \\t]+"
         wok.FS("a".r).FS.toString mustEqual "a"
         wok.FS("a").FS.toString mustEqual "a"
         wok.FS("").FS.toString mustEqual "(?!.)."
@@ -73,27 +74,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "support Iterator[_] and Unit in the type of the result" in {
-      import Helpers.{CompletableIterator, CompletableAny}
-
-      "Unit" in {
-        new Wok { reader.open(new StringReader("a")) foreach { row => } complete() }
-        success
-      }
-
-      "Iterator[Row]" in {
-        new Wok { reader.open(new StringReader("a")) complete() }
-        success
-      }
-
-      "Iterator[Unit]" in {
-        new Wok { reader.open(new StringReader("a")) map {row => ()} complete() }
-        success
-      }
-    }
-
     "provide variables for wok script's context" in {
-      import Helpers.CompletableIterator
 
       trait scope extends Scope {
         val outStream = new ByteArrayOutputStream
@@ -108,8 +89,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
               var NR: Long = -1
               reader.open(new StringReader("a b c"))
                 .map { row => NR = row.id; row }
-                .map { row => print(NR) }
-                .complete()
+                .foreach { row => print(NR) }
             }
           }
         }
@@ -123,8 +103,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
               var NF: Int = -1
               reader.open(new StringReader("a b c"))
                 .map { row => NF = row.size; row }
-                .map { row => print(NF) }
-                .complete()
+                .foreach { row => print(NF) }
             }
           }
         }
@@ -138,8 +117,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
               var RT: String = ""
               reader.open(new StringReader("a b c"))
                 .map { row => RT = row.term; row }
-                .map { row => print(RT) }
-                .complete()
+                .foreach { row => print(RT) }
             }
           }
         }
@@ -153,8 +131,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
               var FT: List[String] = List()
               reader.open(new StringReader("a b c"))
                 .map { row => FT = row.sep; row }
-                .map { row => print(FT.size) }
-                .complete()
+                .foreach { row => print(FT.size) }
             }
           }
         }

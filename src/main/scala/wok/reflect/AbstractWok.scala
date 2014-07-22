@@ -11,6 +11,8 @@ import Helpers.PrintableOutputStream
 trait AbstractWok {
   val arg: List[String]
 
+  def runScript(): Unit
+
   def print(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].print(x: _*)(w) }
   def println(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].println(x: _*)(w) }
 

@@ -120,6 +120,18 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           }
           result mustEqual "a"
         }
+
+        "Codec" in new scope {
+          Console.withOut(out) {
+            SystemInput.withValue(new ByteArrayInputStream("あ".getBytes("Windows-31J"))) {
+              DynamicCompiler
+                .compile(List("CD(Codec(\"Windows-31J\"))"), Some("foreach { row => print(row) }"), Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          result mustEqual "あ"
+        }
       }
     }
   }

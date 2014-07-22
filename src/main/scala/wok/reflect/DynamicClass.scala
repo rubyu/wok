@@ -8,7 +8,7 @@ case class DynamicClass(classLoader: AbstractFileClassLoader) {
   def create(arg: List[String]) = {
     classLoader.findClass("wok.Wok")
       .getConstructor(classOf[List[String]])
-      .newInstance(Nil)
+      .newInstance(arg)
       .asInstanceOf[AbstractWok]
   }
 }

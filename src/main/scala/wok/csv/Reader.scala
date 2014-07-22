@@ -8,7 +8,7 @@ import scalax.io.Codec
 
 
 class Reader {
-  private var fs = """\s+""".r
+  private var fs = """[ \t]+""".r
   private var rs = """(\r\n|\r|\n)""".r
   private var fq = Quote()
   private var cd = Codec.default

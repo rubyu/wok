@@ -2,7 +2,8 @@ package wok.reflect
 
 import org.specs2.mutable._
 import org.specs2.specification.Scope
-import java.io.{BufferedOutputStream, PrintStream, ByteArrayOutputStream, StringReader}
+import wok.core.SystemInput
+import java.io.{ByteArrayOutputStream, PrintStream, BufferedOutputStream, ByteArrayInputStream}
 
 
 class DynamicCompilerTest extends SpecificationWithJUnit {
@@ -16,10 +17,9 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
     "compile Wok" should {
       "access to" in {
-
         "Row" in new scope {
           Console.withOut(out) {
-            Console.withIn(new StringReader("a b c")) {
+            SystemInput.withValue(new ByteArrayInputStream("a b c".getBytes)) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(row) }"), Nil)
                 .create(Nil)
@@ -31,7 +31,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
         "NF" in new scope {
           Console.withOut(out) {
-            Console.withIn(new StringReader("a b c")) {
+            SystemInput.withValue(new ByteArrayInputStream("a b c".getBytes)) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(NF) }"), Nil)
                 .create(Nil)
@@ -43,7 +43,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
         "NR" in new scope {
           Console.withOut(out) {
-            Console.withIn(new StringReader("a b c")) {
+            SystemInput.withValue(new ByteArrayInputStream("a b c".getBytes)) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(NR) }"), Nil)
                 .create(Nil)
@@ -55,7 +55,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
         "FT" in new scope {
           Console.withOut(out) {
-            Console.withIn(new StringReader("a b c")) {
+            SystemInput.withValue(new ByteArrayInputStream("a b c".getBytes)) {
               DynamicCompiler
                 .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(FT) }"), Nil)
                 .create(Nil)
@@ -67,7 +67,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
         "RT" in new scope {
           Console.withOut(out) {
-            Console.withIn(new StringReader("a b c\n")) {
+            SystemInput.withValue(new ByteArrayInputStream("a b c\n".getBytes)) {
               DynamicCompiler
                 .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(RT) }"), Nil)
                 .create(Nil)
@@ -89,7 +89,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
         "Quote" in new scope {
           Console.withOut(out) {
-            Console.withIn(new StringReader("a\\ b\\ c")) {
+            SystemInput.withValue(new ByteArrayInputStream("a\\ b\\ c".getBytes)) {
               DynamicCompiler
                 .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), Some("foreach { row => print(row) }"), Nil)
                 .create(Nil)
@@ -101,9 +101,9 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
         "Reader" in new scope {
           Console.withOut(out) {
-            Console.withIn(new StringReader("a b c")) {
+            SystemInput.withValue(new ByteArrayInputStream("a b c".getBytes)) {
               DynamicCompiler
-                .compile(List("Console.in.open()(Reader()) foreach { row => print(row) }"), None, Nil)
+                .compile(List("SystemInput.get.open()(Reader()) foreach { row => print(row) }"), None, Nil)
                 .create(Nil)
                 .runScript()
             }

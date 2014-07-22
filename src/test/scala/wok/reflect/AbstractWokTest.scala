@@ -74,26 +74,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide a function Reader.open" in {
-      import Helpers.OpenableReader
-
-      "open an InputStream" in {
-        val in = new StringReader("a b c")
-        val wok = new Wok {
-          def open = in.open()
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-
-      "open an InputStream with Reader" in {
-        val in = new StringReader("a-b-c")
-        val wok = new Wok {
-          def open = in.open()(Reader().FS("-"))
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-    }
-
     "privide a function InputStream.open" in {
       import Helpers.OpenableInputStream
 

@@ -45,7 +45,6 @@ class Reader {
   def CD(c: Codec) = { cd = c; this }
 
   def open(in: InputStream) = new RowIterator(new BufferedReader(new InputStreamReader(in, cd.charSet)), this)
-  def open(in: java.io.Reader) = new RowIterator(in, this)
 }
 
 object Reader {

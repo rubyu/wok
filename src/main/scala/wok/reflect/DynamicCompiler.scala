@@ -33,6 +33,7 @@ object DynamicCompiler {
     def indent(xs: List[String]) = xs.map { "    " + _ } .mkString("\n")
 
     def script(str: Option[String]) = {
+      Console
       str match {
         case Some(str) =>
           """|      var currentRow = Row(0, Nil, Nil, "", "")
@@ -40,7 +41,7 @@ object DynamicCompiler {
             |      def NR = currentRow.id
             |      def FT = currentRow.sep
             |      def RT = currentRow.term
-            |      Console.in.open().map { row => currentRow = row; row } %s
+            |      SystemInput.get.open().map { row => currentRow = row; row } %s
           """.stripMargin.format(str)
         case None => "// no script"
       }
@@ -51,6 +52,7 @@ object DynamicCompiler {
       |
       |import wok.reflect.AbstractWok
       |import wok.reflect.Helpers._
+      |import wok.core.SystemInput
       |import wok.csv.{Quote, Reader, Row, Writer}
       |
       |class Wok(val arg: List[String]) extends AbstractWok {

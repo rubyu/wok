@@ -133,7 +133,7 @@ class WriterTest extends SpecificationWithJUnit {
         out.toString("utf-8") mustEqual "\\,\n"
       }
       "throw an exception when a given string contains ORS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None().E('\\')).writeln(pout, "\n") must throwA[RuntimeException]
+        Writer().OFS(",").ORS("\n").OFQ(Quote().None().E('\\')).writeln(pout, "\n") must throwA[EncodingException]
       }
     }
 
@@ -147,10 +147,10 @@ class WriterTest extends SpecificationWithJUnit {
         out.toString("utf-8") mustEqual "a,b\n"
       }
       "throw an exception when a given string contains OFS with Quote().None()" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None()).writeln(pout, ",") must throwA[RuntimeException]
+        Writer().OFS(",").ORS("\n").OFQ(Quote().None()).writeln(pout, ",") must throwA[EncodingException]
       }
       "throw an exception when a given string contains ORS with Quote().None()" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None()).writeln(pout, "\n") must throwA[RuntimeException]
+        Writer().OFS(",").ORS("\n").OFQ(Quote().None()).writeln(pout, "\n") must throwA[EncodingException]
       }
     }
   }

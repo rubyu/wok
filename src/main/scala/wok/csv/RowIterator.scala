@@ -40,7 +40,7 @@ class RowIterator(in: io.Reader, parser: Reader) extends Iterator[Row] {
               try Some(x.get.toRow(resultId, buffer.subSequence(0, x.next.offset).toString))
               finally buffer = buffer.subSequence(x.next.offset, buffer.length)
             case x if canBeLast =>
-              throw new RuntimeException(s"""parse failed at line ${resultId + 2}, after ${buffer.subSequence(0, Math.max(buffer.length, 10))}""")
+              throw new DecodingException(s"""parse failed at line ${resultId + 2}, after '${buffer.subSequence(0, Math.max(buffer.length, 100))}'""")
             case x =>
               if (!reachEnd) {
                 reachEnd = read(math.max(1000000, buffer.length)) match {

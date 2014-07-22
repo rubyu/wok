@@ -44,13 +44,13 @@ class Writer {
 
       //escapes OFS in a given string with e and throws an error when it contains ORS
       case Quote(Quote.Mode.None, _, Some(e)) => {
-        case s if s.contains(ors) => throw new RuntimeException
+        case s if s.contains(ors) => throw new EncodingException(s"data must not contain '$ors'")
         case s => s.escaped(e, ofs)
       }
 
       //throws an error when a given string contains OFS or ORS
       case Quote(Quote.Mode.None, _, None) => {
-        case s if s.contains(ofs) || s.contains(ors) => throw new RuntimeException
+        case s if s.contains(ofs) || s.contains(ors) => throw new EncodingException(s"data must not contain '$ofs' and '$ors'")
         case s => s
       }
     }

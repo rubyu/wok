@@ -1,156 +1,230 @@
 
 package wok.csv
 
+import java.nio.charset.StandardCharsets
+
 import org.specs2.mutable._
 import org.specs2.specification.Scope
-import java.io.{PrintStream, ByteArrayOutputStream}
+import java.io.ByteArrayOutputStream
 
 
 class WriterTest extends SpecificationWithJUnit {
 
   class scope extends Scope {
     val out = new ByteArrayOutputStream
-    val pout = new PrintStream(out)
+    def result = new String(out.toByteArray, StandardCharsets.UTF_8)
   }
 
   "Writer" should {
 
-    "with Quote().All().E(\\)" in {
-      "write a String" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All().E('\\')).writeln(pout, "a")
-        out.toString("utf-8") mustEqual "\"a\"\n"
+    "with QuoteAll Q E" in {
+      
+      val writer = Writer().OFS(",").ORS("\n").OFQ(Quote().All().E('\\'))
+      
+      "write String" in new scope {
+        writer.writeln(out, "a")
+        result mustEqual "\"a\"\n"
       }
-      "write a Seq" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All().E('\\')).writeln(pout, Seq("a", "b"))
-        out.toString("utf-8") mustEqual "\"a\",\"b\"\n"
+      "write Seq" in new scope {
+        writer.writeln(out, Seq("a", "b"))
+        result mustEqual "\"a\",\"b\"\n"
       }
-      "write a String containing E" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All().E('\\')).writeln(pout, "\\")
-        out.toString("utf-8") mustEqual "\"\\\\\"\n"
+      "write E" in new scope {
+        writer.writeln(out, "\\")
+        result mustEqual "\"\\\"\n" //compatible with Python
       }
-      "write a String containing Q" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All().E('\\')).writeln(pout, "\"")
-        out.toString("utf-8") mustEqual "\"\\\"\"\n"
+      "write Q" in new scope {
+        writer.writeln(out, "\"")
+        result mustEqual "\"\"\"\"\n" //compatible with Python
       }
-      "write a String containing OFS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All().E('\\')).writeln(pout, ",")
-        out.toString("utf-8") mustEqual "\",\"\n"
+      "write OFS" in new scope {
+        writer.writeln(out, ",")
+        result mustEqual "\",\"\n"
       }
-      "write a String containing ORS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All().E('\\')).writeln(pout, "\n")
-        out.toString("utf-8") mustEqual "\"\n\"\n"
-      }
-    }
-
-    "with Quote().All()" in {
-      "write a String" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All()).writeln(pout, "a")
-        out.toString("utf-8") mustEqual "\"a\"\n"
-      }
-      "write a Seq" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All()).writeln(pout, Seq("a", "b"))
-        out.toString("utf-8") mustEqual "\"a\",\"b\"\n"
-      }
-      "write a String containing Q" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All()).writeln(pout, "\"")
-        out.toString("utf-8") mustEqual "\"\"\"\"\n"
-      }
-      "write a String containing OFS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All()).writeln(pout, ",")
-        out.toString("utf-8") mustEqual "\",\"\n"
-      }
-      "write a String containing ORS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().All()).writeln(pout, "\n")
-        out.toString("utf-8") mustEqual "\"\n\"\n"
+      "write ORS" in new scope {
+        writer.writeln(out, "\n")
+        result mustEqual "\"\n\"\n"
       }
     }
 
-    "with Quote().Min().E(\\)" in {
-      "write a String" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min().E('\\')).writeln(pout, "a")
-        out.toString("utf-8") mustEqual "a\n"
+    "with QuoteAll Q" in {
+      
+      val writer = Writer().OFS(",").ORS("\n").OFQ(Quote() All() Q('"'))
+      
+      "write String" in new scope {
+        writer.writeln(out, "a")
+        result mustEqual "\"a\"\n"
       }
-      "write a Seq" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min().E('\\')).writeln(pout, Seq("a", "b"))
-        out.toString("utf-8") mustEqual "a,b\n"
+      "write Seq" in new scope {
+        writer.writeln(out, Seq("a", "b"))
+        result mustEqual "\"a\",\"b\"\n"
       }
-      "write a String containing E" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min().E('\\')).writeln(pout, "\\")
-        out.toString("utf-8") mustEqual "\\\\\n"
+      "write Q" in new scope {
+        writer.writeln(out, "\"")
+        result mustEqual "\"\"\"\"\n"
       }
-      "write a String containing Q" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min().E('\\')).writeln(pout, "\"")
-        out.toString("utf-8") mustEqual "\\\"\n"
+      "write OFS" in new scope {
+        writer.writeln(out, ",")
+        result mustEqual "\",\"\n"
       }
-      "write a String containing OFS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min().E('\\')).writeln(pout, ",")
-        out.toString("utf-8") mustEqual "\",\"\n"
-      }
-      "write a String containing ORS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min().E('\\')).writeln(pout, "\n")
-        out.toString("utf-8") mustEqual "\"\n\"\n"
-      }
-    }
-
-    "with Quote().Min()" in {
-      "write a String" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min()).writeln(pout, "a")
-        out.toString("utf-8") mustEqual "a\n"
-      }
-      "write a Seq" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min()).writeln(pout, Seq("a", "b"))
-        out.toString("utf-8") mustEqual "a,b\n"
-      }
-      "write a String containing Q" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min()).writeln(pout, "\"")
-        out.toString("utf-8") mustEqual "\"\"\"\"\n"
-      }
-      "write a String containing OFS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min()).writeln(pout, ",")
-        out.toString("utf-8") mustEqual "\",\"\n"
-      }
-      "write a String containing ORS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().Min()).writeln(pout, "\n")
-        out.toString("utf-8") mustEqual "\"\n\"\n"
+      "write ORS" in new scope {
+        writer.writeln(out, "\n")
+        result mustEqual "\"\n\"\n"
       }
     }
 
-    "with Quote().None().E(\\)" in {
-      "write a String" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None().E('\\')).writeln(pout, "a")
-        out.toString("utf-8") mustEqual "a\n"
+    "with QuoteMin Q E" in {
+
+      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() Min() Q('"') E('\\'))
+
+      "write String" in new scope {
+        writer.writeln(out, "a")
+        result mustEqual "a\n"
       }
-      "write a Seq" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None().E('\\')).writeln(pout, Seq("a", "b"))
-        out.toString("utf-8") mustEqual "a,b\n"
+      "write Seq" in new scope {
+        writer.writeln(out, Seq("a", "b"))
+        result mustEqual "a,b\n"
       }
-      "write a String containing E" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None().E('\\')).writeln(pout, "\\")
-        out.toString("utf-8") mustEqual "\\\\\n"
+      "write Q" in new scope {
+        writer.writeln(out, "\"")
+        result mustEqual "\"\"\"\"\n" //compatible with Python
       }
-      "write a String containing OFS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None().E('\\')).writeln(pout, ",")
-        out.toString("utf-8") mustEqual "\\,\n"
+      "write E" in new scope {
+        writer.writeln(out, "\\")
+        result mustEqual "\"\\\"\n" //compatible with Python
       }
-      "throw an exception when a given string contains ORS" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None().E('\\')).writeln(pout, "\n") must throwA[EncodingException]
+      "write OFS" in new scope {
+        writer.writeln(out, ",")
+        result mustEqual "\",\"\n"
+      }
+      "write ORS" in new scope {
+        writer.writeln(out, "\n")
+        result mustEqual "\"\n\"\n"
       }
     }
 
-    "with Quote().None()" in {
-      "write a String with Quote().None()" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None()).writeln(pout, "a")
-        out.toString("utf-8") mustEqual "a\n"
+    "with QuoteMin Q" in {
+      
+      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() Min() Q('"'))
+      
+      "write String" in new scope {
+        writer.writeln(out, "a")
+        result mustEqual "a\n"
       }
-      "write a Seq with Quote().None()" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None()).writeln(pout, Seq("a", "b"))
-        out.toString("utf-8") mustEqual "a,b\n"
+      "write Seq" in new scope {
+        writer.writeln(out, Seq("a", "b"))
+        result mustEqual "a,b\n"
       }
-      "throw an exception when a given string contains OFS with Quote().None()" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None()).writeln(pout, ",") must throwA[EncodingException]
+      "write Q" in new scope {
+        writer.writeln(out, "\"")
+        result mustEqual "\"\"\"\"\n"
       }
-      "throw an exception when a given string contains ORS with Quote().None()" in new scope {
-        Writer().OFS(",").ORS("\n").OFQ(Quote().None()).writeln(pout, "\n") must throwA[EncodingException]
+      "write OFS" in new scope {
+        writer.writeln(out, ",")
+        result mustEqual "\",\"\n"
+      }
+      "write ORS" in new scope {
+        writer.writeln(out, "\n")
+        result mustEqual "\"\n\"\n"
+      }
+    }
+
+    "with QuoteNone Q E" in {
+
+      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() None() Q('"') E('\\'))
+
+      "write String" in new scope {
+        writer.writeln(out, "a")
+        result mustEqual "a\n"
+      }
+      "write Seq" in new scope {
+        writer.writeln(out, Seq("a", "b"))
+        result mustEqual "a,b\n"
+      }
+      "write Q" in new scope {
+        writer.writeln(out, "\"")
+        result mustEqual "\\\"\n" //compatible with Python
+      }
+      "write E" in new scope {
+        writer.writeln(out, "\\")
+        result mustEqual "\\\\\n"
+      }
+      "write OFS" in new scope {
+        writer.writeln(out, ",")
+        result mustEqual "\\,\n"
+      }
+      "write ORS" in new scope {
+        writer.writeln(out, "\n")
+        result mustEqual "\\\n\n"
+      }
+    }
+
+    "with QuoteNone E" in {
+      
+      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() None() E('\\'))
+      
+      "write String" in new scope {
+        writer.writeln(out, "a")
+        result mustEqual "a\n"
+      }
+      "write Seq" in new scope {
+        writer.writeln(out, Seq("a", "b"))
+        result mustEqual "a,b\n"
+      }
+      "write E" in new scope {
+        writer.writeln(out, "\\")
+        result mustEqual "\\\\\n"
+      }
+      "write OFS" in new scope {
+        writer.writeln(out, ",")
+        result mustEqual "\\,\n"
+      }
+      "write ORS" in new scope {
+        writer.writeln(out, "\n")
+        result mustEqual "\\\n\n"
+      }
+    }
+
+    "with QuoteNone Q" in {
+
+      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() None() Q('"'))
+
+      "write String" in new scope {
+        writer.writeln(out, "a")
+        result mustEqual "a\n"
+      }
+      "write Seq" in new scope {
+        writer.writeln(out, Seq("a", "b"))
+        result mustEqual "a,b\n"
+      }
+      "throw EncodingException when given string contains Q" in new scope {
+        writer.writeln(out, "\"") must throwA[EncodingException] //compatible with Python
+      }
+      "throw EncodingException when given string contains OFS" in new scope {
+        writer.writeln(out, ",") must throwA[EncodingException]
+      }
+      "throw EncodingException when given string contains ORS" in new scope {
+        writer.writeln(out, "\n") must throwA[EncodingException]
+      }
+    }
+
+    "with QuoteNone" in {
+
+      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() None())
+
+      "write String" in new scope {
+        writer.writeln(out, "a")
+        result mustEqual "a\n"
+      }
+      "write Seq" in new scope {
+        writer.writeln(out, Seq("a", "b"))
+        result mustEqual "a,b\n"
+      }
+      "throw EncodingException when given string contains OFS" in new scope {
+        writer.writeln(out, ",") must throwA[EncodingException]
+      }
+      "throw EncodingException when given string contains ORS" in new scope {
+        writer.writeln(out, "\n") must throwA[EncodingException]
       }
     }
   }

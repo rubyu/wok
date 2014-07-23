@@ -3,6 +3,7 @@ package wok.csv
 
 import java.io.OutputStream
 import wok.core.Helpers._
+import scala.util.matching.Regex.quoteReplacement //quoteReplacement(str) == str.escaped('\\', '$')
 import scalax.io.Codec
 
 
@@ -24,34 +25,57 @@ class Writer {
 
   private def _escape: String => String = {
     ofq match {
-      //escapes e and q in a given string with e and quotes it with q
-      case Quote(Quote.Mode.All, Some(q), Some(e)) => { _.escaped(e, q).quoted(q) }
+      /** Quotes a given string with Q. */
+      case Quote(Quote.Mode.All, Some(q), _) => _.escaped(q).quoted(q)
 
-      //quotes a given string with q
-      case Quote(Quote.Mode.All, Some(q), None) => { _.escaped(q).quoted(q) }
-
-      //escapes e and q in a given string with e and quotes it with q when it contains OFS or ORS
+      /** Escapes Q in a given string with Q and quotes it with Q when it contains ORS or OFS or Q or E. */
       case Quote(Quote.Mode.Min, Some(q), Some(e)) => {
-        case s if s.contains(ofs) || s.contains(ors) => s.escaped(e, q).quoted(q)
-        case s => s.escaped(e, q)
+        val p =  s"""(${ors.er}|${ofs.er}|${q.er}|${e.er})""".r
+        s => p.findFirstMatchIn(s) match {
+          case Some(_) => s.escaped(q).quoted(q)
+          case None => s
+        }
       }
 
-      //escapes q in a given string with q and quotes it with q when it contains OFS or ORS or q
+      /** Escapes Q in a given string with Q and quotes it with Q when it contains ORS or OFS or Q. */
       case Quote(Quote.Mode.Min, Some(q), None) => {
-        case s if s.contains(ofs) || s.contains(ors) || s.contains(q) => s.escaped(q).quoted(q)
-        case s => s
+        val p =  s"""(${ors.er}|${ofs.er}|${q.er})""".r
+        s => p.findFirstMatchIn(s) match {
+          case Some(_) => s.escaped(q).quoted(q)
+          case None => s
+        }
       }
 
-      //escapes OFS in a given string with e and throws an error when it contains ORS
-      case Quote(Quote.Mode.None, _, Some(e)) => {
-        case s if s.contains(ors) => throw new EncodingException(s"data must not contain '$ors'")
-        case s => s.escaped(e, ofs)
+      /** Escapes ORS, OFS, E and Q. */
+      case Quote(Quote.Mode.None, Some(q), Some(e)) => {
+        val p =  s"""(${ors.er}|${ofs.er}|${q.er}|${e.er})""".r
+        val r = quoteReplacement(e.toString) + "$0"
+        p.replaceAllIn(_, r)
       }
 
-      //throws an error when a given string contains OFS or ORS
-      case Quote(Quote.Mode.None, _, None) => {
-        case s if s.contains(ofs) || s.contains(ors) => throw new EncodingException(s"data must not contain '$ofs' and '$ors'")
-        case s => s
+      /** Escapes ORS, OFS and E. */
+      case Quote(Quote.Mode.None, None, Some(e)) => {
+        val p =  s"""(${ors.er}|${ofs.er}|${e.er})""".r
+        val r = quoteReplacement(e.toString) + "$0"
+        p.replaceAllIn(_, r)
+      }
+
+      /** Returns a given string as is. Throws an EncodingException when a given string contains ORS or OFS or Q. */
+      case Quote(Quote.Mode.None, Some(q), None) => {
+        val p = s"""(${ors.er}|${ofs.er}|${q.er})""".r
+        s => p.findFirstMatchIn(s) match {
+          case Some(m) => throw new EncodingException(s"Field values must not contain ORS, OFS, and Q")
+          case None => s
+        }
+      }
+
+      /** Returns a given string as is. Throws an EncodingException when a given string contains ORS or OFS. */
+      case Quote(Quote.Mode.None, None, None) => {
+        val p = s"""(${ors.er}|${ofs.er})""".r
+        s => p.findFirstMatchIn(s) match {
+          case Some(m) => throw new EncodingException(s"Field values must not contain ORS and OFS")
+          case None => s
+        }
       }
     }
   }

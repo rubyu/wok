@@ -7,6 +7,8 @@ import org.specs2.mutable._
 import org.specs2.specification.Scope
 import java.io.ByteArrayOutputStream
 
+import scalax.io.Codec
+
 
 class WriterTest extends SpecificationWithJUnit {
 
@@ -16,6 +18,28 @@ class WriterTest extends SpecificationWithJUnit {
   }
 
   "Writer" should {
+    "support shortcuts" in {
+      "access without parens" in {
+        Writer.OFS mustEqual " "
+        Writer.ORS mustEqual "\n"
+        Writer.OFQ mustEqual Quote()
+        Writer.OCD mustEqual Codec.default
+        Writer.OFS("a").OFS mustEqual "a"
+        Writer.ORS("a").ORS mustEqual "a"
+        Writer.OFQ(Quote E('a')).OFQ mustEqual Quote.E('a')
+        Writer.OCD(Codec.ISO8859).OCD mustEqual Codec.ISO8859
+        Writer.write(new ByteArrayOutputStream(), "a") mustEqual ()
+        Writer.writeln(new ByteArrayOutputStream(), "a") mustEqual ()
+      }
+
+      "'new' less constructor" in {
+        Writer().isInstanceOf[Writer] must beTrue
+      }
+
+      "standard constructor" in {
+        new Writer().isInstanceOf[Writer] must beTrue
+      }
+    }
 
     "with QuoteAll Q E" in {
       

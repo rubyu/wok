@@ -98,4 +98,17 @@ class Writer {
 
 object Writer {
   def apply() = new Writer()
+
+  def OFS = new Writer().OFS
+  def ORS = new Writer().ORS
+  def OFQ = new Writer().OFQ
+  def OCD = new Writer().OCD
+
+  def OFS(s: String) = new Writer().OFS(s)
+  def ORS(s: String) = new Writer().ORS(s)
+  def OFQ(q: Quote) = new Writer().OFQ(q)
+  def OCD(c: Codec) = new Writer().OCD(c)
+
+  def write(out: OutputStream, xs: Any *) = new Writer().write(out, xs)
+  def writeln(out: OutputStream, xs: Any *) = new Writer().writeln(out, xs)
 }

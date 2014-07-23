@@ -54,6 +54,7 @@ object DynamicCompiler {
       |import wok.reflect.Helpers._
       |import wok.core.SystemInput
       |import wok.csv.{Quote, Reader, Row, Writer}
+      |import wok.process.Helpers._
       |import scalax.io.Codec
       |
       |class Wok(val arg: List[String]) extends AbstractWok {

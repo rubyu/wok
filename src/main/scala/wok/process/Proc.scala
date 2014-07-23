@@ -9,7 +9,7 @@ import scalax.io.{Codec, Resource}
 import wok.core.Helpers.{EscapedString, QuotedString}
 
 
-class Process(commandStrings: Seq[String]) {
+class Proc(commandStrings: Seq[String]) {
   private def parse(commandStrings: Seq[String]) = {
     @tailrec
     def split(list: Seq[Seq[String]], strings: Seq[String]): Seq[Seq[String]] = {
@@ -61,6 +61,6 @@ class Process(commandStrings: Seq[String]) {
 }
 
 
-object Process {
+object Proc {
   def escape(s: String) = s.escaped('\\', '"').quoted('"')
 }

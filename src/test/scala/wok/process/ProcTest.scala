@@ -5,14 +5,14 @@ import org.specs2.mutable._
 import Helpers._
 
 
-class ProcessTest extends SpecificationWithJUnit {
+class ProcTest extends SpecificationWithJUnit {
 
-  "Process.escape" should {
+  "Proc.escape" should {
     def python(s: String) =
-      new Process(Seq("python", "-c",  "\"import sys; sys.stdout.write(sys.argv[1])\"", s)).exec.string
+      new Proc(Seq("python", "-c",  "\"import sys; sys.stdout.write(sys.argv[1])\"", s)).exec.string
 
     def echo(s: String) =
-      new Process(Seq("echo", s)).exec.string.dropRight(1)
+      new Proc(Seq("echo", s)).exec.string.dropRight(1)
 
     val patterns = Seq(
       "",
@@ -24,13 +24,13 @@ class ProcessTest extends SpecificationWithJUnit {
 
     "escape given parameters" in {
       patterns map { p =>
-        python(Process.escape(p)) mustEqual p
-        echo(Process.escape(p)) mustEqual p
+        python(Proc.escape(p)) mustEqual p
+        echo(Proc.escape(p)) mustEqual p
       }
     }
   }
 
-  "Process.exec" should {
+  "Proc.exec" should {
     "throw IllegalArgumentException when commandStrings is '|'" in {
       Seq("|")
         .exec must throwAn[IllegalArgumentException]
@@ -52,8 +52,13 @@ class ProcessTest extends SpecificationWithJUnit {
     }
 
     "call a program" in {
-      Seq("echo", "a")
-        .exec.string mustEqual "a\n"
+      Seq("echo", "-n", "a")
+        .exec.string mustEqual "a"
+    }
+
+    "call a program with Int argunent" in {
+      Seq("echo", "-n", 1)
+        .exec.string mustEqual "1"
     }
 
     "call a program with arguments" in {

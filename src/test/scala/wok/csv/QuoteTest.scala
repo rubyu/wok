@@ -21,5 +21,11 @@ class QuoteTest extends SpecificationWithJUnit {
     "be created with 'new'" in {
       new Quote() mustEqual Quote()
     }
+
+    "have default value" in {
+      Quote().M mustEqual Quote.Mode.Min
+      Quote().Q mustEqual Some('"')
+      Quote().E mustEqual None
+    }
   }
 }

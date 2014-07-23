@@ -2,7 +2,7 @@
 package wok.csv
 
 
-case class Quote(M: Quote.Mode.Type=Quote.Mode.None, Q: Option[Char] = scala.None, E: Option[Char] = scala.None) {
+case class Quote(M: Quote.Mode.Type=Quote.Mode.Min, Q: Option[Char] = Some('"'), E: Option[Char] = scala.None) {
   def All() = this.copy(M=Quote.Mode.All, Q=if (Q.isDefined) Q else Some('"'))
   def Min() = this.copy(M=Quote.Mode.Min, Q=if (Q.isDefined) Q else Some('"'))
   def None() = this.copy(M=Quote.Mode.None, Q=scala.None)

@@ -42,6 +42,8 @@ class Reader {
   }
 
   def FQ(q: Quote) = { fq = q; update(); this }
+
+  /** Restriction: This method do not reflect the changes of CD to the action of a RowIterator opened before. */
   def CD(c: Codec) = { cd = c; this }
 
   def open(in: InputStream) = new RowIterator(new BufferedReader(new InputStreamReader(in, cd.charSet)), this)

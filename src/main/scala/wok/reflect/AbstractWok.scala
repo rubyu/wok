@@ -16,28 +16,28 @@ trait AbstractWok {
   def print(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].print(x: _*)(w) }
   def println(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].println(x: _*)(w) }
 
-  implicit val reader = Reader()
-  implicit val writer = Writer()
+  implicit val defaultReader = Reader()
+  implicit val defaultWriter = Writer()
 
-  def FS: Regex = reader.FS
-  def RS: Regex = reader.RS
-  def FQ: Quote = reader.FQ
-  def CD: Codec = reader.CD
+  def FS: Regex = defaultReader.FS
+  def RS: Regex = defaultReader.RS
+  def FQ: Quote = defaultReader.FQ
+  def CD: Codec = defaultReader.CD
 
-  def FS(r: Regex) = { reader.FS(r); this }
-  def RS(r: Regex) = { reader.RS(r); this }
-  def FS(s: String) = { reader.FS(s); this }
-  def RS(s: String) = { reader.RS(s); this }
-  def FQ(q: Quote) = { reader.FQ(q); this }
-  def CD(c: Codec) = { reader.CD(c); this }
+  def FS(r: Regex) = { defaultReader.FS(r); this }
+  def RS(r: Regex) = { defaultReader.RS(r); this }
+  def FS(s: String) = { defaultReader.FS(s); this }
+  def RS(s: String) = { defaultReader.RS(s); this }
+  def FQ(q: Quote) = { defaultReader.FQ(q); this }
+  def CD(c: Codec) = { defaultReader.CD(c); this }
 
-  def OFS: String = writer.OFS
-  def ORS: String = writer.ORS
-  def OFQ: Quote = writer.OFQ
-  def OCD: Codec = writer.OCD
+  def OFS: String = defaultWriter.OFS
+  def ORS: String = defaultWriter.ORS
+  def OFQ: Quote = defaultWriter.OFQ
+  def OCD: Codec = defaultWriter.OCD
 
-  def OFS(s: String) = { writer.OFS(s); this }
-  def ORS(s: String) = { writer.ORS(s); this }
-  def OFQ(q: Quote) = { writer.OFQ(q); this }
-  def OCD(c: Codec) = { writer.OCD(c); this }
+  def OFS(s: String) = { defaultWriter.OFS(s); this }
+  def ORS(s: String) = { defaultWriter.ORS(s); this }
+  def OFQ(q: Quote) = { defaultWriter.OFQ(q); this }
+  def OCD(c: Codec) = { defaultWriter.OCD(c); this }
 }

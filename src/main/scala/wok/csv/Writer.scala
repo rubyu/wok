@@ -109,6 +109,6 @@ object Writer {
   def OFQ(q: Quote) = new Writer().OFQ(q)
   def OCD(c: Codec) = new Writer().OCD(c)
 
-  def write(out: OutputStream, xs: Any *) = new Writer().write(out, xs)
-  def writeln(out: OutputStream, xs: Any *) = new Writer().writeln(out, xs)
+  def write(out: OutputStream, xs: Any *) = new Writer().write(out, xs: _*)
+  def writeln(out: OutputStream, xs: Any *) = new Writer().writeln(out, xs: _*)
 }

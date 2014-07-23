@@ -1,12 +1,10 @@
 
 package wok.csv
 
-import java.nio.charset.StandardCharsets
-
 import org.specs2.mutable._
 import org.specs2.specification.Scope
 import java.io.ByteArrayOutputStream
-
+import java.nio.charset.StandardCharsets
 import scalax.io.Codec
 
 
@@ -28,8 +26,26 @@ class WriterTest extends SpecificationWithJUnit {
         Writer.ORS("a").ORS mustEqual "a"
         Writer.OFQ(Quote E('a')).OFQ mustEqual Quote.E('a')
         Writer.OCD(Codec.ISO8859).OCD mustEqual Codec.ISO8859
-        Writer.write(new ByteArrayOutputStream(), "a") mustEqual ()
-        Writer.writeln(new ByteArrayOutputStream(), "a") mustEqual ()
+
+        "write String" in new scope {
+          Writer.write(out, "a")
+          result mustEqual "a"
+        }
+
+        "write Seq" in new scope {
+          Writer.write(out, Seq("a"))
+          result mustEqual "a"
+        }
+
+        "writeln String" in new scope {
+          Writer.writeln(out, "a")
+          result mustEqual "a\n"
+        }
+
+        "writeln Seq" in new scope {
+          Writer.writeln(out, Seq("a"))
+          result mustEqual "a\n"
+        }
       }
 
       "'new' less constructor" in {

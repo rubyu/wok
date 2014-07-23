@@ -49,4 +49,16 @@ class Reader {
 
 object Reader {
   def apply() = new Reader()
+
+  def FS = new Reader().FS
+  def RS = new Reader().RS
+  def FQ = new Reader().FQ
+  def CD = new Reader().CD
+
+  def FS(s: String) = new Reader().FS(s)
+  def RS(s: String) = new Reader().RS(s)
+  def FQ(q: Quote) = new Reader().FQ(q)
+  def CD(c: Codec) = new Reader().CD(c)
+
+  def open(in: InputStream) = new Reader().open(in)
 }

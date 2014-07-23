@@ -4,10 +4,34 @@ package wok.csv
 import org.specs2.mutable._
 import java.io.ByteArrayInputStream
 
+import scalax.io.Codec
+
 
 class ReaderTest extends SpecificationWithJUnit {
 
   "Reader" should {
+    "support shortcuts" in {
+      "access without parens" in {
+        Reader.FS.toString mustEqual """[ \t]+""".r.toString
+        Reader.RS.toString mustEqual """(\r\n|\r|\n)""".r.toString
+        Reader.FQ mustEqual Quote()
+        Reader.CD mustEqual Codec.default
+        Reader.FS("a").FS.toString mustEqual "a".r.toString
+        Reader.RS("a").RS.toString mustEqual "a".r.toString
+        Reader.FQ(Quote E('a')).FQ mustEqual Quote.E('a')
+        Reader.CD(Codec.ISO8859).CD mustEqual Codec.ISO8859
+        Reader.open(new ByteArrayInputStream("a".getBytes)).isInstanceOf[Iterator[_]] must beTrue
+      }
+
+      "'new' less constructor" in {
+        Reader().isInstanceOf[Reader] must beTrue
+      }
+
+      "standard constructor" in {
+        new Reader().isInstanceOf[Reader] must beTrue
+      }
+    }
+
     "return Row" in {
       Reader()
         .FS("""\t""".r)

@@ -13,7 +13,7 @@ class ReaderTest extends SpecificationWithJUnit {
     "support shortcuts" in {
       "access without parens" in {
         Reader.FS.toString mustEqual """[ \t]+""".r.toString
-        Reader.RS.toString mustEqual """(\r\n|\r|\n)""".r.toString
+        Reader.RS.toString mustEqual """\r\n|\r|\n""".r.toString
         Reader.FQ mustEqual Quote()
         Reader.CD mustEqual Codec.default
         Reader.FS("a").FS.toString mustEqual "a".r.toString

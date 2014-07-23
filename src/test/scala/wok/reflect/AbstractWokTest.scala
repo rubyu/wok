@@ -29,7 +29,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       "RS" in {
         val wok = new Wok()
-        wok.RS.toString mustEqual "(\\r\\n|\\r|\\n)"
+        wok.RS.toString mustEqual "\\r\\n|\\r|\\n"
         wok.RS("a".r).RS.toString mustEqual "a"
         wok.RS("a").RS.toString mustEqual "a"
         wok.RS("").RS.toString mustEqual "(?!.)."

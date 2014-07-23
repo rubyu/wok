@@ -60,7 +60,7 @@ class Writer {
         p.replaceAllIn(_, r)
       }
 
-      /** Returns a given string as is. Throws an EncodingException when a given string contains ORS or OFS or Q. */
+      /** Returns a given string as is. Throws an EncodingException when it contains ORS or OFS or Q. */
       case Quote(Quote.Mode.None, Some(q), None) => {
         val p = s"""(${ors.er}|${ofs.er}|${q.er})""".r
         s => p.findFirstMatchIn(s) match {
@@ -69,7 +69,7 @@ class Writer {
         }
       }
 
-      /** Returns a given string as is. Throws an EncodingException when a given string contains ORS or OFS. */
+      /** Returns a given string as is. Throws an EncodingException when it contains ORS or OFS. */
       case Quote(Quote.Mode.None, None, None) => {
         val p = s"""(${ors.er}|${ofs.er})""".r
         s => p.findFirstMatchIn(s) match {

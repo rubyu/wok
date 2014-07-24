@@ -16,6 +16,8 @@ object Quote {
   def None() = new Quote().None()
   def Q(c: Char) = new Quote().Q(c)
   def E(c: Char) = new Quote().E(c)
+  def Q = new Quote().Q
+  def E = new Quote().E
 
   object Mode {
     trait Type

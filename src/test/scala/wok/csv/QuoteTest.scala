@@ -12,6 +12,8 @@ class QuoteTest extends SpecificationWithJUnit {
       Quote.None mustEqual Quote().None()
       Quote.E('a') mustEqual Quote().E('a')
       Quote.Q('a') mustEqual Quote().Q('a')
+      Quote.E mustEqual None
+      Quote.Q mustEqual Some('"')
     }
 
     "be created" in {

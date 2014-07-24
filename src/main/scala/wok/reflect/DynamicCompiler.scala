@@ -55,7 +55,7 @@ object DynamicCompiler {
       |import wok.core.SystemInput
       |import wok.csv.{Quote, Reader, Row, Writer}
       |import wok.process.Helpers._
-      |import scalax.io.Codec
+      |import scalax.io.{Codec, Resource}
       |import scalax.file.Path
       |
       |

@@ -166,6 +166,16 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           }
           result mustEqual "a"
         }
+
+        "Resource" in new scope {
+          Console.withOut(out) {
+            DynamicCompiler
+              .compile(List("val out = Resource.fromFile(\"test\"); out.write(\"a\"); print(out.string); Path(\"test\").delete()"), None, Nil)
+              .create(Nil)
+              .runScript()
+          }
+          result mustEqual "a"
+        }
       }
     }
   }

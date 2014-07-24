@@ -41,7 +41,7 @@ object DynamicCompiler {
             |      def NR = currentRow.id
             |      def FT = currentRow.sep
             |      def RT = currentRow.term
-            |      SystemInput.get.open().map { row => currentRow = row; row } %s
+            |      STDIN.csv().map { row => currentRow = row; row } %s
           """.stripMargin.format(str)
         case None => "// no script"
       }
@@ -52,7 +52,7 @@ object DynamicCompiler {
       |
       |import wok.reflect.AbstractWok
       |import wok.reflect.Helpers._
-      |import wok.core.SystemInput
+      |import wok.core.Stdio.{in => STDIN}
       |import wok.csv.{Quote, Reader, Row, Writer}
       |import wok.process.Helpers._
       |import scalax.io.{Codec, Resource}

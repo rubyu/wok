@@ -2,10 +2,10 @@
 package wok.reflect
 
 import util.matching.Regex
-import wok.csv.{Writer, Reader, Quote}
 import scalax.io.Codec
-import java.io.OutputStream
-import Helpers.PrintableOutputStream
+import wok.core.Stdio.{out => STDOUT}
+import wok.csv.{Writer, Reader, Quote}
+import Helpers.PrintableOutputStreamResource
 
 
 trait AbstractWok {
@@ -13,8 +13,8 @@ trait AbstractWok {
 
   def runScript(): Unit
 
-  def print(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].print(x: _*)(w) }
-  def println(x: Any *)(implicit w: Writer): Unit = { Console.out.asInstanceOf[OutputStream].println(x: _*)(w) }
+  def print(x: Any *)(implicit w: Writer): Unit = { STDOUT.print(x: _*)(w) }
+  def println(x: Any *)(implicit w: Writer): Unit = { STDOUT.println(x: _*)(w) }
 
   implicit val defaultReader = Reader()
   implicit val defaultWriter = Writer()

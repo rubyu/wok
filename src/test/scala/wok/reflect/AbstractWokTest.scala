@@ -4,10 +4,10 @@ package wok.reflect
 import org.specs2.mutable._
 import org.specs2.specification.Scope
 import wok.csv.{Quote, Writer, Reader}
+import wok.core.Stdio
 import java.io._
 import scalax.file.Path
-import scala.Console
-import scalax.io.Codec
+import scalax.io.{Resource, Codec}
 
 
 class AbstractWokTest extends SpecificationWithJUnit {
@@ -74,13 +74,13 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "privide a function InputStream.open" in {
+    "privide a function InputStream.csv" in {
       import Helpers.OpenableInputStream
 
       "open an InputStream" in {
         val in = new ByteArrayInputStream("a b c".getBytes())
         val wok = new Wok {
-          def open = in.open()
+          def open = in.csv()
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
@@ -88,13 +88,33 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open an InputStream with Reader" in {
         val in = new ByteArrayInputStream("a-b-c".getBytes())
         val wok = new Wok {
-          def open = in.open()(Reader().FS("-"))
+          def open = in.csv()(Reader().FS("-"))
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
     }
 
-    "privide a function Path.open" in {
+    "privide a function InputStreamResource.csv" in {
+      import Helpers.OpenableInputStreamResource
+
+      "open an InputStreamResource" in {
+        val in = Resource.fromInputStream(new ByteArrayInputStream("a b c".getBytes()))
+        val wok = new Wok {
+          def open = in.csv()
+        }
+        wok.open.next mustEqual List("a", "b", "c")
+      }
+
+      "open an InputStreamResource with Reader" in {
+        val in = Resource.fromInputStream(new ByteArrayInputStream("a-b-c".getBytes()))
+        val wok = new Wok {
+          def open = in.csv()(Reader().FS("-"))
+        }
+        wok.open.next mustEqual List("a", "b", "c")
+      }
+    }
+
+    "privide a function Path.csv" in {
       import Helpers.OpenablePath
 
       trait scope extends Scope {
@@ -104,14 +124,14 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open a existent file" in new scope {
         p.write("a b c")
         val wok = new Wok {
-          def open = p.open()
+          def open = p.csv()
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
 
       "open a non-existent file" in new scope {
         val wok = new Wok {
-          def open = Path("non-existent").open()
+          def open = Path("non-existent").csv()
         }
         wok.open must throwA[FileNotFoundException]
       }
@@ -119,7 +139,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open a existent file with Reader" in new scope {
         p.write("a-b-c")
         val wok = new Wok {
-          def open = p.open()(Reader().FS("-"))
+          def open = p.csv()(Reader().FS("-"))
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
@@ -308,13 +328,12 @@ class AbstractWokTest extends SpecificationWithJUnit {
     "provide functions Wok.print/println" in {
 
       trait scope extends Scope {
-        val outStream = new ByteArrayOutputStream
-        val out = new PrintStream(new BufferedOutputStream(outStream), true, "utf-8")
-        def result = new String(outStream.toByteArray, "utf-8")
+        val out = new ByteArrayOutputStream
+        def result = new String(out.toByteArray, "utf-8")
       }
 
       "print(Any)" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             print("a")
             print("b")
@@ -324,7 +343,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "println()" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             println()
             println()
@@ -334,7 +353,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "println(Any)" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             println("a")
             println("b")
@@ -344,7 +363,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "print(Seq, Any)" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             print(Seq("a"), "b")
           }
@@ -353,7 +372,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "println(Seq, Any)" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             println(Seq("a"), "b")
           }
@@ -362,7 +381,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "print(Any) with Writer" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             print("a")(Writer().OFQ(Quote().All()))
             print("b")(Writer().OFQ(Quote().All()))
@@ -372,7 +391,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "println() with Writer" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             println()(Writer().OFQ(Quote().All()))
             println()(Writer().OFQ(Quote().All()))
@@ -382,7 +401,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "println(Any) with Writer" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             println("a")(Writer().OFQ(Quote().All()))
             println("b")(Writer().OFQ(Quote().All()))
@@ -392,7 +411,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "print(Seq, Any) with Writer" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             print(Seq("a"), "b")(Writer().OFQ(Quote().All()))
           }
@@ -401,7 +420,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "println(Seq, Any) with Writer" in new scope {
-        Console.withOut(out) {
+        Stdio.withOut(out) {
           new Wok {
             println(Seq("a"), "b")(Writer().OFQ(Quote().All()))
           }

@@ -28,6 +28,16 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           }
           result mustEqual "あ"
         }
+
+        "seq2process" in new scope {
+          Console.withOut(out) {
+            DynamicCompiler
+              .compile(List("print(Seq(\"echo\", \"-n\", \"a\").exec().string)"), None, Nil)
+              .create(Nil)
+              .runScript()
+          }
+          result mustEqual "a"
+        }
       }
 
       "provide access to" in {
@@ -146,17 +156,6 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           }
           result mustEqual "あ"
         }
-
-        "Proc implicitly" in new scope {
-          Console.withOut(out) {
-            DynamicCompiler
-              .compile(List("print(Seq(\"echo\", \"-n\", \"a\").exec().string)"), None, Nil)
-              .create(Nil)
-              .runScript()
-          }
-          result mustEqual "a"
-        }
-
       }
     }
   }

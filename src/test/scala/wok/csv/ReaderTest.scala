@@ -14,7 +14,7 @@ class ReaderTest extends SpecificationWithJUnit {
       "access without parens" in {
         Reader.FS.toString mustEqual """[ \t]+""".r.toString
         Reader.RS.toString mustEqual """\r\n|\r|\n""".r.toString
-        Reader.FQ mustEqual Quote()
+        Reader.FQ mustEqual Quote.None()
         Reader.CD mustEqual Codec.default
         Reader.FS("a").FS.toString mustEqual "a".r.toString
         Reader.RS("a").RS.toString mustEqual "a".r.toString

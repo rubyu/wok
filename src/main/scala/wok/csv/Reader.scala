@@ -10,7 +10,7 @@ import scalax.io.Codec
 class Reader {
   private var fs = """[ \t]+""".r
   private var rs = """\r\n|\r|\n""".r
-  private var fq = Quote()
+  private var fq = Quote.None()
   private var cd = Codec.default
 
   private var parser = new Parser(fs, rs, fq)

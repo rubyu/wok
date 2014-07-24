@@ -37,7 +37,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       "FQ" in {
         val wok = new Wok()
-        wok.FQ mustEqual Quote()
+        wok.FQ mustEqual Quote.None()
         wok.FQ(Quote().All()).FQ mustEqual Quote().All()
       }
 
@@ -63,7 +63,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       "OFQ" in {
         val wok = new Wok()
-        wok.OFQ mustEqual Quote()
+        wok.OFQ mustEqual Quote.None()
         wok.OFQ(Quote().All()).OFQ mustEqual Quote().All()
       }
 

@@ -20,7 +20,7 @@ class WriterTest extends SpecificationWithJUnit {
       "access without parens" in {
         Writer.OFS mustEqual " "
         Writer.ORS mustEqual "\n"
-        Writer.OFQ mustEqual Quote()
+        Writer.OFQ mustEqual Quote.None()
         Writer.OCD mustEqual Codec.default
         Writer.OFS("a").OFS mustEqual "a"
         Writer.ORS("a").ORS mustEqual "a"

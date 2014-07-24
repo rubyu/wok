@@ -10,7 +10,7 @@ import scalax.io.Codec
 class Writer {
   private var ofs = " "
   private var ors = "\n"
-  private var ofq = Quote()
+  private var ofq = Quote.None()
   private var ocd = Codec.default
 
   def OFS = ofs

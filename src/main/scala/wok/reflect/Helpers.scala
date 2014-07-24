@@ -18,10 +18,7 @@ object Helpers {
   }
 
   implicit class OpenablePath(val p: Path) extends AnyVal {
-    def csv()(implicit r: Reader): Iterator[Row] = {
-      if (p.exists) Resource.fromFile(p.fileOption.get).inputStream.open().get.csv()(r)
-      else throw new FileNotFoundException()
-    }
+    def csv()(implicit r: Reader): Iterator[Row] = p.inputStream().csv()(r)
   }
 
   implicit class PrintableOutputStream(val out: OutputStream) extends AnyVal {

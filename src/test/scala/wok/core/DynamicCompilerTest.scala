@@ -9,6 +9,8 @@ import java.io.{ByteArrayOutputStream, PrintStream, BufferedOutputStream, ByteAr
 class DynamicCompilerTest extends SpecificationWithJUnit {
   "DynamicCompiler" should {
 
+    sequential
+
     trait scope extends Scope {
       val outStream = new ByteArrayOutputStream
       val out = new PrintStream(new BufferedOutputStream(outStream), true, "utf-8")

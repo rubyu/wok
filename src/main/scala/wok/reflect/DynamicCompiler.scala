@@ -56,6 +56,8 @@ object DynamicCompiler {
       |import wok.csv.{Quote, Reader, Row, Writer}
       |import wok.process.Helpers._
       |import scalax.io.Codec
+      |import scalax.file.Path
+      |
       |
       |class Wok(val arg: List[String]) extends AbstractWok {
       |  def runScript() {

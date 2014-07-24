@@ -44,7 +44,7 @@ class RowIterator(in: io.Reader, parser: Reader) extends Iterator[Row] {
             case x =>
               if (!reachEnd) {
                 reachEnd = read(math.max(1000000, buffer.length)) match {
-                  case s if s.length == 0 => in.close(); true
+                  case s if s.length == 0 => true
                   case s if buffer.length == 0 => buffer = s; false
                   case s => buffer = new JointCharSequence(buffer, s); false
                 }

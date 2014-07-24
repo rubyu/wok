@@ -3,7 +3,7 @@ package wok.reflect
 
 import scalax.file.Path
 import wok.csv.{Row, Reader, Writer}
-import scalax.io.{Resource, StandardOpenOption}
+import scalax.io.{Codec, Resource, StandardOpenOption}
 import java.io.{OutputStream, InputStream, FileNotFoundException}
 
 
@@ -31,4 +31,6 @@ object Helpers {
     def println(x: Any *)(implicit w: Writer): Unit =
       p.outputStream(StandardOpenOption.Append).acquireFor { _.println(x: _*)(w) }
   }
+
+  implicit def codecToCharset(c: Codec) = c.charSet
 }

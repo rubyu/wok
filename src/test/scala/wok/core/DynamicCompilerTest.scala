@@ -18,7 +18,19 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
     }
 
     "compile Wok" should {
-      "access to" in {
+      "provide implicit conversions" in {
+        "codecToCharset" in new scope {
+          Console.withOut(out) {
+            DynamicCompiler
+              .compile(List("val c = Codec(\"Windows-31J\"); print(new String(\"あ\".getBytes(c), c))"), None, Nil)
+              .create(Nil)
+              .runScript()
+          }
+          result mustEqual "あ"
+        }
+      }
+
+      "provide access to" in {
         "Row" in new scope {
           Console.withOut(out) {
             SystemInput.withValue(new ByteArrayInputStream("a b c".getBytes)) {

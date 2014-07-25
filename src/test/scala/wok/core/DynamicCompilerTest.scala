@@ -126,7 +126,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withOut(out) {
             Stdio.withIn(new ByteArrayInputStream("a b c".getBytes)) {
               DynamicCompiler
-                .compile(List("STDIN.csv()(Reader()) foreach { row => print(row) }"), None, Nil)
+                .compile(List("STDIN.csv(Reader()) foreach { row => print(row) }"), None, Nil)
                 .create(Nil)
                 .runScript()
             }

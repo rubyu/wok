@@ -10,15 +10,15 @@ import java.io.{OutputStream, InputStream, FileNotFoundException}
 
 object Helpers {
   implicit class OpenableInputStream(val in: InputStream) extends AnyVal {
-    def csv()(implicit r: Reader): Iterator[Row] = r.open(in)
+    def csv(implicit r: Reader): Iterator[Row] = r.open(in)
   }
 
   implicit class OpenableInputStreamResource(val in: InputStreamResource[InputStream]) extends AnyVal {
-    def csv()(implicit r: Reader): Iterator[Row] = in.open().get.csv()(r)
+    def csv(implicit r: Reader): Iterator[Row] = in.open().get.csv(r)
   }
 
   implicit class OpenablePath(val p: Path) extends AnyVal {
-    def csv()(implicit r: Reader): Iterator[Row] = p.inputStream().csv()(r)
+    def csv(implicit r: Reader): Iterator[Row] = p.inputStream().csv(r)
   }
 
   implicit class PrintableOutputStream(val out: OutputStream) extends AnyVal {

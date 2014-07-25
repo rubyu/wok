@@ -16,6 +16,8 @@ class ReaderTest extends SpecificationWithJUnit {
         Reader.RS.toString mustEqual """\r\n|\r|\n""".r.toString
         Reader.FQ mustEqual Quote.None()
         Reader.CD mustEqual Codec.default
+        Reader.FS("a".r).FS.toString mustEqual "a".r.toString
+        Reader.RS("a".r).RS.toString mustEqual "a".r.toString
         Reader.FS("a").FS.toString mustEqual "a".r.toString
         Reader.RS("a").RS.toString mustEqual "a".r.toString
         Reader.FQ(Quote E('a')).FQ mustEqual Quote.E('a')
@@ -33,10 +35,10 @@ class ReaderTest extends SpecificationWithJUnit {
     }
 
     "return Row" in {
-      Reader()
+      Reader
         .FS("""\t""".r)
         .RS("""(\r\n|\r|\n)""".r)
-        .FQ(Quote() None())
+        .FQ(Quote None())
         .open(new ByteArrayInputStream("a1\ta2\ta3\nb1\tb2\tb3".getBytes))
         .toList mustEqual List(
         Row(0, List("a1", "a2", "a3"), List("\t", "\t"), "\n", "a1\ta2\ta3\n"),
@@ -44,10 +46,10 @@ class ReaderTest extends SpecificationWithJUnit {
     }
 
     "have a Regex does not match to any string as FS when a empty string given" in {
-      Reader()
+      Reader
         .FS("")
         .RS("""(\r\n|\r|\n)""".r)
-        .FQ(Quote() None())
+        .FQ(Quote None())
         .open(new ByteArrayInputStream("a1\ta2\nb1\tb2".getBytes))
         .toList mustEqual List(
         Row(0, List("a1\ta2"), Nil, "\n", "a1\ta2\n"),
@@ -55,10 +57,10 @@ class ReaderTest extends SpecificationWithJUnit {
     }
 
     "have a Regex does not match to any string as RS when a empty string given" in {
-      Reader()
+      Reader
         .FS("""\t""".r)
         .RS("")
-        .FQ(Quote() None())
+        .FQ(Quote None())
         .open(new ByteArrayInputStream("a1\ta2\nb1\tb2".getBytes))
         .toList mustEqual List(
         Row(0, List("a1", "a2\nb1", "b2"), List("\t", "\t"), "", "a1\ta2\nb1\tb2"))
@@ -69,7 +71,7 @@ class ReaderTest extends SpecificationWithJUnit {
         reader
         .FS("""\t""".r)
         .RS("\n")
-        .FQ(Quote() None())
+        .FQ(Quote None())
         .open(new ByteArrayInputStream("a1\ta2\nb1 b2".getBytes))
         .map { row => reader.FS(" "); row }
         .toList mustEqual List(
@@ -83,7 +85,7 @@ class ReaderTest extends SpecificationWithJUnit {
       reader
         .FS("""\t""".r)
         .RS("\n")
-        .FQ(Quote() None())
+        .FQ(Quote None())
         .open(new ByteArrayInputStream("a\nb c".getBytes))
         .map { row => reader.RS(" "); row }
         .toList mustEqual List(
@@ -98,9 +100,9 @@ class ReaderTest extends SpecificationWithJUnit {
       reader
         .FS("""\t""".r)
         .RS("\n")
-        .FQ(Quote() None())
+        .FQ(Quote None())
         .open(new ByteArrayInputStream("\"a\"\n\"b\"".getBytes))
-        .map { row => reader.FQ(Quote() Min()); row }
+        .map { row => reader.FQ(Quote Min()); row }
         .toList mustEqual List(
         Row(0, List("\"a\""), Nil, "\n", "\"a\"\n"),
         Row(1, List("b"), Nil, "", "\"b\"")

@@ -59,6 +59,8 @@ object Reader {
 
   def FS(s: String) = new Reader().FS(s)
   def RS(s: String) = new Reader().RS(s)
+  def FS(r: Regex) = new Reader().FS(r)
+  def RS(r: Regex) = new Reader().RS(r)
   def FQ(q: Quote) = new Reader().FQ(q)
   def CD(c: Codec) = new Reader().CD(c)
 

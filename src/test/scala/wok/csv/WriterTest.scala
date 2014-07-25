@@ -59,7 +59,7 @@ class WriterTest extends SpecificationWithJUnit {
 
     "with QuoteAll Q E" in {
       
-      val writer = Writer().OFS(",").ORS("\n").OFQ(Quote().All().E('\\'))
+      val writer = Writer OFS(",") ORS("\n") OFQ(Quote All() E('\\'))
       
       "write String" in new scope {
         writer.writeln(out, "a")
@@ -89,7 +89,7 @@ class WriterTest extends SpecificationWithJUnit {
 
     "with QuoteAll Q" in {
       
-      val writer = Writer().OFS(",").ORS("\n").OFQ(Quote() All() Q('"'))
+      val writer = Writer OFS(",") ORS("\n") OFQ(Quote All() Q('"'))
       
       "write String" in new scope {
         writer.writeln(out, "a")
@@ -115,7 +115,7 @@ class WriterTest extends SpecificationWithJUnit {
 
     "with QuoteMin Q E" in {
 
-      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() Min() Q('"') E('\\'))
+      val writer = Writer OFS(",") ORS("\n") OFQ(Quote Min() Q('"') E('\\'))
 
       "write String" in new scope {
         writer.writeln(out, "a")
@@ -145,7 +145,7 @@ class WriterTest extends SpecificationWithJUnit {
 
     "with QuoteMin Q" in {
       
-      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() Min() Q('"'))
+      val writer = Writer OFS(",") ORS("\n") OFQ(Quote Min() Q('"'))
       
       "write String" in new scope {
         writer.writeln(out, "a")
@@ -171,7 +171,7 @@ class WriterTest extends SpecificationWithJUnit {
 
     "with QuoteNone Q E" in {
 
-      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() None() Q('"') E('\\'))
+      val writer = Writer OFS(",") ORS("\n") OFQ(Quote None() Q('"') E('\\'))
 
       "write String" in new scope {
         writer.writeln(out, "a")
@@ -201,7 +201,7 @@ class WriterTest extends SpecificationWithJUnit {
 
     "with QuoteNone E" in {
       
-      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() None() E('\\'))
+      val writer = Writer OFS(",") ORS("\n") OFQ(Quote None() E('\\'))
       
       "write String" in new scope {
         writer.writeln(out, "a")
@@ -227,7 +227,7 @@ class WriterTest extends SpecificationWithJUnit {
 
     "with QuoteNone Q" in {
 
-      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() None() Q('"'))
+      val writer = Writer OFS(",") ORS("\n") OFQ(Quote None() Q('"'))
 
       "write String" in new scope {
         writer.writeln(out, "a")
@@ -250,7 +250,7 @@ class WriterTest extends SpecificationWithJUnit {
 
     "with QuoteNone" in {
 
-      val writer = Writer() OFS(",") ORS("\n") OFQ(Quote() None())
+      val writer = Writer OFS(",") ORS("\n") OFQ(Quote None())
 
       "write String" in new scope {
         writer.writeln(out, "a")

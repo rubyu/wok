@@ -24,5 +24,5 @@ class FastCharSequence(chars: Array[Char], val sb: Int, val eb: Int) extends Cha
     new FastCharSequence(chars, sb + s, sb + e)
   }
 
-  override def toString(): String = new String(chars, sb, length)
+  override def toString: String = new String(chars, sb, length)
 }

@@ -34,7 +34,7 @@ class JointCharSequence(a: CharSequence, b: CharSequence) extends CharSequence {
     }
   }
 
-  override def toString(): String = a.toString + b.toString
+  override def toString: String = a.toString + b.toString
 
   override def equals(other: Any) = other match {
     case that: JointCharSequence if that.isInstanceOf[JointCharSequence] => toString == that.toString

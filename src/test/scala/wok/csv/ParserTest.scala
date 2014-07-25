@@ -18,7 +18,7 @@ class ParserTest extends SpecificationWithJUnit {
 
     "" in {
       val dseq = new DebugCharSequence("\"a\\,a\"")
-      val parser = new Parser(",".r, "(\r\n|\r|\n)".r, Quote() All().E('\\'))
+      val parser = new Parser(",".r, "(\r\n|\r|\n)".r, Quote All().E('\\'))
       parser.parse(parser.field, dseq)
       println("access count: ", count)
       success
@@ -30,7 +30,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() None()
+      val FQ = Quote None()
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "").get mustEqual ""
@@ -44,7 +44,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse Row" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() None()
+      val FQ = Quote None()
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.line, "").get mustEqual Row1(Nil, Nil, "")
@@ -69,7 +69,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() None() E('\\')
+      val FQ = Quote None() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "").get mustEqual ""
@@ -83,7 +83,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings contain RS and FS escaped by \\" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() None() E('\\')
+      val FQ = Quote None() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\\").get mustEqual ""         //more loose than Python
@@ -106,7 +106,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings contain RS and FS escaped by *" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() None() E('*')
+      val FQ = Quote None() E('*')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "*").get mustEqual ""         //more loose than Python
@@ -129,7 +129,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse Row" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() None() E('\\')
+      val FQ = Quote None() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.line, "").get mustEqual Row1(Nil, Nil, "")
@@ -172,7 +172,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min()
+      val FQ = Quote Min()
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "").get mustEqual ""
@@ -186,7 +186,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings contain invalid quote expressions" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min()
+      val FQ = Quote Min()
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"").get mustEqual "\""     //more loose than Python
@@ -198,7 +198,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse quoted strings" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min()
+      val FQ = Quote Min()
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"\"").get mustEqual ""
@@ -214,7 +214,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse Row" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min()
+      val FQ = Quote Min()
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.line, "").get mustEqual Row1(Nil, Nil, "")
@@ -271,7 +271,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('\\')
+      val FQ = Quote Min() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "").get mustEqual ""
@@ -285,7 +285,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings contain RS and FS escaped by \\" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('\\')
+      val FQ = Quote Min() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\\").get mustEqual ""         //more loose than Python
@@ -308,7 +308,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings contain RS and FS escaped by *" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('*')
+      val FQ = Quote Min() E('*')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "*").get mustEqual ""         //more loose than Python
@@ -331,7 +331,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse non-quoted strings contain invalid quote expressions" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('\\')
+      val FQ = Quote Min() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"").get mustEqual "\""     //more loose than Python
@@ -343,7 +343,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse quoted strings" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('\\')
+      val FQ = Quote Min() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"\"").get mustEqual ""
@@ -359,7 +359,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse quoted strings contain RS and FS escaped by \\" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('\\')
+      val FQ = Quote Min() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"\\\"\"").get mustEqual "\""
@@ -380,7 +380,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse quoted strings contain RS and FS escaped by *" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('*')
+      val FQ = Quote Min() E('*')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"*\"\"").get mustEqual "\""
@@ -401,7 +401,7 @@ class ParserTest extends SpecificationWithJUnit {
     "not to parse quoted strings contain invalid escape expressions" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() All() E('\\')
+      val FQ = Quote All() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.line, "\"\"\"").isEmpty must beTrue
@@ -412,7 +412,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse Row" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('\\')
+      val FQ = Quote Min() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.line, "").get mustEqual Row1(Nil, Nil, "")
@@ -469,7 +469,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse quoted strings" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() All()
+      val FQ = Quote All()
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"\"").get mustEqual ""
@@ -485,7 +485,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse Row" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() All()
+      val FQ = Quote All()
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.line, "\"\"").get mustEqual Row1(List(""), Nil, "")
@@ -510,7 +510,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse quoted strings" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() All() E('\\')
+      val FQ = Quote All() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"\"").get mustEqual ""
@@ -526,7 +526,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse quoted strings contain RS and FS escaped by \\" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('\\')
+      val FQ = Quote Min() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"\\\"\"").get mustEqual "\""
@@ -547,7 +547,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse quoted strings contain RS and FS escaped by *" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() Min() E('*')
+      val FQ = Quote Min() E('*')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.field, "\"*\"\"").get mustEqual "\""
@@ -568,7 +568,7 @@ class ParserTest extends SpecificationWithJUnit {
     "not to parse quoted strings contain invalid escape expressions" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() All() E('\\')
+      val FQ = Quote All() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.line, "\"\"\"").isEmpty must beTrue
@@ -579,7 +579,7 @@ class ParserTest extends SpecificationWithJUnit {
     "parse Row" in {
       val FS = "\t".r
       val RS = "(\r\n|\r|\n)".r
-      val FQ = Quote() All() E('\\')
+      val FQ = Quote All() E('\\')
       val parser = new Parser(FS, RS, FQ)
 
       parser.parse(parser.line, "\"\"").get mustEqual Row1(List(""), Nil, "")

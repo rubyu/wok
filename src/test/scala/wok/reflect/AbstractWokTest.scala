@@ -94,6 +94,36 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
+    "privide a function String.csv" in {
+      import Helpers.OpenableString
+
+      "open an InputStream" in {
+        val p = Path.createTempFile()
+        p.write("a b c")
+        val wok = new Wok {
+          def open = p.path.csv
+        }
+        wok.open.next mustEqual List("a", "b", "c")
+      }
+
+      "throw FileNotFoundException when open non-existent file" in {
+        val p = Path("non-existent")
+        val wok = new Wok {
+          def open = p.path.csv
+        }
+        wok.open must throwA[FileNotFoundException]
+      }
+
+      "open an InputStream with Reader" in {
+        val p = Path.createTempFile()
+        p.write("a-b-c")
+        val wok = new Wok {
+          def open = p.path.csv(Reader() FS "-")
+        }
+        wok.open.next mustEqual List("a", "b", "c")
+      }
+    }
+
     "privide a function InputStreamResource.csv" in {
       import Helpers.OpenableInputStreamResource
 
@@ -129,7 +159,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         wok.open.next mustEqual List("a", "b", "c")
       }
 
-      "open a non-existent file" in new scope {
+      "throw FileNotFoundException when open a non-existent file" in new scope {
         val wok = new Wok {
           def open = Path("non-existent").csv
         }
@@ -237,15 +267,13 @@ class AbstractWokTest extends SpecificationWithJUnit {
         val p = Path.createTempFile()
       }
 
-      "println to non-existing file" in {
-        val p = Path("testoutput")
+      "println to non-existing file" in new scope {
+        p.delete()
         new Wok {
           p.println("a")
           p.println("b")
         }
-        val result = p.string
-        p.delete()
-        result mustEqual "a\nb\n"
+        p.string mustEqual "a\nb\n"
       }
 
       "println()" in new scope {
@@ -320,6 +348,101 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "print(Seq, Any) with Writer" in new scope {
         new Wok {
           p.print(Seq("a"), "b")(Writer().OFQ(Quote().All()))
+        }
+        p.string mustEqual "\"a\" \"b\""
+      }
+    }
+
+    "provide functions String.print/println" in {
+      import Helpers.PrintableString
+
+      trait scope extends Scope {
+        val p = Path.createTempFile()
+      }
+
+      "println to non-existing file" in new scope {
+        p.delete()
+        new Wok {
+          p.path.println("a")
+          p.path.println("b")
+        }
+        val result = p.string
+        p.delete()
+        result mustEqual "a\nb\n"
+      }
+
+      "println()" in new scope {
+        new Wok {
+          p.path.println()
+          p.path.println()
+        }
+        p.string mustEqual "\n\n"
+      }
+
+      "println(Any)" in new scope {
+        new Wok {
+          p.path.println("a")
+          p.path.println("b")
+        }
+        p.string mustEqual "a\nb\n"
+      }
+
+      "print(Any)" in new scope {
+        new Wok {
+          p.path.print("a")
+          p.path.print("b")
+        }
+        p.string mustEqual "ab"
+      }
+
+      "println(Seq, Any)" in new scope {
+        new Wok {
+          p.path.println(Seq("a"), "b")
+        }
+        p.string mustEqual "a b\n"
+      }
+
+      "print(Seq, Any)" in new scope {
+        new Wok {
+          p.path.print(Seq("a"), "b")
+        }
+        p.string mustEqual "a b"
+      }
+
+      "println() with Writer" in new scope {
+        new Wok {
+          p.path.println()(Writer().OFQ(Quote().All()))
+          p.path.println()(Writer().OFQ(Quote().All()))
+        }
+        p.string mustEqual "\n\n"
+      }
+
+      "println(Any) with Writer" in new scope {
+        new Wok {
+          p.path.println("a")(Writer().OFQ(Quote().All()))
+          p.path.println("b")(Writer().OFQ(Quote().All()))
+        }
+        p.string mustEqual "\"a\"\n\"b\"\n"
+      }
+
+      "print(Any) with Writer" in new scope {
+        new Wok {
+          p.path.print("a")(Writer().OFQ(Quote().All()))
+          p.path.print("b")(Writer().OFQ(Quote().All()))
+        }
+        p.string mustEqual "\"a\"\"b\""
+      }
+
+      "println(Seq, Any) with Writer" in new scope {
+        new Wok {
+          p.path.println(Seq("a"), "b")(Writer().OFQ(Quote().All()))
+        }
+        p.string mustEqual "\"a\" \"b\"\n"
+      }
+
+      "print(Seq, Any) with Writer" in new scope {
+        new Wok {
+          p.path.print(Seq("a"), "b")(Writer().OFQ(Quote().All()))
         }
         p.string mustEqual "\"a\" \"b\""
       }

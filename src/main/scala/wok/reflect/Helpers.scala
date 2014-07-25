@@ -4,8 +4,8 @@ package wok.reflect
 import scalax.file.Path
 import wok.csv.{Row, Reader, Writer}
 import scalax.io.managed.{OutputStreamResource, InputStreamResource}
-import scalax.io.{Codec, Resource, StandardOpenOption}
-import java.io.{OutputStream, InputStream, FileNotFoundException}
+import scalax.io.{Codec, StandardOpenOption}
+import java.io.{OutputStream, InputStream}
 
 
 object Helpers {
@@ -19,6 +19,10 @@ object Helpers {
 
   implicit class OpenablePath(val p: Path) extends AnyVal {
     def csv(implicit r: Reader): Iterator[Row] = p.inputStream().csv(r)
+  }
+
+  implicit class OpenableString(val s: String) extends AnyVal {
+    def csv(implicit r: Reader): Iterator[Row] = Path.fromString(s).csv(r)
   }
 
   implicit class PrintableOutputStream(val out: OutputStream) extends AnyVal {
@@ -37,6 +41,11 @@ object Helpers {
 
     def println(x: Any *)(implicit w: Writer): Unit =
       p.outputStream(StandardOpenOption.Append).acquireFor { _.println(x: _*)(w) }
+  }
+
+  implicit class PrintableString(val s: String) extends AnyVal {
+    def print(x: Any *)(implicit w: Writer): Unit = Path.fromString(s).print(x: _*)(w)
+    def println(x: Any *)(implicit w: Writer): Unit = Path.fromString(s).println(x: _*)(w)
   }
 
   implicit def codecToCharset(c: Codec) = c.charSet

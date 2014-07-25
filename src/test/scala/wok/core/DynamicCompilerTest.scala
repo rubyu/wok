@@ -13,8 +13,11 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
     trait scope extends Scope {
       val out = new ByteArrayOutputStream
-      def result = new String(out.toByteArray, "utf-8")
+      val err = new ByteArrayOutputStream
     }
+
+    implicit def stringToByteArrayInputStream(s: String) = new ByteArrayInputStream(s.getBytes("utf-8"))
+    implicit def bytesToByteArrayInputStream(bytes: Array[Byte]) = new ByteArrayInputStream(bytes)
 
     "compile Wok" should {
       "provide implicit conversions" in {
@@ -25,7 +28,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
               .create(Nil)
               .runScript()
           }
-          result mustEqual "あ"
+          out.toString("utf-8") mustEqual "あ"
         }
 
         "seq2process" in new scope {
@@ -35,69 +38,69 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
               .create(Nil)
               .runScript()
           }
-          result mustEqual "a"
+          out.toString mustEqual "a"
         }
       }
 
       "provide access to" in {
         "Row" in new scope {
-          Stdio.withOut(out) {
-            Stdio.withIn(new ByteArrayInputStream("a b c".getBytes)) {
+          Stdio.withIn("a b c") {
+            Stdio.withOut(out) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(row) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
           }
-          result mustEqual "a b c"
+          out.toString mustEqual "a b c"
         }
 
         "NF" in new scope {
-          Stdio.withOut(out) {
-            Stdio.withIn(new ByteArrayInputStream("a b c".getBytes)) {
+          Stdio.withIn("a b c") {
+            Stdio.withOut(out) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(NF) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
           }
-          result mustEqual "3"
+          out.toString mustEqual "3"
         }
 
         "NR" in new scope {
-          Stdio.withOut(out) {
-            Stdio.withIn(new ByteArrayInputStream("a b c".getBytes)) {
+          Stdio.withIn("a b c") {
+            Stdio.withOut(out) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(NR) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
           }
-          result mustEqual "0"
+          out.toString mustEqual "0"
         }
 
         "FT" in new scope {
-          Stdio.withOut(out) {
-            Stdio.withIn(new ByteArrayInputStream("a b c".getBytes)) {
+          Stdio.withIn("a b c") {
+            Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(FT) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
           }
-          result mustEqual "\" \" \" \""
+          out.toString mustEqual "\" \" \" \""
         }
 
         "RT" in new scope {
-          Stdio.withOut(out) {
-            Stdio.withIn(new ByteArrayInputStream("a b c\n".getBytes)) {
+          Stdio.withIn("a b c\n") {
+            Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(RT) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
           }
-          result mustEqual "\"\n\""
+          out.toString mustEqual "\"\n\""
         }
 
         "arg" in new scope {
@@ -107,31 +110,31 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
               .create(List("1", "2", "3"))
               .runScript()
           }
-          result mustEqual "1 2 3"
+          out.toString mustEqual "1 2 3"
         }
 
         "Quote" in new scope {
-          Stdio.withOut(out) {
-            Stdio.withIn(new ByteArrayInputStream("a\\ b\\ c".getBytes)) {
+          Stdio.withIn("a\\ b\\ c") {
+            Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), Some("foreach { row => print(row) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
           }
-          result mustEqual "a\\ b\\ c"
+          out.toString mustEqual "a\\ b\\ c"
         }
 
         "Reader" in new scope {
-          Stdio.withOut(out) {
-            Stdio.withIn(new ByteArrayInputStream("a b c".getBytes)) {
+          Stdio.withIn("a b c") {
+            Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("STDIN.csv(Reader()) foreach { row => print(row) }"), None, Nil)
                 .create(Nil)
                 .runScript()
             }
           }
-          result mustEqual "a b c"
+          out.toString mustEqual "a b c"
         }
 
         "Writer" in new scope {
@@ -141,19 +144,19 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
               .create(Nil)
               .runScript()
           }
-          result mustEqual "a"
+          out.toString mustEqual "a"
         }
 
         "Codec" in new scope {
-          Stdio.withOut(out) {
-            Stdio.withIn(new ByteArrayInputStream("あ".getBytes("Windows-31J"))) {
+          Stdio.withIn("あ".getBytes("Windows-31J")) {
+            Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("CD(Codec(\"Windows-31J\"))"), Some("foreach { row => print(row) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
           }
-          result mustEqual "あ"
+          out.toString("utf-8") mustEqual "あ"
         }
 
         "Path" in new scope {
@@ -163,7 +166,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
               .create(Nil)
               .runScript()
           }
-          result mustEqual "a"
+          out.toString mustEqual "a"
         }
 
         "Resource" in new scope {
@@ -173,7 +176,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
               .create(Nil)
               .runScript()
           }
-          result mustEqual "a"
+          out.toString mustEqual "a"
         }
       }
     }

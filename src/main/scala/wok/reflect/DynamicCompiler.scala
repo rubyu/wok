@@ -52,7 +52,7 @@ object DynamicCompiler {
       |
       |import wok.reflect.AbstractWok
       |import wok.reflect.Helpers._
-      |import wok.core.Stdio.{in => STDIN}
+      |import wok.core.Stdio.{in => STDIN, out => STDOUT, err => STDERR}
       |import wok.csv.{Quote, Reader, Row, Writer}
       |import wok.process.Helpers._
       |import scalax.io.{Codec, Resource}

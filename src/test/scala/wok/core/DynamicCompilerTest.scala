@@ -178,6 +178,30 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           }
           out.toString mustEqual "a"
         }
+
+        "STDIN" in new scope {
+          Stdio.withIn("あ") {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("STDOUT.write(STDIN.string)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          out.toString mustEqual "あ"
+        }
+
+        "STDERR" in new scope {
+          Stdio.withIn("あ") {
+            Stdio.withErr(err) {
+              DynamicCompiler
+                .compile(List("STDERR.write(STDIN.string)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+          }
+          err.toString mustEqual "あ"
+        }
       }
     }
   }

@@ -33,17 +33,16 @@ object DynamicCompiler {
     def indent(xs: List[String]) = xs.map { "    " + _ } .mkString("\n")
 
     def script(str: Option[String]) = {
-      Console
-      str match {
-        case Some(str) =>
-          """|      var currentRow = Row(0, Nil, Nil, "", "")
-            |      def NF = currentRow.size
-            |      def NR = currentRow.id
-            |      def FT = currentRow.sep
-            |      def RT = currentRow.term
-            |      STDIN.csv.map { row => currentRow = row; row } %s
-          """.stripMargin.format(str)
-        case None => "// no script"
+      if (str.isDefined) {
+        """|      var currentRow = Row(0, Nil, Nil, "", "")
+          |      def NF = currentRow.size
+          |      def NR = currentRow.id
+          |      def FT = currentRow.sep
+          |      def RT = currentRow.term
+          |      STDIN.csv.map { row => currentRow = row; row } %s
+        """.stripMargin.format(str.get)
+      } else {
+        "// no script"
       }
     }
 

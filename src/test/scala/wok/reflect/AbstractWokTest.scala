@@ -80,7 +80,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open an InputStream" in {
         val in = new ByteArrayInputStream("a b c".getBytes())
         val wok = new Wok {
-          def open = in.csv()
+          def open = in.csv
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
@@ -88,7 +88,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open an InputStream with Reader" in {
         val in = new ByteArrayInputStream("a-b-c".getBytes())
         val wok = new Wok {
-          def open = in.csv()(Reader().FS("-"))
+          def open = in.csv(Reader().FS("-"))
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
@@ -100,7 +100,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open an InputStreamResource" in {
         val in = Resource.fromInputStream(new ByteArrayInputStream("a b c".getBytes()))
         val wok = new Wok {
-          def open = in.csv()
+          def open = in.csv
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
@@ -108,7 +108,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open an InputStreamResource with Reader" in {
         val in = Resource.fromInputStream(new ByteArrayInputStream("a-b-c".getBytes()))
         val wok = new Wok {
-          def open = in.csv()(Reader().FS("-"))
+          def open = in.csv(Reader().FS("-"))
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
@@ -124,14 +124,14 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open a existent file" in new scope {
         p.write("a b c")
         val wok = new Wok {
-          def open = p.csv()
+          def open = p.csv
         }
         wok.open.next mustEqual List("a", "b", "c")
       }
 
       "open a non-existent file" in new scope {
         val wok = new Wok {
-          def open = Path("non-existent").csv()
+          def open = Path("non-existent").csv
         }
         wok.open must throwA[FileNotFoundException]
       }
@@ -139,7 +139,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "open a existent file with Reader" in new scope {
         p.write("a-b-c")
         val wok = new Wok {
-          def open = p.csv()(Reader().FS("-"))
+          def open = p.csv(Reader().FS("-"))
         }
         wok.open.next mustEqual List("a", "b", "c")
       }

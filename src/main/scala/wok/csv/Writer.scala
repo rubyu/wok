@@ -29,54 +29,48 @@ class Writer {
       case Quote(Quote.Mode.All, Some(q), _) => _.escaped(q).quoted(q)
 
       /** Escapes Q in a given string with Q and quotes it with Q when it contains ORS or OFS or Q or E. */
-      case Quote(Quote.Mode.Min, Some(q), Some(e)) => {
+      case Quote(Quote.Mode.Min, Some(q), Some(e)) =>
         val p =  s"""(${ors.er}|${ofs.er}|${q.er}|${e.er})""".r
         s => p.findFirstMatchIn(s) match {
           case Some(_) => s.escaped(q).quoted(q)
           case None => s
         }
-      }
 
       /** Escapes Q in a given string with Q and quotes it with Q when it contains ORS or OFS or Q. */
-      case Quote(Quote.Mode.Min, Some(q), None) => {
+      case Quote(Quote.Mode.Min, Some(q), None) =>
         val p =  s"""(${ors.er}|${ofs.er}|${q.er})""".r
         s => p.findFirstMatchIn(s) match {
           case Some(_) => s.escaped(q).quoted(q)
           case None => s
         }
-      }
 
       /** Escapes ORS, OFS, E and Q. */
-      case Quote(Quote.Mode.None, Some(q), Some(e)) => {
+      case Quote(Quote.Mode.None, Some(q), Some(e)) =>
         val p =  s"""(${ors.er}|${ofs.er}|${q.er}|${e.er})""".r
         val r = quoteReplacement(e.toString) + "$0"
         p.replaceAllIn(_, r)
-      }
 
       /** Escapes ORS, OFS and E. */
-      case Quote(Quote.Mode.None, None, Some(e)) => {
+      case Quote(Quote.Mode.None, None, Some(e)) =>
         val p =  s"""(${ors.er}|${ofs.er}|${e.er})""".r
         val r = quoteReplacement(e.toString) + "$0"
         p.replaceAllIn(_, r)
-      }
 
       /** Returns a given string as is. Throws an EncodingException when it contains ORS or OFS or Q. */
-      case Quote(Quote.Mode.None, Some(q), None) => {
+      case Quote(Quote.Mode.None, Some(q), None) =>
         val p = s"""(${ors.er}|${ofs.er}|${q.er})""".r
         s => p.findFirstMatchIn(s) match {
           case Some(m) => throw new EncodingException(s"Field values must not contain ORS, OFS, and Q")
           case None => s
         }
-      }
 
       /** Returns a given string as is. Throws an EncodingException when it contains ORS or OFS. */
-      case Quote(Quote.Mode.None, None, None) => {
+      case Quote(Quote.Mode.None, None, None) =>
         val p = s"""(${ors.er}|${ofs.er})""".r
         s => p.findFirstMatchIn(s) match {
           case Some(m) => throw new EncodingException(s"Field values must not contain ORS and OFS")
           case None => s
         }
-      }
     }
   }
 

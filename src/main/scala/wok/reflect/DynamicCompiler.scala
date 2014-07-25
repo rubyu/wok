@@ -57,6 +57,7 @@ object DynamicCompiler {
       |import wok.process.Helpers._
       |import scalax.io.{Codec, Resource}
       |import scalax.file.Path
+      |import scalax.file.ImplicitConversions.string2path
       |
       |
       |class Wok(val arg: List[String]) extends AbstractWok {

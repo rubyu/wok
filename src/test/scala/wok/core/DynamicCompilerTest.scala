@@ -20,6 +20,20 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
     implicit def bytesToByteArrayInputStream(bytes: Array[Byte]) = new ByteArrayInputStream(bytes)
 
     "compile Wok" should {
+      "provide implicit scalax.io.OutputConverter" in {
+        "" in new scope {
+          "ByteArrayConverter" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("STDOUT.write(\"a\".getBytes)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "a"
+          }
+        }
+      }
+
       "provide implicit conversions" in {
         "codecToCharset" in new scope {
           Stdio.withOut(out) {
@@ -35,6 +49,16 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("print(Seq(\"echo\", \"-n\", \"a\").exec().string)"), None, Nil)
+              .create(Nil)
+              .runScript()
+          }
+          out.toString mustEqual "a"
+        }
+
+        "string2path" in new scope {
+          Stdio.withOut(out) {
+            DynamicCompiler
+              .compile(List("STDOUT.write(\"a\".name)"), None, Nil)
               .create(Nil)
               .runScript()
           }

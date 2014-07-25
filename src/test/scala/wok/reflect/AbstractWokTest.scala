@@ -78,7 +78,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.OpenableInputStream
 
       "open an InputStream" in {
-        val in = new ByteArrayInputStream("a b c".getBytes())
+        val in = new ByteArrayInputStream("a b c".getBytes)
         val wok = new Wok {
           def open = in.csv
         }
@@ -86,7 +86,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "open an InputStream with Reader" in {
-        val in = new ByteArrayInputStream("a-b-c".getBytes())
+        val in = new ByteArrayInputStream("a-b-c".getBytes)
         val wok = new Wok {
           def open = in.csv(Reader.FS("-"))
         }
@@ -128,7 +128,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.OpenableInputStreamResource
 
       "open an InputStreamResource" in {
-        val in = Resource.fromInputStream(new ByteArrayInputStream("a b c".getBytes()))
+        val in = Resource.fromInputStream(new ByteArrayInputStream("a b c".getBytes))
         val wok = new Wok {
           def open = in.csv
         }
@@ -136,7 +136,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "open an InputStreamResource with Reader" in {
-        val in = Resource.fromInputStream(new ByteArrayInputStream("a-b-c".getBytes()))
+        val in = Resource.fromInputStream(new ByteArrayInputStream("a-b-c".getBytes))
         val wok = new Wok {
           def open = in.csv(Reader.FS("-"))
         }

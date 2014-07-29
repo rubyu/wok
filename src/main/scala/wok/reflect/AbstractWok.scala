@@ -5,7 +5,7 @@ import util.matching.Regex
 import scalax.io.Codec
 import wok.core.Stdio.{out => STDOUT}
 import wok.csv.{Writer, Reader, Quote}
-import Helpers.PrintableOutputStreamResource
+import Helpers.ExtendedOutputStreamResource
 
 
 trait AbstractWok {

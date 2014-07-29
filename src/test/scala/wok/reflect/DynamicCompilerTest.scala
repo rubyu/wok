@@ -153,7 +153,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withIn("a b c") {
             Stdio.withOut(out) {
               DynamicCompiler
-                .compile(List("STDIN.csv(Reader()) foreach { row => print(row) }"), None, Nil)
+                .compile(List("STDIN |> { _.csv(Reader()) foreach { row => print(row) } }"), None, Nil)
                 .create(Nil)
                 .runScript()
             }

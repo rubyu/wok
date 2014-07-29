@@ -7,7 +7,7 @@ import wok.csv.{Quote, Writer, Reader}
 import wok.core.Stdio
 import java.io._
 import scalax.file.Path
-import scalax.io.{Resource, Codec}
+import scalax.io.{StandardOpenOption, Resource, Codec}
 
 
 class AbstractWokTest extends SpecificationWithJUnit {
@@ -75,7 +75,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
     }
 
     "privide a function InputStream.csv" in {
-      import Helpers.OpenableInputStream
+      import Helpers.ExtendedInputStream
 
       "open an InputStream" in {
         val in = new ByteArrayInputStream("a b c".getBytes)
@@ -94,89 +94,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "privide a function String.csv" in {
-      import Helpers.OpenableString
-
-      "open an InputStream" in {
-        val p = Path.createTempFile()
-        p.write("a b c")
-        val wok = new Wok {
-          def open = p.path.csv
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-
-      "throw FileNotFoundException when open non-existent file" in {
-        val p = Path("non-existent")
-        val wok = new Wok {
-          def open = p.path.csv
-        }
-        wok.open must throwA[FileNotFoundException]
-      }
-
-      "open an InputStream with Reader" in {
-        val p = Path.createTempFile()
-        p.write("a-b-c")
-        val wok = new Wok {
-          def open = p.path.csv(Reader.FS("-"))
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-    }
-
-    "privide a function InputStreamResource.csv" in {
-      import Helpers.OpenableInputStreamResource
-
-      "open an InputStreamResource" in {
-        val in = Resource.fromInputStream(new ByteArrayInputStream("a b c".getBytes))
-        val wok = new Wok {
-          def open = in.csv
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-
-      "open an InputStreamResource with Reader" in {
-        val in = Resource.fromInputStream(new ByteArrayInputStream("a-b-c".getBytes))
-        val wok = new Wok {
-          def open = in.csv(Reader.FS("-"))
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-    }
-
-    "privide a function Path.csv" in {
-      import Helpers.OpenablePath
-
-      trait scope extends Scope {
-        val p = Path.createTempFile()
-      }
-
-      "open a existent file" in new scope {
-        p.write("a b c")
-        val wok = new Wok {
-          def open = p.csv
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-
-      "throw FileNotFoundException when open a non-existent file" in new scope {
-        val wok = new Wok {
-          def open = Path("non-existent").csv
-        }
-        wok.open must throwA[FileNotFoundException]
-      }
-
-      "open a existent file with Reader" in new scope {
-        p.write("a-b-c")
-        val wok = new Wok {
-          def open = p.csv(Reader.FS("-"))
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-    }
-
-    "provide functions OutputStream.print/println" in {
-      import Helpers.PrintableOutputStream
+    "add extended functions print/println to OutputStream" in {
+      import Helpers.ExtendedOutputStream
 
       trait scope extends Scope {
         val out = new ByteArrayOutputStream()
@@ -260,8 +179,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide functions Path.<|.print/println" in {
-      import Helpers.RedirectModePath
+    "add a extended function <| to Path" in {
+      import Helpers.ExtendedPath
 
       trait scope extends Scope {
         val out = Path.createTempFile().<|
@@ -345,8 +264,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide functions Path.<<|.print/println" in {
-      import Helpers.AppendModePath
+    "add a extended function <<| to Path" in {
+      import Helpers.ExtendedPath
 
       trait scope extends Scope {
         val out = Path.createTempFile().<<|
@@ -430,8 +349,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide functions String.<|.print/println" in {
-      import Helpers.RedirectModePathString
+    "add a extended function <| to String" in {
+      import Helpers.ExtendedPathString
 
       trait scope extends Scope {
         val out = Path.createTempFile().path <|
@@ -515,8 +434,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide functions String.<<|.print/println" in {
-      import Helpers.AppendModePathString
+    "add a extended function <<| to String" in {
+      import Helpers.ExtendedPathString
 
       trait scope extends Scope {
         val out = Path.createTempFile().path <<|
@@ -600,7 +519,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide functions Wok.print/println" in {
+    "provide functions print/println" in {
 
       trait scope extends Scope {
         val out = new ByteArrayOutputStream
@@ -704,51 +623,107 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "provide a function Path.<" in {
-      import Helpers.RedirectModePath
-      "write a Array[Byte]" in {
-        val out = Path.createTempFile()
-        out.write("a")
-        new Wok {
-          out <| { _.write("b".getBytes) }
+    "ExtendedInputStreamResource" in {
+      import Helpers.ExtendedInputStreamResource
+
+      "add a extended function |> to InputStreamResource" in {
+        "write a Array[Byte]" in {
+          val out = Path.createTempFile()
+          out.write("a")
+          val wok = new Wok {
+            def string = out.inputStream |> { _.read().toChar.toString }
+          }
+          wok.string mustEqual "a"
         }
-        out.string mustEqual "b"
       }
     }
 
-    "provide a function Path.<<" in {
-      import Helpers.AppendModePath
-      "truncate contents already exists and write a Array[Byte]" in {
-        val out = Path.createTempFile()
-        out.write("a")
-        new Wok {
-          out <<| { _.write("b".getBytes) }
+   "ExtendedOutputStreamResource" in {
+     import Helpers.ExtendedOutputStreamResource
+
+      "add a extended function <<| to OutputStreamResource" in {
+        "write a Array[Byte]" in {
+          val out = Path.createTempFile()
+          out.write("a")
+          new Wok {
+            out.outputStream(StandardOpenOption.Append) <<| { _.write("b".getBytes) }
+          }
+          out.string mustEqual "ab"
         }
-        out.string mustEqual "ab"
       }
     }
 
-    "provide a function String.<" in {
-      import Helpers.RedirectModePathString
-      "write a Array[Byte]" in {
-        val out = Path.createTempFile()
-        out.write("a")
-        new Wok {
-          out.path <| { _.write("b".getBytes) }
+    "ExtendedPath" in {
+      import Helpers.ExtendedPath
+
+      "add a extended function |> to Path" in {
+        "write a Array[Byte]" in {
+          val out = Path.createTempFile()
+          out.write("a")
+          val wok = new Wok {
+            def string = out |> { _.read().toChar.toString }
+          }
+          wok.string mustEqual "a"
         }
-        out.string mustEqual "b"
+      }
+
+      "add a extended function <| to Path" in {
+        "write a Array[Byte]" in {
+          val out = Path.createTempFile()
+          out.write("a")
+          new Wok {
+            out <| { _.write("b".getBytes) }
+          }
+          out.string mustEqual "b"
+        }
+      }
+
+      "add a extended function <<| to Path" in {
+        "truncate contents already exists and write a Array[Byte]" in {
+          val out = Path.createTempFile()
+          out.write("a")
+          new Wok {
+            out <<| { _.write("b".getBytes) }
+          }
+          out.string mustEqual "ab"
+        }
       }
     }
 
-    "provide a function Path.<<" in {
-      import Helpers.AppendModePathString
-      "truncate contents already exists and write a Array[Byte]" in {
-        val out = Path.createTempFile()
-        out.write("a")
-        new Wok {
-          out.path <<| { _.write("b".getBytes) }
+    "ExtendedPathString" in {
+      import Helpers.ExtendedPathString
+
+      "add a extended function |> to String" in {
+        "write a Array[Byte]" in {
+          val out = Path.createTempFile()
+          out.write("a")
+          val wok = new Wok {
+            def string = out.path |> { _.read().toChar.toString }
+          }
+          wok.string mustEqual "a"
         }
-        out.string mustEqual "ab"
+      }
+
+      "add a extended function <| to String" in {
+        "write a Array[Byte]" in {
+          val out = Path.createTempFile()
+          out.write("a")
+          new Wok {
+            out.path <| { _.write("b".getBytes) }
+          }
+          out.string mustEqual "b"
+        }
+      }
+
+      "add a extended fucntion <<| to String" in {
+        "truncate contents already exists and write a Array[Byte]" in {
+          val out = Path.createTempFile()
+          out.write("a")
+          new Wok {
+            out.path <<| { _.write("b".getBytes) }
+          }
+          out.string mustEqual "ab"
+        }
       }
     }
   }

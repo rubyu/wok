@@ -1,8 +1,7 @@
 package scalax.file.defaultfs
 
-import scalax.io.StandardOpenOption
 import wok.csv.Writer
-import wok.reflect.Helpers.{AppendModePath, PrintableOutputStream}
+import wok.reflect.Helpers.{ExtendedPath, ExtendedOutputStream}
 
 
 class AppendModePath(defaultPath: DefaultPath) extends DefaultPath(defaultPath.jfile, defaultPath.fileSystem) {

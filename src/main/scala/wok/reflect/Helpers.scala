@@ -32,8 +32,8 @@ object Helpers {
   }
 
   implicit class PrintableOutputStreamResource(val out: OutputStreamResource[OutputStream]) extends AnyVal {
-    def print(x: Any *)(implicit w: Writer): Unit = out.open().get.print(x: _*)(w)
-    def println(x: Any *)(implicit w: Writer): Unit = out.open().get.println(x: _*)(w)
+    def print(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.print(x: _*)(w) }
+    def println(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.println(x: _*)(w) }
   }
 
   implicit class AppendModePath[T <: Path](val path: T) extends AnyVal {

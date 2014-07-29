@@ -260,6 +260,346 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
+    "provide functions Path.<|.print/println" in {
+      import Helpers.RedirectModePath
+
+      trait scope extends Scope {
+        val out = Path.createTempFile() <|
+        def result = out.string
+      }
+
+      "println()" in new scope {
+        new Wok {
+          out.println()
+          out.println()
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(Any)" in new scope {
+        new Wok {
+          out.println("a")
+          out.println("b")
+        }
+        result mustEqual "a\nb\n"
+      }
+
+      "print(Any)" in new scope {
+        new Wok {
+          out.print("a")
+          out.print("b")
+        }
+        result mustEqual "ab"
+      }
+
+      "println(Seq, Any)" in new scope {
+        new Wok {
+          out.println(Seq("a"), "b")
+        }
+        result mustEqual "a b\n"
+      }
+
+      "print(Seq, Any)" in new scope {
+        new Wok {
+          out.print(Seq("a"), "b")
+        }
+        result mustEqual "a b"
+      }
+
+      "println() with Writer" in new scope {
+        new Wok {
+          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(Any) with Writer" in new scope {
+        new Wok {
+          out.println("a")(Writer.OFQ(Quote.All))
+          out.println("b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\"\n\"b\"\n"
+      }
+
+      "print(Any) with Writer" in new scope {
+        new Wok {
+          out.print("a")(Writer.OFQ(Quote.All))
+          out.print("b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\"\"b\""
+      }
+
+      "println(Seq, Any) with Writer" in new scope {
+        new Wok {
+          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\" \"b\"\n"
+      }
+
+      "print(Seq, Any) with Writer" in new scope {
+        new Wok {
+          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\" \"b\""
+      }
+    }
+
+    "provide functions Path.<<|.print/println" in {
+      import Helpers.AppendModePath
+
+      trait scope extends Scope {
+        val out = Path.createTempFile() <<|
+        def result = out.string
+      }
+
+      "println()" in new scope {
+        new Wok {
+          out.println()
+          out.println()
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(Any)" in new scope {
+        new Wok {
+          out.println("a")
+          out.println("b")
+        }
+        result mustEqual "a\nb\n"
+      }
+
+      "print(Any)" in new scope {
+        new Wok {
+          out.print("a")
+          out.print("b")
+        }
+        result mustEqual "ab"
+      }
+
+      "println(Seq, Any)" in new scope {
+        new Wok {
+          out.println(Seq("a"), "b")
+        }
+        result mustEqual "a b\n"
+      }
+
+      "print(Seq, Any)" in new scope {
+        new Wok {
+          out.print(Seq("a"), "b")
+        }
+        result mustEqual "a b"
+      }
+
+      "println() with Writer" in new scope {
+        new Wok {
+          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(Any) with Writer" in new scope {
+        new Wok {
+          out.println("a")(Writer.OFQ(Quote.All))
+          out.println("b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\"\n\"b\"\n"
+      }
+
+      "print(Any) with Writer" in new scope {
+        new Wok {
+          out.print("a")(Writer.OFQ(Quote.All))
+          out.print("b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\"\"b\""
+      }
+
+      "println(Seq, Any) with Writer" in new scope {
+        new Wok {
+          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\" \"b\"\n"
+      }
+
+      "print(Seq, Any) with Writer" in new scope {
+        new Wok {
+          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\" \"b\""
+      }
+    }
+
+    "provide functions String.<|.print/println" in {
+      import Helpers.RedirectModePathString
+
+      trait scope extends Scope {
+        val out = Path.createTempFile().path <|
+        def result = out.string
+      }
+
+      "println()" in new scope {
+        new Wok {
+          out.println()
+          out.println()
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(Any)" in new scope {
+        new Wok {
+          out.println("a")
+          out.println("b")
+        }
+        result mustEqual "a\nb\n"
+      }
+
+      "print(Any)" in new scope {
+        new Wok {
+          out.print("a")
+          out.print("b")
+        }
+        result mustEqual "ab"
+      }
+
+      "println(Seq, Any)" in new scope {
+        new Wok {
+          out.println(Seq("a"), "b")
+        }
+        result mustEqual "a b\n"
+      }
+
+      "print(Seq, Any)" in new scope {
+        new Wok {
+          out.print(Seq("a"), "b")
+        }
+        result mustEqual "a b"
+      }
+
+      "println() with Writer" in new scope {
+        new Wok {
+          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(Any) with Writer" in new scope {
+        new Wok {
+          out.println("a")(Writer.OFQ(Quote.All))
+          out.println("b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\"\n\"b\"\n"
+      }
+
+      "print(Any) with Writer" in new scope {
+        new Wok {
+          out.print("a")(Writer.OFQ(Quote.All))
+          out.print("b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\"\"b\""
+      }
+
+      "println(Seq, Any) with Writer" in new scope {
+        new Wok {
+          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\" \"b\"\n"
+      }
+
+      "print(Seq, Any) with Writer" in new scope {
+        new Wok {
+          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\" \"b\""
+      }
+    }
+
+    "provide functions String.<<|.print/println" in {
+      import Helpers.AppendModePathString
+
+      trait scope extends Scope {
+        val out = Path.createTempFile().path <<|
+        def result = out.string
+      }
+
+      "println()" in new scope {
+        new Wok {
+          out.println()
+          out.println()
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(Any)" in new scope {
+        new Wok {
+          out.println("a")
+          out.println("b")
+        }
+        result mustEqual "a\nb\n"
+      }
+
+      "print(Any)" in new scope {
+        new Wok {
+          out.print("a")
+          out.print("b")
+        }
+        result mustEqual "ab"
+      }
+
+      "println(Seq, Any)" in new scope {
+        new Wok {
+          out.println(Seq("a"), "b")
+        }
+        result mustEqual "a b\n"
+      }
+
+      "print(Seq, Any)" in new scope {
+        new Wok {
+          out.print(Seq("a"), "b")
+        }
+        result mustEqual "a b"
+      }
+
+      "println() with Writer" in new scope {
+        new Wok {
+          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\n\n"
+      }
+
+      "println(Any) with Writer" in new scope {
+        new Wok {
+          out.println("a")(Writer.OFQ(Quote.All))
+          out.println("b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\"\n\"b\"\n"
+      }
+
+      "print(Any) with Writer" in new scope {
+        new Wok {
+          out.print("a")(Writer.OFQ(Quote.All))
+          out.print("b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\"\"b\""
+      }
+
+      "println(Seq, Any) with Writer" in new scope {
+        new Wok {
+          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\" \"b\"\n"
+      }
+
+      "print(Seq, Any) with Writer" in new scope {
+        new Wok {
+          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+        }
+        result mustEqual "\"a\" \"b\""
+      }
+    }
+
     "provide functions Wok.print/println" in {
 
       trait scope extends Scope {

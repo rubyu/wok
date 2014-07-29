@@ -38,7 +38,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "FQ" in {
         val wok = new Wok()
         wok.FQ mustEqual Quote.None()
-        wok.FQ(Quote.All).FQ mustEqual Quote.All
+        wok.FQ(Quote All()).FQ mustEqual Quote.All()
       }
 
       "CD" in {
@@ -64,7 +64,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "OFQ" in {
         val wok = new Wok()
         wok.OFQ mustEqual Quote.None()
-        wok.OFQ(Quote.All).OFQ mustEqual Quote.All
+        wok.OFQ(Quote All()).OFQ mustEqual Quote.All()
       }
 
       "OCD" in {
@@ -142,38 +142,38 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       "println() with Writer" in new scope {
         new Wok {
-          out.println()(Writer.OFQ(Quote.All))
-          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer OFQ(Quote All()))
+          out.println()(Writer OFQ(Quote All()))
         }
         result mustEqual "\n\n"
       }
 
       "println(Any) with Writer" in new scope {
         new Wok {
-          out.println("a")(Writer.OFQ(Quote.All))
-          out.println("b")(Writer.OFQ(Quote.All))
+          out.println("a")(Writer OFQ(Quote All()))
+          out.println("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\n\"b\"\n"
       }
 
       "print(Any) with Writer" in new scope {
         new Wok {
-          out.print("a")(Writer.OFQ(Quote.All))
-          out.print("b")(Writer.OFQ(Quote.All))
+          out.print("a")(Writer OFQ(Quote All()))
+          out.print("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\"b\""
       }
 
       "println(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.println(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\"\n"
       }
 
       "print(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.print(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\""
       }
@@ -227,38 +227,38 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       "println() with Writer" in new scope {
         new Wok {
-          out.println()(Writer.OFQ(Quote.All))
-          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer OFQ(Quote All()))
+          out.println()(Writer OFQ(Quote All()))
         }
         result mustEqual "\n\n"
       }
 
       "println(Any) with Writer" in new scope {
         new Wok {
-          out.println("a")(Writer.OFQ(Quote.All))
-          out.println("b")(Writer.OFQ(Quote.All))
+          out.println("a")(Writer OFQ(Quote All()))
+          out.println("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\n\"b\"\n"
       }
 
       "print(Any) with Writer" in new scope {
         new Wok {
-          out.print("a")(Writer.OFQ(Quote.All))
-          out.print("b")(Writer.OFQ(Quote.All))
+          out.print("a")(Writer OFQ(Quote All()))
+          out.print("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\"b\""
       }
 
       "println(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.println(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\"\n"
       }
 
       "print(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.print(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\""
       }
@@ -312,38 +312,38 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       "println() with Writer" in new scope {
         new Wok {
-          out.println()(Writer.OFQ(Quote.All))
-          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer OFQ(Quote All()))
+          out.println()(Writer OFQ(Quote All()))
         }
         result mustEqual "\n\n"
       }
 
       "println(Any) with Writer" in new scope {
         new Wok {
-          out.println("a")(Writer.OFQ(Quote.All))
-          out.println("b")(Writer.OFQ(Quote.All))
+          out.println("a")(Writer OFQ(Quote All()))
+          out.println("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\n\"b\"\n"
       }
 
       "print(Any) with Writer" in new scope {
         new Wok {
-          out.print("a")(Writer.OFQ(Quote.All))
-          out.print("b")(Writer.OFQ(Quote.All))
+          out.print("a")(Writer OFQ(Quote All()))
+          out.print("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\"b\""
       }
 
       "println(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.println(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\"\n"
       }
 
       "print(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.print(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\""
       }
@@ -353,7 +353,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.ExtendedPathString
 
       trait scope extends Scope {
-        val out = Path.createTempFile().path <|
+        val out = Path.createTempFile().path.<|
         def result = out.string
       }
 
@@ -397,38 +397,38 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       "println() with Writer" in new scope {
         new Wok {
-          out.println()(Writer.OFQ(Quote.All))
-          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer OFQ(Quote All()))
+          out.println()(Writer OFQ(Quote All()))
         }
         result mustEqual "\n\n"
       }
 
       "println(Any) with Writer" in new scope {
         new Wok {
-          out.println("a")(Writer.OFQ(Quote.All))
-          out.println("b")(Writer.OFQ(Quote.All))
+          out.println("a")(Writer OFQ(Quote All()))
+          out.println("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\n\"b\"\n"
       }
 
       "print(Any) with Writer" in new scope {
         new Wok {
-          out.print("a")(Writer.OFQ(Quote.All))
-          out.print("b")(Writer.OFQ(Quote.All))
+          out.print("a")(Writer OFQ(Quote All()))
+          out.print("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\"b\""
       }
 
       "println(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.println(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\"\n"
       }
 
       "print(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.print(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\""
       }
@@ -438,7 +438,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.ExtendedPathString
 
       trait scope extends Scope {
-        val out = Path.createTempFile().path <<|
+        val out = Path.createTempFile().path.<<|
         def result = out.string
       }
 
@@ -482,38 +482,38 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       "println() with Writer" in new scope {
         new Wok {
-          out.println()(Writer.OFQ(Quote.All))
-          out.println()(Writer.OFQ(Quote.All))
+          out.println()(Writer OFQ(Quote All()))
+          out.println()(Writer OFQ(Quote All()))
         }
         result mustEqual "\n\n"
       }
 
       "println(Any) with Writer" in new scope {
         new Wok {
-          out.println("a")(Writer.OFQ(Quote.All))
-          out.println("b")(Writer.OFQ(Quote.All))
+          out.println("a")(Writer OFQ(Quote All()))
+          out.println("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\n\"b\"\n"
       }
 
       "print(Any) with Writer" in new scope {
         new Wok {
-          out.print("a")(Writer.OFQ(Quote.All))
-          out.print("b")(Writer.OFQ(Quote.All))
+          out.print("a")(Writer OFQ(Quote All()))
+          out.print("b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\"\"b\""
       }
 
       "println(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.println(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\"\n"
       }
 
       "print(Seq, Any) with Writer" in new scope {
         new Wok {
-          out.print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+          out.print(Seq("a"), "b")(Writer OFQ(Quote All()))
         }
         result mustEqual "\"a\" \"b\""
       }
@@ -577,8 +577,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "print(Any) with Writer" in new scope {
         Stdio.withOut(out) {
           new Wok {
-            print("a")(Writer.OFQ(Quote.All))
-            print("b")(Writer.OFQ(Quote.All))
+            print("a")(Writer OFQ(Quote All()))
+            print("b")(Writer OFQ(Quote All()))
           }
         }
         result mustEqual "\"a\"\"b\""
@@ -587,8 +587,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "println() with Writer" in new scope {
         Stdio.withOut(out) {
           new Wok {
-            println()(Writer.OFQ(Quote.All))
-            println()(Writer.OFQ(Quote.All))
+            println()(Writer OFQ(Quote All()))
+            println()(Writer OFQ(Quote All()))
           }
         }
         result mustEqual "\n\n"
@@ -597,8 +597,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "println(Any) with Writer" in new scope {
         Stdio.withOut(out) {
           new Wok {
-            println("a")(Writer.OFQ(Quote.All))
-            println("b")(Writer.OFQ(Quote.All))
+            println("a")(Writer OFQ(Quote All()))
+            println("b")(Writer OFQ(Quote All()))
           }
         }
         result mustEqual "\"a\"\n\"b\"\n"
@@ -607,7 +607,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "print(Seq, Any) with Writer" in new scope {
         Stdio.withOut(out) {
           new Wok {
-            print(Seq("a"), "b")(Writer.OFQ(Quote.All))
+            print(Seq("a"), "b")(Writer OFQ(Quote All()))
           }
         }
         result mustEqual "\"a\" \"b\""
@@ -616,7 +616,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "println(Seq, Any) with Writer" in new scope {
         Stdio.withOut(out) {
           new Wok {
-            println(Seq("a"), "b")(Writer.OFQ(Quote.All))
+            println(Seq("a"), "b")(Writer OFQ(Quote All()))
           }
         }
         result mustEqual "\"a\" \"b\"\n"

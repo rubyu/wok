@@ -35,18 +35,5 @@ object Helpers {
     def println(x: Any *)(implicit w: Writer): Unit = out.open().get.println(x: _*)(w)
   }
 
-  implicit class PrintablePath(val p: Path) extends AnyVal {
-    def print(x: Any *)(implicit w: Writer): Unit =
-      p.outputStream(StandardOpenOption.Append).acquireFor { _.print(x: _*)(w) }
-
-    def println(x: Any *)(implicit w: Writer): Unit =
-      p.outputStream(StandardOpenOption.Append).acquireFor { _.println(x: _*)(w) }
-  }
-
-  implicit class PrintableString(val s: String) extends AnyVal {
-    def print(x: Any *)(implicit w: Writer): Unit = Path.fromString(s).print(x: _*)(w)
-    def println(x: Any *)(implicit w: Writer): Unit = Path.fromString(s).println(x: _*)(w)
-  }
-
   implicit def codecToCharset(c: Codec) = c.charSet
 }

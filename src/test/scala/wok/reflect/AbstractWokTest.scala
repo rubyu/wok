@@ -264,7 +264,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.RedirectModePath
 
       trait scope extends Scope {
-        val out = Path.createTempFile() <|
+        val out = Path.createTempFile().<|
         def result = out.string
       }
 
@@ -349,7 +349,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.AppendModePath
 
       trait scope extends Scope {
-        val out = Path.createTempFile() <<|
+        val out = Path.createTempFile().<<|
         def result = out.string
       }
 
@@ -701,6 +701,54 @@ class AbstractWokTest extends SpecificationWithJUnit {
           }
         }
         result mustEqual "\"a\" \"b\"\n"
+      }
+    }
+
+    "provide a function Path.<" in {
+      import Helpers.RedirectModePath
+      "write a Array[Byte]" in {
+        val out = Path.createTempFile()
+        out.write("a")
+        new Wok {
+          out <| { _.write("b".getBytes) }
+        }
+        out.string mustEqual "b"
+      }
+    }
+
+    "provide a function Path.<<" in {
+      import Helpers.AppendModePath
+      "truncate contents already exists and write a Array[Byte]" in {
+        val out = Path.createTempFile()
+        out.write("a")
+        new Wok {
+          out <<| { _.write("b".getBytes) }
+        }
+        out.string mustEqual "ab"
+      }
+    }
+
+    "provide a function String.<" in {
+      import Helpers.RedirectModePathString
+      "write a Array[Byte]" in {
+        val out = Path.createTempFile()
+        out.write("a")
+        new Wok {
+          out.path <| { _.write("b".getBytes) }
+        }
+        out.string mustEqual "b"
+      }
+    }
+
+    "provide a function Path.<<" in {
+      import Helpers.AppendModePathString
+      "truncate contents already exists and write a Array[Byte]" in {
+        val out = Path.createTempFile()
+        out.write("a")
+        new Wok {
+          out.path <<| { _.write("b".getBytes) }
+        }
+        out.string mustEqual "ab"
       }
     }
   }

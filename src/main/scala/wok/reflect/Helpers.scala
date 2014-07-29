@@ -5,7 +5,7 @@ import scalax.file.Path
 import wok.csv.{Row, Reader, Writer}
 import scalax.file.defaultfs.{DefaultPath, RedirectModePath => RMPath, AppendModePath => AMPath}
 import scalax.io.managed.{OutputStreamResource, InputStreamResource}
-import scalax.io.Codec
+import scalax.io.{StandardOpenOption, Codec}
 import java.io.{OutputStream, InputStream}
 
 
@@ -38,18 +38,22 @@ object Helpers {
 
   implicit class AppendModePath[T <: Path](val path: T) extends AnyVal {
     def <<| = new AMPath(path.asInstanceOf[DefaultPath])
+    def <<|[A](f: OutputStream => A): A = path.outputStream(StandardOpenOption.Append).acquireAndGet(f(_))
   }
 
   implicit class RedirectModePath[T <: Path](val path: T) extends AnyVal {
     def <| = new RMPath(path.asInstanceOf[DefaultPath])
+    def <|[A](f: OutputStream => A): A = path.outputStream(StandardOpenOption.Write).acquireAndGet(f(_))
   }
 
   implicit class AppendModePathString(val s: String) extends AnyVal {
     def <<| = new AMPath(Path.fromString(s))
+    def <<|[A](f: OutputStream => A): A = Path.fromString(s).outputStream(StandardOpenOption.Append).acquireAndGet(f(_))
   }
 
   implicit class RedirectModePathString(val s: String) extends AnyVal {
     def <| = new RMPath(Path.fromString(s))
+    def <|[A](f: OutputStream => A): A = Path.fromString(s).outputStream(StandardOpenOption.Write).acquireAndGet(f(_))
   }
 
   implicit def codecToCharset(c: Codec) = c.charSet

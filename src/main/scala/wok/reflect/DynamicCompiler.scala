@@ -39,7 +39,7 @@ object DynamicCompiler {
           |      def NR = currentRow.id
           |      def FT = currentRow.sep
           |      def RT = currentRow.term
-          |      STDIN |> {
+          |      STDIN #> {
           |        _.csv.map { row => currentRow = row; row } %s
           |      }
         """.stripMargin.format(str.get)

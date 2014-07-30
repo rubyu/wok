@@ -183,7 +183,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.ExtendedPath
 
       trait scope extends Scope {
-        val out = Path.createTempFile().<|
+        val out = Path.createTempFile().<!
         def result = out.string
       }
 
@@ -268,7 +268,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.ExtendedPath
 
       trait scope extends Scope {
-        val out = Path.createTempFile().<<|
+        val out = Path.createTempFile().<<!
         def result = out.string
       }
 
@@ -353,7 +353,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.ExtendedPathString
 
       trait scope extends Scope {
-        val out = Path.createTempFile().path.<|
+        val out = Path.createTempFile().path.<!
         def result = out.string
       }
 
@@ -438,7 +438,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.ExtendedPathString
 
       trait scope extends Scope {
-        val out = Path.createTempFile().path.<<|
+        val out = Path.createTempFile().path.<<!
         def result = out.string
       }
 
@@ -631,7 +631,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           val out = Path.createTempFile()
           out.write("a")
           val wok = new Wok {
-            def string = out.inputStream |> { _.read().toChar.toString }
+            def string = out.inputStream #> { _.read().toChar.toString }
           }
           wok.string mustEqual "a"
         }
@@ -646,7 +646,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           val out = Path.createTempFile()
           out.write("a")
           new Wok {
-            out.outputStream(StandardOpenOption.Append) <<| { _.write("b".getBytes) }
+            out.outputStream(StandardOpenOption.Append) #<< { _.write("b".getBytes) }
           }
           out.string mustEqual "ab"
         }
@@ -661,7 +661,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           val out = Path.createTempFile()
           out.write("a")
           val wok = new Wok {
-            def string = out |> { _.read().toChar.toString }
+            def string = out #> { _.read().toChar.toString }
           }
           wok.string mustEqual "a"
         }
@@ -672,7 +672,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           val out = Path.createTempFile()
           out.write("a")
           new Wok {
-            out <| { _.write("b".getBytes) }
+            out #< { _.write("b".getBytes) }
           }
           out.string mustEqual "b"
         }
@@ -683,7 +683,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           val out = Path.createTempFile()
           out.write("a")
           new Wok {
-            out <<| { _.write("b".getBytes) }
+            out #<< { _.write("b".getBytes) }
           }
           out.string mustEqual "ab"
         }
@@ -698,7 +698,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           val out = Path.createTempFile()
           out.write("a")
           val wok = new Wok {
-            def string = out.path |> { _.read().toChar.toString }
+            def string = out.path #> { _.read().toChar.toString }
           }
           wok.string mustEqual "a"
         }
@@ -709,7 +709,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           val out = Path.createTempFile()
           out.write("a")
           new Wok {
-            out.path <| { _.write("b".getBytes) }
+            out.path #< { _.write("b".getBytes) }
           }
           out.string mustEqual "b"
         }
@@ -720,7 +720,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
           val out = Path.createTempFile()
           out.write("a")
           new Wok {
-            out.path <<| { _.write("b".getBytes) }
+            out.path #<< { _.write("b".getBytes) }
           }
           out.string mustEqual "ab"
         }

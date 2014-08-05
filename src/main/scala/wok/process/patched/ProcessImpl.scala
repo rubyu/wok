@@ -113,7 +113,7 @@ private[process] trait ProcessImpl {
     protected[this] override def runAndExitValue() = {
       val source = new PipeSource(a.toString)
       val sink = new PipeSink(b.toString)
-      source connect sink
+      source connectOut sink
       source.start()
       sink.start()
 
@@ -126,14 +126,11 @@ private[process] trait ProcessImpl {
         process foreach( _.destroy() )
       }
 
-      def handleOutOrError(fromOutput: InputStream) = source connect fromOutput
-
       val firstIO =
-        if (toError)
-          defaultIO.withError(handleOutOrError)
-        else
-          defaultIO.withOutput(handleOutOrError)
-      val secondIO = defaultIO.withInput(toInput => sink connect toInput)
+        if (toError) defaultIO.withError(source.connectIn)
+        else defaultIO.withOutput(source.connectIn)
+
+      val secondIO = defaultIO.withInput(sink.connectOut)
 
       val second =
         try b.run(secondIO)
@@ -189,13 +186,13 @@ private[process] trait ProcessImpl {
       finally BasicIO close pipe
     }
 
-    final def connect(in: InputStream) = put(Some(in))
+    final def connectIn(in: InputStream) = put(Some(in))
 
     private[this] final def put(value: Option[InputStream]) = synchronized {
       if (!source.isSet) source put value
     }
 
-    final def connect(sink: PipeSink) = sink connect pipe
+    final def connectOut(sink: PipeSink) = sink connectIn pipe
 
     final def release(): Unit = {
       interrupt()
@@ -217,13 +214,13 @@ private[process] trait ProcessImpl {
       finally BasicIO close pipe
     }
 
-    final def connect(out: OutputStream) = put(Some(out))
+    final def connectOut(out: OutputStream) = put(Some(out))
 
     private[this] final def put(value: Option[OutputStream]) = synchronized {
       if (!sink.isSet) sink put value
     }
 
-    final def connect(pipeOut: PipedOutputStream) = pipe connect pipeOut
+    final def connectIn(pipeOut: PipedOutputStream) = pipe connect pipeOut
 
     final def release(): Unit = {
       interrupt()

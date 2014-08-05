@@ -121,7 +121,7 @@ class ProcTest extends SpecificationWithJUnit {
         val pin = new PipedInputStream
         pout connect pin
         source.start()
-        source connect in
+        source connectIn in
         val f = Future {
           source.join()
         }
@@ -149,9 +149,9 @@ class ProcTest extends SpecificationWithJUnit {
           val in = new DebugInfinityInputStream
           val pout = sourcePipe(source)
           val pin = new PipedInputStream
-          pout connect pin
+          pout connect pin // source connectIn sink
           source.start()
-          source connect in
+          source connectIn in
           val f = Future {
             while (pin.available() == 0) {
               Thread.sleep(1)
@@ -171,9 +171,9 @@ class ProcTest extends SpecificationWithJUnit {
         val pout = new PipedOutputStream
         val pin = sinkPipe(sink)
         val out = new DebugOutputStream
-        sink connect pout
+        sink connectIn pout
         sink.start()
-        sink connect out
+        sink connectOut out
         pout write 1
         pout.close()
         val f = Future {
@@ -189,7 +189,7 @@ class ProcTest extends SpecificationWithJUnit {
           val sink = new Process.PipeSink("TestPipeSink")
           val pout = new PipedOutputStream
           val pin = sinkPipe(sink)
-          sink connect pout
+          sink connectIn pout
           sink.start()
           val f = Future {
             sink.release()
@@ -203,9 +203,9 @@ class ProcTest extends SpecificationWithJUnit {
           val pout = new PipedOutputStream
           val pin = sinkPipe(sink)
           val out = new DebugOutputStream
-          sink connect pout
+          sink connectIn pout
           sink.start()
-          sink connect out
+          sink connectOut out
           pout write 1
           val f = Future {
             while (out.size == 0) {

@@ -234,6 +234,7 @@ package scala.sys.patched {
       type InputStream            = java.io.InputStream
       type JProcess               = java.lang.Process
       type JProcessBuilder        = java.lang.ProcessBuilder
+      type LinkedBlockingQueue[T] = java.util.concurrent.LinkedBlockingQueue[T]
       type OutputStream           = java.io.OutputStream
       type SyncVar[T]             = scala.concurrent.SyncVar[T]
       type URL                    = java.net.URL

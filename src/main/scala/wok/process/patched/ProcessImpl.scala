@@ -174,10 +174,10 @@ private[process] trait ProcessImpl {
 
   private[process] class PipeSource(label: => String) extends PipeThread(false, () => label) {
     private[this] val pipe = new PipedOutputStream
-    private[this] val source = new SyncVar[Option[InputStream]]
+    private[this] val source = new LinkedBlockingQueue[Option[InputStream]]
     final override def run(): Unit = {
       try {
-        source.get match {
+        source.take match {
           case Some(in) => runloop(in, pipe)
           case None =>
         }
@@ -185,23 +185,20 @@ private[process] trait ProcessImpl {
       catch onInterrupt(())
       finally BasicIO close pipe
     }
-    final def connectIn(in: InputStream) = put(Some(in))
-    private[this] final def put(value: Option[InputStream]) = synchronized {
-      if (!source.isSet) source put value
-    }
-    final def connectOut(sink: PipeSink) = sink connectIn pipe
+    final def connectIn(in: InputStream): Unit = source add Some(in)
+    final def connectOut(sink: PipeSink): Unit = sink connectIn pipe
     final def release(): Unit = {
       interrupt()
-      put(None)
+      source add None
       join()
     }
   }
   private[process] class PipeSink(label: => String) extends PipeThread(true, () => label) {
     private[this] val pipe = new PipedInputStream
-    private[this] val sink = new SyncVar[Option[OutputStream]]
+    private[this] val sink = new LinkedBlockingQueue[Option[OutputStream]]
     final override def run(): Unit = {
       try {
-        sink.get match {
+        sink.take match {
           case Some(out) => runloop(pipe, out)
           case None =>
         }
@@ -209,14 +206,11 @@ private[process] trait ProcessImpl {
       catch onInterrupt(())
       finally BasicIO close pipe
     }
-    final def connectOut(out: OutputStream) = put(Some(out))
-    private[this] final def put(value: Option[OutputStream]) = synchronized {
-      if (!sink.isSet) sink put value
-    }
-    final def connectIn(pipeOut: PipedOutputStream) = pipe connect pipeOut
+    final def connectOut(out: OutputStream): Unit = sink add Some(out)
+    final def connectIn(pipeOut: PipedOutputStream): Unit = pipe connect pipeOut
     final def release(): Unit = {
       interrupt()
-      put(None)
+      sink add None
       join()
     }
   }

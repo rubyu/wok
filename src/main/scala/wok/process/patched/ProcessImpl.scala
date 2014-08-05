@@ -110,9 +110,8 @@ private[process] trait ProcessImpl {
   }
 
   private[process] class PipedProcesses(a: ProcessBuilder, b: ProcessBuilder, defaultIO: ProcessIO, toError: Boolean) extends CompoundProcess {
-    protected[this] override def runAndExitValue() = {
-      val source = new PipeSource(a.toString)
-      val sink = new PipeSink(b.toString)
+    protected[this] override def runAndExitValue() = runAndExitValue(new PipeSource(a.toString), new PipeSink(b.toString))
+    protected[this] def runAndExitValue(source: PipeSource, sink: PipeSink) = {
       source connectOut sink
       source.start()
       sink.start()
@@ -183,6 +182,7 @@ private[process] trait ProcessImpl {
           case None =>
         }
       }
+      catch onInterrupt(())
       finally BasicIO close pipe
     }
 
@@ -211,6 +211,7 @@ private[process] trait ProcessImpl {
           case None =>
         }
       }
+      catch onInterrupt(())
       finally BasicIO close pipe
     }
 

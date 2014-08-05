@@ -2,7 +2,7 @@
 package scala.sys.patched.process
 
 import java.io._
-
+import java.lang.reflect.InvocationTargetException
 import org.specs2.mutable._
 
 
@@ -103,6 +103,28 @@ class ProcTest extends SpecificationWithJUnit {
       field.get(pipeSource).asInstanceOf[PipedOutputStream]
     }
 
+    def createProcess(builder: ProcessBuilder, io: ProcessIO) = {
+      val m = builder.getClass.getDeclaredMethod("createProcess", classOf[ProcessIO])
+      m.setAccessible(true)
+      m.invoke(builder, io).asInstanceOf[Process.PipedProcesses]
+    }
+
+    def runAndExitValue(p: Process.PipedProcesses, source: Process.PipeSource, sink: Process.PipeSink) = {
+      val m = p.getClass.getDeclaredMethod("runAndExitValue", classOf[Process.PipeSource], classOf[Process.PipeSink])
+      m.setAccessible(true)
+      m.invoke(p, source, sink).asInstanceOf[Option[Int]]
+    }
+
+    def throwsInvocationTargetException(f: => Unit) = {
+      try {
+        f
+        false
+      }
+      catch {
+        case _: InvocationTargetException => true
+      }
+    }
+
     def throwsIOException(f: => Unit) = {
       try {
         f
@@ -110,6 +132,58 @@ class ProcTest extends SpecificationWithJUnit {
       }
       catch {
         case _: IOException => true
+      }
+    }
+
+    "PipedProcesses" in {
+      val echo = Process("echo a")
+      val wc = Process("wc -l")
+      val nonExistent = Process("non-existent-command")
+      "runAndExitValue() should release resources" in {
+        "when normally ends" in {
+          val io = BasicIO(false, ProcessLogger( _ => () ))
+          val source = new Process.PipeSource("TestPipeSource")
+          val sink = new Process.PipeSink("TestPipeSink")
+          val p = createProcess(wc #< echo, io)
+          val f = Future {
+            runAndExitValue(p, source, sink)
+          }
+          Await.result(f, Duration(5, SECONDS))
+          val pout = sourcePipe(source)
+          val pin = sinkPipe(sink)
+          throwsIOException { pin.read() } must beTrue
+          throwsIOException { pout.write(1) } must beTrue
+          source.isAlive must beFalse
+          sink.isAlive must beFalse
+        }
+
+        "when b.run() fail" in {
+          val io = BasicIO(false, ProcessLogger( _ => () ))
+          val source = new Process.PipeSource("TestPipeSource")
+          val sink = new Process.PipeSink("TestPipeSink")
+          val pout = sourcePipe(source)
+          val pin = sinkPipe(sink)
+          val p = createProcess(nonExistent #< echo, io)
+          throwsInvocationTargetException { runAndExitValue(p, source, sink) } must beTrue
+          throwsIOException { pin.read() } must beTrue
+          throwsIOException { pout.write(1) } must beTrue
+          source.isAlive must beFalse
+          sink.isAlive must beFalse
+        }
+
+        "when a.run() fail" in {
+          val io = BasicIO(false, ProcessLogger( _ => () ))
+          val source = new Process.PipeSource("TestPipeSource")
+          val sink = new Process.PipeSink("TestPipeSink")
+          val pout = sourcePipe(source)
+          val pin = sinkPipe(sink)
+          val p = createProcess(wc #< nonExistent, io)
+          throwsInvocationTargetException { runAndExitValue(p, source, sink) } must beTrue
+          throwsIOException { pin.read() } must beTrue
+          throwsIOException { pout.write(1) } must beTrue
+          source.isAlive must beFalse
+          sink.isAlive must beFalse
+        }
       }
     }
 
@@ -128,6 +202,7 @@ class ProcTest extends SpecificationWithJUnit {
         Await.result(f, Duration(5, SECONDS))
         in.closed must beTrue
         throwsIOException { pout.write(1) } must beTrue
+        source.isAlive must beFalse
       }
 
       "release() should release resources" in {
@@ -142,6 +217,7 @@ class ProcTest extends SpecificationWithJUnit {
           }
           Await.result(f, Duration(5, SECONDS))
           throwsIOException { pout.write(1) } must beTrue
+          source.isAlive must beFalse
         }
 
         "when copying stream" in {
@@ -161,6 +237,7 @@ class ProcTest extends SpecificationWithJUnit {
           Await.result(f, Duration(5, SECONDS))
           in.closed must beTrue
           throwsIOException { pout.write(1) } must beTrue
+          source.isAlive must beFalse
         }
       }
     }
@@ -182,6 +259,7 @@ class ProcTest extends SpecificationWithJUnit {
         Await.result(f, Duration(5, SECONDS))
         throwsIOException { pin.read() } must beTrue
         out.closed must beTrue
+        sink.isAlive must beFalse
       }
 
       "release() should release resources" in {
@@ -196,6 +274,7 @@ class ProcTest extends SpecificationWithJUnit {
           }
           Await.result(f, Duration(5, SECONDS))
           throwsIOException { pin.read() } must beTrue
+          sink.isAlive must beFalse
         }
 
         "when copying stream" in {
@@ -216,6 +295,7 @@ class ProcTest extends SpecificationWithJUnit {
           Await.result(f, Duration(5, SECONDS))
           throwsIOException { pin.read() } must beTrue
           out.closed must beTrue
+          sink.isAlive must beFalse
         }
       }
     }

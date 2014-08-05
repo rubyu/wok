@@ -1,8 +1,6 @@
 
 package scala.sys.patched.process
 
-import java.io._
-import java.lang.reflect.InvocationTargetException
 import org.specs2.mutable._
 
 
@@ -76,6 +74,10 @@ class ProcTest extends SpecificationWithJUnit {
     //val sink = ctorsink(obj, "dummy")
     println(sink)
     */
+    import java.io._
+    import java.lang.reflect.InvocationTargetException
+    import java.util.concurrent.CountDownLatch
+    import java.util.concurrent.TimeUnit
     import scala.concurrent.{Future, Await}
     import scala.concurrent.duration.Duration
     import scala.concurrent.duration.SECONDS
@@ -91,8 +93,9 @@ class ProcTest extends SpecificationWithJUnit {
     }
 
     class DebugProcess(p: Process) extends Process {
+      val exitValueCalled = new CountDownLatch(1)
       var destroyed = false
-      def exitValue() = p.exitValue()
+      def exitValue() = { exitValueCalled.countDown(); p.exitValue() }
       def destroy() = { destroyed = true; p.destroy() }
     }
 
@@ -206,7 +209,7 @@ class ProcTest extends SpecificationWithJUnit {
           val sink = new Process.PipeSink("TestPipeSink")
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
-          val p = createProcess(wc #< sleep, io)
+          val p = createProcess("" #< "", io)
           val first = new DebugProcess(sleep.run(io.withOutput(source.connectIn)))
           val second = new DebugProcess(wc.run(io.withInput(sink.connectOut)))
           val t = new Thread {
@@ -215,7 +218,7 @@ class ProcTest extends SpecificationWithJUnit {
             }
           }
           t.start()
-          Thread.sleep(100)
+          first.exitValueCalled.await(5, TimeUnit.SECONDS) must beTrue
           t.interrupt()
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue
@@ -231,7 +234,7 @@ class ProcTest extends SpecificationWithJUnit {
           val sink = new Process.PipeSink("TestPipeSink")
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
-          val p = createProcess(sleep #< echo, io)
+          val p = createProcess("" #< "", io)
           val first = new DebugProcess(echo.run(io.withOutput(source.connectIn)))
           val second = new DebugProcess(sleep.run(io.withInput(sink.connectOut)))
           val t = new Thread {
@@ -240,7 +243,7 @@ class ProcTest extends SpecificationWithJUnit {
             }
           }
           t.start()
-          Thread.sleep(100)
+          second.exitValueCalled.await(5, TimeUnit.SECONDS) must beTrue
           t.interrupt()
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue

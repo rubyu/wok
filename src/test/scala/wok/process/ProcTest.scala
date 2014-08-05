@@ -90,6 +90,12 @@ class ProcTest extends SpecificationWithJUnit {
       def read() = 1
     }
 
+    class DebugProcess(p: Process) extends Process {
+      var destroyed = false
+      def exitValue() = p.exitValue()
+      def destroy() = { destroyed = true; p.destroy() }
+    }
+
 
     def sinkPipe(pipeSink: Process.PipeSink) = {
       val field = pipeSink.getClass.getDeclaredField("pipe")
@@ -109,10 +115,18 @@ class ProcTest extends SpecificationWithJUnit {
       m.invoke(builder, io).asInstanceOf[Process.PipedProcesses]
     }
 
-    def runAndExitValue(p: Process.PipedProcesses, source: Process.PipeSource, sink: Process.PipeSink) = {
+    def runAndExitValue1(p: Process.PipedProcesses, source: Process.PipeSource, sink: Process.PipeSink) = {
       val m = p.getClass.getDeclaredMethod("runAndExitValue", classOf[Process.PipeSource], classOf[Process.PipeSink])
       m.setAccessible(true)
       m.invoke(p, source, sink).asInstanceOf[Option[Int]]
+    }
+
+    def runAndExitValue2(p: Process.PipedProcesses, source: Process.PipeSource, sink: Process.PipeSink,
+                          first: Process, second: Process) = {
+      val m = p.getClass.getDeclaredMethod("runAndExitValue", classOf[Process.PipeSource], classOf[Process.PipeSink],
+        classOf[Process], classOf[Process])
+      m.setAccessible(true)
+      m.invoke(p, source, sink, first, second).asInstanceOf[Option[Int]]
     }
 
     def throwsInvocationTargetException(f: => Unit) = {
@@ -139,18 +153,19 @@ class ProcTest extends SpecificationWithJUnit {
       val echo = Process("echo a")
       val wc = Process("wc -l")
       val nonExistent = Process("non-existent-command")
+      val sleep = Process("sleep 3000")
       "runAndExitValue() should release resources" in {
         "when normally ends" in {
           val io = BasicIO(false, ProcessLogger( _ => () ))
           val source = new Process.PipeSource("TestPipeSource")
           val sink = new Process.PipeSink("TestPipeSink")
-          val p = createProcess(wc #< echo, io)
-          val f = Future {
-            runAndExitValue(p, source, sink)
-          }
-          Await.result(f, Duration(5, SECONDS))
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
+          val p = createProcess(wc #< echo, io)
+          val f = Future {
+            runAndExitValue1(p, source, sink)
+          }
+          Await.result(f, Duration(5, SECONDS))
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue
           source.isAlive must beFalse
@@ -164,7 +179,7 @@ class ProcTest extends SpecificationWithJUnit {
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
           val p = createProcess(nonExistent #< echo, io)
-          throwsInvocationTargetException { runAndExitValue(p, source, sink) } must beTrue
+          throwsInvocationTargetException { runAndExitValue1(p, source, sink) } must beTrue
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue
           source.isAlive must beFalse
@@ -178,11 +193,61 @@ class ProcTest extends SpecificationWithJUnit {
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
           val p = createProcess(wc #< nonExistent, io)
-          throwsInvocationTargetException { runAndExitValue(p, source, sink) } must beTrue
+          throwsInvocationTargetException { runAndExitValue1(p, source, sink) } must beTrue
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue
           source.isAlive must beFalse
           sink.isAlive must beFalse
+        }
+
+        "when first interrupted" in {
+          val io = BasicIO(false, ProcessLogger( _ => () ))
+          val source = new Process.PipeSource("TestPipeSource")
+          val sink = new Process.PipeSink("TestPipeSink")
+          val pout = sourcePipe(source)
+          val pin = sinkPipe(sink)
+          val p = createProcess(wc #< sleep, io)
+          val first = new DebugProcess(sleep.run(io.withOutput(source.connectIn)))
+          val second = new DebugProcess(wc.run(io.withInput(sink.connectOut)))
+          val t = new Thread {
+            override def run() = {
+              runAndExitValue2(p, source, sink, first, second)
+            }
+          }
+          t.start()
+          Thread.sleep(100)
+          t.interrupt()
+          throwsIOException { pin.read() } must beTrue
+          throwsIOException { pout.write(1) } must beTrue
+          source.isAlive must beFalse
+          sink.isAlive must beFalse
+          first.destroyed must beTrue
+          second.destroyed must beTrue
+        }
+
+        "when second interrupted" in {
+          val io = BasicIO(false, ProcessLogger( _ => () ))
+          val source = new Process.PipeSource("TestPipeSource")
+          val sink = new Process.PipeSink("TestPipeSink")
+          val pout = sourcePipe(source)
+          val pin = sinkPipe(sink)
+          val p = createProcess(sleep #< echo, io)
+          val first = new DebugProcess(echo.run(io.withOutput(source.connectIn)))
+          val second = new DebugProcess(sleep.run(io.withInput(sink.connectOut)))
+          val t = new Thread {
+            override def run() = {
+              runAndExitValue2(p, source, sink, first, second)
+            }
+          }
+          t.start()
+          Thread.sleep(100)
+          t.interrupt()
+          throwsIOException { pin.read() } must beTrue
+          throwsIOException { pout.write(1) } must beTrue
+          source.isAlive must beFalse
+          sink.isAlive must beFalse
+          first.destroyed must beTrue
+          second.destroyed must beTrue
         }
       }
     }

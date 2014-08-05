@@ -110,39 +110,40 @@ private[process] trait ProcessImpl {
   }
 
   private[process] class PipedProcesses(a: ProcessBuilder, b: ProcessBuilder, defaultIO: ProcessIO, toError: Boolean) extends CompoundProcess {
+    /** Release PipeSource, PipeSink and Process in the correct order.
+     * If once connect Process with Source or Sink, then the order of releasing them
+     * must be Source -> Sink -> Process, otherwise IOException will be thrown. */
+    protected[this] def releaseResources(so: PipeSource, sk: PipeSink, p: Process *) = {
+      so.release()
+      sk.release()
+      p foreach( _.destroy() )
+    }
     protected[this] override def runAndExitValue() = runAndExitValue(new PipeSource(a.toString), new PipeSink(b.toString))
-    protected[this] def runAndExitValue(source: PipeSource, sink: PipeSink) = {
+    protected[this] def runAndExitValue(source: PipeSource, sink: PipeSink): Option[Int] = {
       source connectOut sink
       source.start()
       sink.start()
 
-      // Release PipeSource, PipeSink and Process in the correct order.
-      // Note: If once connect Process with Source or Sink, then the order of releasing them
-      // must be Source -> Sink -> Process, otherwise IOException will be thrown.
-      def releaseResources(process: Process *) = {
-        source.release()
-        sink.release()
-        process foreach( _.destroy() )
-      }
-
       val firstIO =
         if (toError) defaultIO.withError(source.connectIn)
         else defaultIO.withOutput(source.connectIn)
-
       val secondIO = defaultIO.withInput(sink.connectOut)
 
       val second =
         try b.run(secondIO)
         catch onError { err =>
-          releaseResources()
+          releaseResources(source, sink)
           throw err
         }
       val first =
         try a.run(firstIO)
         catch onError { err =>
-          releaseResources(second)
+          releaseResources(source, sink, second)
           throw err
         }
+      runAndExitValue(source, sink, first, second)
+    }
+    protected[this] def runAndExitValue(source: PipeSource, sink: PipeSink, first: Process, second: Process): Option[Int] = {
       runInterruptible {
         val exit1 = first.exitValue()
         val exit2 = second.exitValue()
@@ -150,7 +151,7 @@ private[process] trait ProcessImpl {
         // we ignore its exit value so cmd #> file doesn't always return 0.
         if (b.hasExitValue) exit2 else exit1
       } {
-        releaseResources(first, second)
+        releaseResources(source, sink, first, second)
       }
     }
   }
@@ -174,7 +175,6 @@ private[process] trait ProcessImpl {
   private[process] class PipeSource(label: => String) extends PipeThread(false, () => label) {
     private[this] val pipe = new PipedOutputStream
     private[this] val source = new SyncVar[Option[InputStream]]
-
     final override def run(): Unit = {
       try {
         source.get match {
@@ -185,15 +185,11 @@ private[process] trait ProcessImpl {
       catch onInterrupt(())
       finally BasicIO close pipe
     }
-
     final def connectIn(in: InputStream) = put(Some(in))
-
     private[this] final def put(value: Option[InputStream]) = synchronized {
       if (!source.isSet) source put value
     }
-
     final def connectOut(sink: PipeSink) = sink connectIn pipe
-
     final def release(): Unit = {
       interrupt()
       put(None)
@@ -203,7 +199,6 @@ private[process] trait ProcessImpl {
   private[process] class PipeSink(label: => String) extends PipeThread(true, () => label) {
     private[this] val pipe = new PipedInputStream
     private[this] val sink = new SyncVar[Option[OutputStream]]
-
     final override def run(): Unit = {
       try {
         sink.get match {
@@ -214,15 +209,11 @@ private[process] trait ProcessImpl {
       catch onInterrupt(())
       finally BasicIO close pipe
     }
-
     final def connectOut(out: OutputStream) = put(Some(out))
-
     private[this] final def put(value: Option[OutputStream]) = synchronized {
       if (!sink.isSet) sink put value
     }
-
     final def connectIn(pipeOut: PipedOutputStream) = pipe connect pipeOut
-
     final def release(): Unit = {
       interrupt()
       put(None)

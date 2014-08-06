@@ -1,97 +1,9 @@
 
-package scala.sys.patched.process
+package scala.sys.patched.process {
+  import java.io.{PipedOutputStream, PipedInputStream}
+  import java.util.concurrent.CountDownLatch
 
-import org.specs2.mutable._
-
-
-class ProcTest extends SpecificationWithJUnit {
-
-  /*
-      "process 2 pass" in {
-      import scala.sys.process._
-      import scala.concurrent.Future
-
-      val input = Patched.IStreamBuilder(new ByteArrayInputStream(("1").getBytes))
-      def command =
-        if (System.getProperty("os.name", "") startsWith "Windows")
-          new Patched.PipedBuilder(input, "find /v \"\"", false)
-        else
-          new Patched.PipedBuilder(input, "wc", false)
-      val f = Future {
-        for (i <- 0 until 10) {
-          println(s"p2p $i")
-          command.run(ProcessLogger { _ => () }).exitValue()
-        }
-      }
-      Thread.sleep(1000)
-      //println(f.isCompleted)
-      f.isCompleted must beTrue
-    }
-   */
-
-  /*
-  "PipeSink.release() stop " in {
-
-    class TestPipeSource(label: => String) extends scala.sys.process.Process.PipeSource(() => label) {
-    }
-  }
-  */
-
-  "by reflection" in {
-
-    //val theType = getType(classOf[Process.PipeSink])
-    //println(s"typeTag.declarations => ${theType.declarations}")
-    //println(s"typeTag.members => ${theType.members}")
-
-    //val sink = newInstance(classOf[Process.PipeSink])
-    //println(sink)
-
-    //val m  = universe.runtimeMirror(scala.sys.process.Process.getClass.getClassLoader)
-    //val oC = universe.typeOf[scala.sys.process.Process.type].termSymbol.asModule
-    //val p = m.reflectModule(oC)
-    //p.instance.asInstanceOf[Process]
-    //val p2 = m.reflect(p)
-    //val sink = p2.reflectClass(universe.typeOf[Process.PipeSink].typeSymbol.asClass)
-    //val sink_cons_m = universe.typeOf[Process.PipeSink].declaration(universe.nme.CONSTRUCTOR).asMethod
-    //val sink_cons = sink.reflectConstructor(sink_cons_m)
-    //val s = sink_cons("dummy")
-    //println(s)
-
-    /*
-    val ru = scala.reflect.runtime.universe
-    val rm = ru.runtimeMirror(Thread.currentThread.getContextClassLoader)
-
-    val objectP = ru.typeOf[Process.type].termSymbol.asModule
-    val mm = rm.reflectModule(objectP)
-    val obj = mm.instance
-    println(obj)
-
-    val objectSink = rm.reflect(obj).reflectClass(ru.typeOf[Process.PipeSink].typeSymbol.asClass)
-    val ctorSink = ru.typeOf[Process.PipeSink].declaration(ru.nme.CONSTRUCTOR).asMethod
-    val ctorsink = objectSink.reflectConstructor(ctorSink)
-    println(ctorsink)
-    val sink = ctorsink(obj, "aa", "aa")
-    //val sink = ctorsink(obj, "dummy")
-    println(sink)
-    */
-    import java.io._
-    import java.lang.reflect.InvocationTargetException
-    import java.util.concurrent.CountDownLatch
-    import java.util.concurrent.TimeUnit
-    import scala.concurrent.{Future, Await}
-    import scala.concurrent.duration.Duration
-    import scala.concurrent.duration.SECONDS
-
-    trait CloseCheckingCloseable extends Closeable {
-      var closed = false
-      override def close() = closed = true
-    }
-    class DebugOutputStream extends ByteArrayOutputStream with CloseCheckingCloseable
-    class DebugInputStream(bytes: Array[Byte]) extends ByteArrayInputStream(bytes) with CloseCheckingCloseable
-    class DebugInfinityInputStream extends InputStream with CloseCheckingCloseable {
-      def read() = 1
-    }
-
+  object debug {
     class DebugProcess(p: Process) extends Process {
       val exitValueCalled = new CountDownLatch(1)
       var destroyed = false
@@ -99,57 +11,72 @@ class ProcTest extends SpecificationWithJUnit {
       def destroy() = { destroyed = true; p.destroy() }
     }
 
+    class PipeSinkCopy(s: String) extends Process.PipeSink(s)
+    class PipeSourceCopy(s: String) extends Process.PipeSource(s)
+    class PipedProcessesCopy(a: ProcessBuilder, b: ProcessBuilder, defaultIO: ProcessIO, toError: Boolean)
+      extends Process.PipedProcesses(a, b, defaultIO, toError)
 
     def sinkPipe(pipeSink: Process.PipeSink) = {
-      val field = pipeSink.getClass.getDeclaredField("pipe")
+      val field = classOf[Process.PipeSink].getDeclaredField("pipe")
       field.setAccessible(true)
       field.get(pipeSink).asInstanceOf[PipedInputStream]
     }
 
     def sourcePipe(pipeSource: Process.PipeSource) = {
-      val field = pipeSource.getClass.getDeclaredField("pipe")
+      val field = classOf[Process.PipeSource].getDeclaredField("pipe")
       field.setAccessible(true)
       field.get(pipeSource).asInstanceOf[PipedOutputStream]
     }
 
-    def createProcess(builder: ProcessBuilder, io: ProcessIO) = {
-      val m = builder.getClass.getDeclaredMethod("createProcess", classOf[ProcessIO])
-      m.setAccessible(true)
-      m.invoke(builder, io).asInstanceOf[Process.PipedProcesses]
-    }
-
-    def runAndExitValue1(p: Process.PipedProcesses, source: Process.PipeSource, sink: Process.PipeSink) = {
-      val m = p.getClass.getDeclaredMethod("runAndExitValue", classOf[Process.PipeSource], classOf[Process.PipeSink])
+    def runAndExitValue1(p: Process.PipedProcesses, source: PipeSourceCopy, sink: PipeSinkCopy) = {
+      val m = classOf[Process.PipedProcesses].getDeclaredMethod("runAndExitValue", classOf[Process.PipeSource], classOf[Process.PipeSink])
       m.setAccessible(true)
       m.invoke(p, source, sink).asInstanceOf[Option[Int]]
     }
 
-    def runAndExitValue2(p: Process.PipedProcesses, source: Process.PipeSource, sink: Process.PipeSink,
-                          first: Process, second: Process) = {
-      val m = p.getClass.getDeclaredMethod("runAndExitValue", classOf[Process.PipeSource], classOf[Process.PipeSink],
+    def runAndExitValue2(p: Process.PipedProcesses, source: PipeSourceCopy, sink: PipeSinkCopy,
+                         first: Process, second: Process) = {
+      val m = classOf[Process.PipedProcesses].getDeclaredMethod("runAndExitValue", classOf[Process.PipeSource], classOf[Process.PipeSink],
         classOf[Process], classOf[Process])
       m.setAccessible(true)
       m.invoke(p, source, sink, first, second).asInstanceOf[Option[Int]]
     }
+  }
+}
+
+import org.specs2.mutable._
+
+
+class ProcTest extends SpecificationWithJUnit {
+
+  "by reflection" in {
+    import scala.sys.patched.process.debug._
+    import scala.sys.patched.process.{Process, ProcessLogger, BasicIO}
+    import java.io.{Closeable, ByteArrayInputStream, ByteArrayOutputStream,
+      PipedInputStream, PipedOutputStream, InputStream, IOException}
+    import java.lang.reflect.InvocationTargetException
+    import java.util.concurrent.TimeUnit
+    import scala.concurrent.{Future, Await}
+    import scala.concurrent.duration.{Duration, SECONDS}
+
+    trait CloseChecking extends Closeable {
+      var closed = false
+      override def close() = closed = true
+    }
+    class DebugOutputStream extends ByteArrayOutputStream with CloseChecking
+    class DebugInputStream(bytes: Array[Byte]) extends ByteArrayInputStream(bytes) with CloseChecking
+    class DebugInfinityInputStream extends InputStream with CloseChecking {
+      def read() = 1
+    }
 
     def throwsInvocationTargetException(f: => Unit) = {
-      try {
-        f
-        false
-      }
-      catch {
-        case _: InvocationTargetException => true
-      }
+      try { f; false }
+      catch { case _: InvocationTargetException => true }
     }
 
     def throwsIOException(f: => Unit) = {
-      try {
-        f
-        false
-      }
-      catch {
-        case _: IOException => true
-      }
+      try { f; false }
+      catch { case _: IOException => true }
     }
 
     "PipedProcesses" in {
@@ -160,11 +87,11 @@ class ProcTest extends SpecificationWithJUnit {
       "runAndExitValue() should release resources" in {
         "when normally ends" in {
           val io = BasicIO(false, ProcessLogger( _ => () ))
-          val source = new Process.PipeSource("TestPipeSource")
-          val sink = new Process.PipeSink("TestPipeSink")
+          val source = new PipeSourceCopy("TestPipeSource")
+          val sink = new PipeSinkCopy("TestPipeSink")
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
-          val p = createProcess(wc #< echo, io)
+          val p = new PipedProcessesCopy(echo, wc, io, false)
           val f = Future {
             runAndExitValue1(p, source, sink)
           }
@@ -177,11 +104,11 @@ class ProcTest extends SpecificationWithJUnit {
 
         "when b.run() fail" in {
           val io = BasicIO(false, ProcessLogger( _ => () ))
-          val source = new Process.PipeSource("TestPipeSource")
-          val sink = new Process.PipeSink("TestPipeSink")
+          val source = new PipeSourceCopy("TestPipeSource")
+          val sink = new PipeSinkCopy("TestPipeSink")
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
-          val p = createProcess(nonExistent #< echo, io)
+          val p = new PipedProcessesCopy(echo, nonExistent, io, false)
           throwsInvocationTargetException { runAndExitValue1(p, source, sink) } must beTrue
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue
@@ -191,11 +118,11 @@ class ProcTest extends SpecificationWithJUnit {
 
         "when a.run() fail" in {
           val io = BasicIO(false, ProcessLogger( _ => () ))
-          val source = new Process.PipeSource("TestPipeSource")
-          val sink = new Process.PipeSink("TestPipeSink")
+          val source = new PipeSourceCopy("TestPipeSource")
+          val sink = new PipeSinkCopy("TestPipeSink")
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
-          val p = createProcess(wc #< nonExistent, io)
+          val p = new PipedProcessesCopy(nonExistent, echo, io, false)
           throwsInvocationTargetException { runAndExitValue1(p, source, sink) } must beTrue
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue
@@ -203,15 +130,15 @@ class ProcTest extends SpecificationWithJUnit {
           sink.isAlive must beFalse
         }
 
-        "when first interrupted" in {
+        "when interrupted waiting for first.exitValue()" in {
           val io = BasicIO(false, ProcessLogger( _ => () ))
-          val source = new Process.PipeSource("TestPipeSource")
-          val sink = new Process.PipeSink("TestPipeSink")
+          val source = new PipeSourceCopy("TestPipeSource")
+          val sink = new PipeSinkCopy("TestPipeSink")
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
-          val p = createProcess("" #< "", io)
+          val p = new PipedProcessesCopy(null, null, io, false)
           val first = new DebugProcess(sleep.run(io.withOutput(source.connectIn)))
-          val second = new DebugProcess(wc.run(io.withInput(sink.connectOut)))
+          val second = new DebugProcess(echo.run(io.withInput(sink.connectOut)))
           val t = new Thread {
             override def run() = {
               runAndExitValue2(p, source, sink, first, second)
@@ -220,6 +147,7 @@ class ProcTest extends SpecificationWithJUnit {
           t.start()
           first.exitValueCalled.await(5, TimeUnit.SECONDS) must beTrue
           t.interrupt()
+          t.join()
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue
           source.isAlive must beFalse
@@ -228,13 +156,13 @@ class ProcTest extends SpecificationWithJUnit {
           second.destroyed must beTrue
         }
 
-        "when second interrupted" in {
+        "when interrupted waiting for second.exitValue()" in {
           val io = BasicIO(false, ProcessLogger( _ => () ))
-          val source = new Process.PipeSource("TestPipeSource")
-          val sink = new Process.PipeSink("TestPipeSink")
+          val source = new PipeSourceCopy("TestPipeSource")
+          val sink = new PipeSinkCopy("TestPipeSink")
           val pout = sourcePipe(source)
           val pin = sinkPipe(sink)
-          val p = createProcess("" #< "", io)
+          val p = new PipedProcessesCopy(null, null, io, false)
           val first = new DebugProcess(echo.run(io.withOutput(source.connectIn)))
           val second = new DebugProcess(sleep.run(io.withInput(sink.connectOut)))
           val t = new Thread {
@@ -245,6 +173,7 @@ class ProcTest extends SpecificationWithJUnit {
           t.start()
           second.exitValueCalled.await(5, TimeUnit.SECONDS) must beTrue
           t.interrupt()
+          t.join()
           throwsIOException { pin.read() } must beTrue
           throwsIOException { pout.write(1) } must beTrue
           source.isAlive must beFalse
@@ -257,7 +186,7 @@ class ProcTest extends SpecificationWithJUnit {
 
     "PipeSource" in {
       "run() should release resources" in {
-        val source = new Process.PipeSource("TestPipeSource")
+        val source = new PipeSourceCopy("TestPipeSource")
         val in = new DebugInputStream(Array[Byte](1))
         val pout = sourcePipe(source)
         val pin = new PipedInputStream
@@ -274,8 +203,8 @@ class ProcTest extends SpecificationWithJUnit {
       }
 
       "release() should release resources" in {
-        "when waiting for sourse.get()" in {
-          val source = new Process.PipeSource("TestPipeSource")
+        "when waiting for source.take()" in {
+          val source = new PipeSourceCopy("TestPipeSource")
           val pout = sourcePipe(source)
           val pin = new PipedInputStream
           pout connect pin
@@ -289,7 +218,7 @@ class ProcTest extends SpecificationWithJUnit {
         }
 
         "when copying stream" in {
-          val source = new Process.PipeSource("TestPipeSource")
+          val source = new PipeSourceCopy("TestPipeSource")
           val in = new DebugInfinityInputStream
           val pout = sourcePipe(source)
           val pin = new PipedInputStream
@@ -312,7 +241,7 @@ class ProcTest extends SpecificationWithJUnit {
 
     "PipeSink" in {
       "run() should release resources" in {
-        val sink = new Process.PipeSink("TestPipeSink")
+        val sink = new PipeSinkCopy("TestPipeSink")
         val pout = new PipedOutputStream
         val pin = sinkPipe(sink)
         val out = new DebugOutputStream
@@ -331,8 +260,8 @@ class ProcTest extends SpecificationWithJUnit {
       }
 
       "release() should release resources" in {
-        "when waiting for sink.get()" in {
-          val sink = new Process.PipeSink("TestPipeSink")
+        "when waiting for sink.take()" in {
+          val sink = new PipeSinkCopy("TestPipeSink")
           val pout = new PipedOutputStream
           val pin = sinkPipe(sink)
           sink connectIn pout
@@ -346,7 +275,7 @@ class ProcTest extends SpecificationWithJUnit {
         }
 
         "when copying stream" in {
-          val sink = new Process.PipeSink("TestPipeSink")
+          val sink = new PipeSinkCopy("TestPipeSink")
           val pout = new PipedOutputStream
           val pin = sinkPipe(sink)
           val out = new DebugOutputStream
@@ -369,8 +298,8 @@ class ProcTest extends SpecificationWithJUnit {
     }
   }
 
-  /*
   "PipedProcesses.runAndExitValue() x10 return value within a second" in {
+    import scala.sys.patched.process.{Process, ProcessLogger}
     import scala.concurrent.{Future, Await}
     import scala.concurrent.duration.Duration
     import scala.concurrent.duration.SECONDS
@@ -379,14 +308,13 @@ class ProcTest extends SpecificationWithJUnit {
     def input = new ByteArrayInputStream("a".getBytes())
 
     val f = Future {
-      for (i <- 0 until 100) {
-        println(s"process $i returns ${ ("wc" #< input).run(ProcessLogger { _ => () }).exitValue() }")
+      for (i <- 0 until 10) {
+        (Process("wc") #< input).run(ProcessLogger { _ => () }).exitValue()
       }
-      "OK"
     }
-    Await.result(f, Duration(5, SECONDS)) mustEqual "OK"
+    Await.result(f, Duration(5, SECONDS))
+    success
   }
-  */
 
   /*
   "Proc.escape" should {

@@ -110,19 +110,20 @@ private[process] trait ProcessImpl {
   }
 
   private[process] class PipedProcesses(a: ProcessBuilder, b: ProcessBuilder, defaultIO: ProcessIO, toError: Boolean) extends CompoundProcess {
-    /** Release PipeSource, PipeSink and Process in the correct order.
-     * If once connect Process with Source or Sink, then the order of releasing them
-     * must be Source -> Sink -> Process, otherwise IOException will be thrown. */
-    protected[this] def releaseResources(so: PipeSource, sk: PipeSink, p: Process *) = {
-      so.release()
-      sk.release()
-      p foreach( _.destroy() )
-    }
     protected[this] override def runAndExitValue() = runAndExitValue(new PipeSource(a.toString), new PipeSink(b.toString))
     protected[this] def runAndExitValue(source: PipeSource, sink: PipeSink): Option[Int] = {
       source connectOut sink
       source.start()
       sink.start()
+
+      /** Release PipeSource, PipeSink and Process in the correct order.
+      * If once connect Process with Source or Sink, then the order of releasing them
+      * must be Source -> Sink -> Process, otherwise IOException will be thrown. */
+      def releaseResources(so: PipeSource, sk: PipeSink, p: Process *) = {
+        so.release()
+        sk.release()
+        p foreach( _.destroy() )
+      }
 
       val firstIO =
         if (toError) defaultIO.withError(source.connectIn)
@@ -141,9 +142,6 @@ private[process] trait ProcessImpl {
           releaseResources(source, sink, second)
           throw err
         }
-      runAndExitValue(source, sink, first, second)
-    }
-    protected[this] def runAndExitValue(source: PipeSource, sink: PipeSink, first: Process, second: Process): Option[Int] = {
       runInterruptible {
         val exit1 = first.exitValue()
         val exit2 = second.exitValue()
@@ -173,9 +171,9 @@ private[process] trait ProcessImpl {
   }
 
   private[process] class PipeSource(label: => String) extends PipeThread(false, () => label) {
-    private[this] val pipe = new PipedOutputStream
-    private[this] val source = new LinkedBlockingQueue[Option[InputStream]]
-    final override def run(): Unit = {
+    protected[this] val pipe = new PipedOutputStream
+    protected[this] val source = new LinkedBlockingQueue[Option[InputStream]]
+    override def run(): Unit = {
       try {
         source.take match {
           case Some(in) => runloop(in, pipe)
@@ -185,18 +183,18 @@ private[process] trait ProcessImpl {
       catch onInterrupt(())
       finally BasicIO close pipe
     }
-    final def connectIn(in: InputStream): Unit = source add Some(in)
-    final def connectOut(sink: PipeSink): Unit = sink connectIn pipe
-    final def release(): Unit = {
+    def connectIn(in: InputStream): Unit = source add Some(in)
+    def connectOut(sink: PipeSink): Unit = sink connectIn pipe
+    def release(): Unit = {
       interrupt()
       source add None
       join()
     }
   }
   private[process] class PipeSink(label: => String) extends PipeThread(true, () => label) {
-    private[this] val pipe = new PipedInputStream
-    private[this] val sink = new LinkedBlockingQueue[Option[OutputStream]]
-    final override def run(): Unit = {
+    protected[this] val pipe = new PipedInputStream
+    protected[this] val sink = new LinkedBlockingQueue[Option[OutputStream]]
+    override def run(): Unit = {
       try {
         sink.take match {
           case Some(out) => runloop(pipe, out)
@@ -206,9 +204,9 @@ private[process] trait ProcessImpl {
       catch onInterrupt(())
       finally BasicIO close pipe
     }
-    final def connectOut(out: OutputStream): Unit = sink add Some(out)
-    final def connectIn(pipeOut: PipedOutputStream): Unit = pipe connect pipeOut
-    final def release(): Unit = {
+    def connectOut(out: OutputStream): Unit = sink add Some(out)
+    def connectIn(pipeOut: PipedOutputStream): Unit = pipe connect pipeOut
+    def release(): Unit = {
       interrupt()
       sink add None
       join()

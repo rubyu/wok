@@ -34,7 +34,9 @@ object DynamicCompiler {
 
     def script(str: Option[String]) = {
       if (str.isDefined) {
-        """|      var currentRow = Row(0, Nil, Nil, "", "")
+        """|    {
+          |
+          |      var currentRow = Row(0, Nil, Nil, "", "")
           |      def NF = currentRow.size
           |      def NR = currentRow.id
           |      def FT = currentRow.sep
@@ -42,6 +44,8 @@ object DynamicCompiler {
           |      STDIN #> {
           |        _.csv.map { row => currentRow = row; row } %s
           |      }
+          |
+          |    }
         """.stripMargin.format(str.get)
       } else {
         "// no script"
@@ -62,15 +66,11 @@ object DynamicCompiler {
       |
       |
       |class Wok(val args: List[String]) extends AbstractWok {
-      |  def runScript() {
+      |  def runScript(): Unit = {
       |
       |%s
       |
-      |    {
-      |
       |%s
-      |
-      |    }
       |
       |%s
       |

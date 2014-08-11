@@ -626,7 +626,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
     "ExtendedInputStreamResource" in {
       import Helpers.ExtendedInputStreamResource
 
-      "add a extended function |> to InputStreamResource" in {
+      "add a extended function #> to InputStreamResource" in {
         "write a Array[Byte]" in {
           val out = Path.createTempFile()
           out.write("a")
@@ -641,7 +641,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
    "ExtendedOutputStreamResource" in {
      import Helpers.ExtendedOutputStreamResource
 
-      "add a extended function <<| to OutputStreamResource" in {
+      "add a extended function #<< to OutputStreamResource" in {
         "write a Array[Byte]" in {
           val out = Path.createTempFile()
           out.write("a")
@@ -656,7 +656,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
     "ExtendedPath" in {
       import Helpers.ExtendedPath
 
-      "add a extended function |> to Path" in {
+      "add a extended function #> to Path" in {
         "write a Array[Byte]" in {
           val out = Path.createTempFile()
           out.write("a")
@@ -667,7 +667,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
       }
 
-      "add a extended function <| to Path" in {
+      "add a extended function #< to Path" in {
         "write a Array[Byte]" in {
           val out = Path.createTempFile()
           out.write("a")
@@ -678,7 +678,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
       }
 
-      "add a extended function <<| to Path" in {
+      "add a extended function #<< to Path" in {
         "truncate contents already exists and write a Array[Byte]" in {
           val out = Path.createTempFile()
           out.write("a")
@@ -693,7 +693,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
     "ExtendedPathString" in {
       import Helpers.ExtendedPathString
 
-      "add a extended function |> to String" in {
+      "add a extended function #> to String" in {
         "write a Array[Byte]" in {
           val out = Path.createTempFile()
           out.write("a")
@@ -704,7 +704,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
       }
 
-      "add a extended function <| to String" in {
+      "add a extended function #< to String" in {
         "write a Array[Byte]" in {
           val out = Path.createTempFile()
           out.write("a")
@@ -715,7 +715,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
       }
 
-      "add a extended fucntion <<| to String" in {
+      "add a extended fucntion #<< to String" in {
         "truncate contents already exists and write a Array[Byte]" in {
           val out = Path.createTempFile()
           out.write("a")

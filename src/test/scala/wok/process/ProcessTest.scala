@@ -51,7 +51,7 @@ class ProcessTest extends SpecificationWithJUnit {
 
     "call a program with arguments" in {
       Seq("cat", "./src/test/scala/wok/process/resources/angel.txt")
-        .!>.string mustEqual "angel\r\néindʒəl\r\n"
+        .!>.string mustEqual "angel\néindʒəl\n"
     }
 
     "call a program with unicode encoded arguments" in {
@@ -60,17 +60,15 @@ class ProcessTest extends SpecificationWithJUnit {
         .!>.string mustEqual "éindʒəl\n"
     }
 
-    /*
     "call a program with standard input" in {
       Seq("cat", "./src/test/scala/wok/process/resources/angel.txt", "-")
-        .exec("stdin-data").string mustEqual "angel\r\néindʒəl\r\nstdin-data"
+        .#<("stdin-data").!>.string mustEqual "angel\néindʒəl\nstdin-data"
     }
 
     "call a program with unicode encoded standard input" in {
       Seq("cat", "./src/test/scala/wok/process/resources/angel.txt", "-")
-        .exec("éindʒəl").string mustEqual "angel\r\néindʒəl\r\néindʒəl"
+        .#<("éindʒəl").!>.string mustEqual "angel\néindʒəl\néindʒəl"
     }
-    */
 
     "connect programs" in {
       Seq("cat", "./src/test/scala/wok/process/resources/angel.txt")

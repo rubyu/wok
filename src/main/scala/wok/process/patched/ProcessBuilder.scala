@@ -367,6 +367,8 @@ object ProcessBuilder extends ProcessBuilderImpl {
       * time this process is executed.
       */
     def #<(in: => InputStream): ProcessBuilder = #< (new IStreamBuilder(in, "<input stream>"))
+    def #<(in: Array[Byte]): ProcessBuilder = #< ( new java.io.ByteArrayInputStream(in) )
+    def #<(in: String): ProcessBuilder = #< ( in.getBytes(java.nio.charset.StandardCharsets.UTF_8) )
 
     /** Reads the output of a [[scala.sys.process.ProcessBuilder]] into the input stream of this process. */
     def #<(b: ProcessBuilder): ProcessBuilder = new PipedBuilder(b, toSink, false)

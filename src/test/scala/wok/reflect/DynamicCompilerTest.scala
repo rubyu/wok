@@ -137,10 +137,10 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           out.toString mustEqual "\"\n\""
         }
 
-        "arg" in new scope {
+        "args" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("print(arg)"), None, Nil)
+              .compile(List("print(args)"), None, Nil)
               .create(List("1", "2", "3"))
               .runScript()
           }

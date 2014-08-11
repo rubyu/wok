@@ -61,7 +61,7 @@ object DynamicCompiler {
       |import scalax.file.ImplicitConversions.string2path
       |
       |
-      |class Wok(val arg: List[String]) extends AbstractWok {
+      |class Wok(val args: List[String]) extends AbstractWok {
       |  def runScript() {
       |
       |%s

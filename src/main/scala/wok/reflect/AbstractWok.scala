@@ -9,7 +9,7 @@ import Helpers.ExtendedOutputStreamResource
 
 
 trait AbstractWok {
-  val arg: List[String]
+  val args: List[String]
 
   def runScript(): Unit
 

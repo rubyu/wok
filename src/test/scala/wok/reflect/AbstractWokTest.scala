@@ -14,7 +14,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
   "AbstractWok" should {
 
     class Wok extends AbstractWok {
-      val arg = List()
+      val args = List()
       def runScript(){}
     }
 

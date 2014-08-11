@@ -96,13 +96,21 @@ trait ProcessCreation {
     }*/
   }
 
+  private[this] lazy val escape : String => String = {
+    import wok.core.Helpers.{EscapedString, QuotedString}
+    if (System.getProperty("os.name", "") startsWith "Windows")
+      _.escaped('\\', '"').quoted('"')
+    else
+      s => s
+  }
+
   /** Creates a [[scala.sys.process.ProcessBuilder]] with working dir optionally set to
     * `File` and extra environment variables.
     *
     * @example {{{ apply("java" :: javaArgs, params.get("cwd"), "CLASSPATH" -> "library.jar") }}}
     */
   def apply(command: Seq[String], cwd: Option[File], extraEnv: (String, String)*): ProcessBuilder = {
-    val jpb = new JProcessBuilder(command.toArray: _*)
+    val jpb = new JProcessBuilder(command map escape toArray: _*)
     cwd foreach (jpb directory _)
     extraEnv foreach { case (k, v) => jpb.environment.put(k, v) }
     apply(jpb)

@@ -238,6 +238,8 @@ trait ProcessBuilder extends Source with Sink {
     */
   def !<(log: ProcessLogger): Int
 
+  def !> : wok.process.Result
+
   /** Starts the process represented by this builder.  Standard output and error
    * are sent to the console.*/
   def run(): Process

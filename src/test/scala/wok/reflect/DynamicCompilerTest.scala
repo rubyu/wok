@@ -45,10 +45,20 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           out.toString("utf-8") mustEqual "あ"
         }
 
-        "seq2process" in new scope {
+        "stringSeq2process" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("print(Seq(\"echo\", \"-n\", \"a\").exec().string)"), None, Nil)
+              .compile(List("print(Seq(\"echo\", \"-n\", \"a\").!>.string)"), None, Nil)
+              .create(Nil)
+              .runScript()
+          }
+          out.toString mustEqual "a"
+        }
+
+        "string2process" in new scope {
+          Stdio.withOut(out) {
+            DynamicCompiler
+              .compile(List("print(\"echo -n a\".!>.string)"), None, Nil)
               .create(Nil)
               .runScript()
           }

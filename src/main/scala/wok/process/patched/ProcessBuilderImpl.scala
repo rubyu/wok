@@ -13,9 +13,10 @@ package process
 
 import processInternal._
 import Process._
-import java.io.{ FileInputStream, FileOutputStream }
+import java.io.{ByteArrayOutputStream, FileInputStream, FileOutputStream, ByteArrayInputStream}
 import BasicIO.{ Uncloseable, Streamed }
 import Uncloseable.protect
+import scalax.io.Resource
 
 private[process] trait ProcessBuilderImpl {
   self: ProcessBuilder.type =>
@@ -115,6 +116,22 @@ private[process] trait ProcessBuilderImpl {
     def !(log: ProcessLogger)  = runBuffered(log, connectInput = false)
     def !<                     = run(connectInput = true).exitValue()
     def !<(log: ProcessLogger) = runBuffered(log, connectInput = true)
+
+    def !> : wok.process.Result = {
+      val out, err = new ByteArrayOutputStream
+      val p = this.run(new ProcessIO(
+        i => { i.close() },
+        o => { try BasicIO.transferFully(o, out) finally o.close() },
+        e => { try BasicIO.transferFully(e, err) finally e.close() })
+      )
+      try {
+        wok.process.Result(p.exitValue(),
+          new ByteArrayInputStream(out.toByteArray),
+          new ByteArrayInputStream(err.toByteArray))
+      } finally {
+        p.destroy()
+      }
+    }
 
     /** Constructs a new builder which runs this command with all input/output threads marked
      *  as daemon threads.  This allows the creation of a long running process while still

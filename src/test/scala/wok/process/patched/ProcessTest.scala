@@ -95,18 +95,17 @@ package scala.sys.patched.process {
 import org.specs2.mutable._
 
 
-class ProcTest extends SpecificationWithJUnit {
+class ProcessTest extends SpecificationWithJUnit {
 
-  "by reflection" in {
+  "PipedProcesses" in {
     import scala.sys.patched.process.debug._
     import scala.sys.patched.process.{ProcessLogger, BasicIO}
-    import java.io.{Closeable, ByteArrayInputStream, ByteArrayOutputStream, InputStream, IOException}
+    import java.io.IOException
     import scala.concurrent.{Future, Await}
     import scala.concurrent.duration.{Duration, SECONDS}
     import scala.util.control.Exception._
 
-
-    "PipedProcesses need not to release resources when it normally ends" in {
+    "need not to release resources when it normally ends" in {
       val io = BasicIO(false, ProcessLogger(_ => ()))
       val source = new PipeSourceMock
       val sink = new PipeSinkMock
@@ -123,7 +122,7 @@ class ProcTest extends SpecificationWithJUnit {
       b.destroyCount mustEqual 0
     }
 
-    "PipedProcesses must release resources when b.run() fails" in {
+    "must release resources when b.run() fails" in {
       val io = BasicIO(false, ProcessLogger(_ => ()))
       val source = new PipeSourceMock
       val sink = new PipeSinkMock
@@ -142,7 +141,7 @@ class ProcTest extends SpecificationWithJUnit {
       b.destroyCount mustEqual 0
     }
 
-    "PipedProcesses must release resources when a.run() fails" in {
+    "must release resources when a.run() fails" in {
       val io = BasicIO(false, ProcessLogger(_ => ()))
       val source = new PipeSourceMock
       val sink = new PipeSinkMock
@@ -161,7 +160,7 @@ class ProcTest extends SpecificationWithJUnit {
       b.destroyCount mustEqual 1
     }
 
-    "PipedProcesses must release resources when interrupted waiting for first.exitValue()" in {
+    "must release resources when interrupted waiting for first.exitValue()" in {
       val io = BasicIO(false, ProcessLogger(_ => ()))
       val source = new PipeSourceMock
       val sink = new PipeSinkMock
@@ -178,7 +177,7 @@ class ProcTest extends SpecificationWithJUnit {
       b.destroyCount mustEqual 1
     }
 
-    "PipedProcesses must release resources when interrupted waiting for second.exitValue()" in {
+    "must release resources when interrupted waiting for second.exitValue()" in {
       val io = BasicIO(false, ProcessLogger(_ => ()))
       val source = new PipeSourceMock
       val sink = new PipeSinkMock
@@ -194,6 +193,28 @@ class ProcTest extends SpecificationWithJUnit {
       a.destroyCount mustEqual 1
       b.destroyCount mustEqual 1
     }
+
+    "runAndExitValue() x10 must return value within a second" in {
+      import scala.sys.patched.process.{Process, ProcessLogger}
+      import java.io.ByteArrayInputStream
+
+      def input = new ByteArrayInputStream("a".getBytes())
+
+      val f = Future {
+        for (i <- 0 until 10) {
+          (Process("wc") #< input).run(ProcessLogger { _ => () }).exitValue()
+        }
+      }
+      Await.result(f, Duration(5, SECONDS))
+      success
+    }
+  }
+
+  "PipeSource and PipeSink" in {
+    import scala.sys.patched.process.debug._
+    import java.io.{Closeable, ByteArrayInputStream, ByteArrayOutputStream, InputStream}
+    import scala.concurrent.{Future, Await}
+    import scala.concurrent.duration.{Duration, SECONDS}
 
     trait CloseChecking extends Closeable {
       var closed = false
@@ -214,7 +235,7 @@ class ProcTest extends SpecificationWithJUnit {
       (source, sink)
     }
 
-    "PipeSource and PipeSink must release resources when it normally ends" in {
+    "must release resources when it normally ends" in {
       val in = new DebugInputStream("aaa")
       val (source, sink) = sourceSink()
       val out = new DebugOutputStream
@@ -231,7 +252,7 @@ class ProcTest extends SpecificationWithJUnit {
       sink.isReleased mustEqual true
     }
 
-    "PipeSource and PipeSink must release resources when when waiting for source.take()" in {
+    "must release resources when when waiting for source.take()" in {
       val (source, sink) = sourceSink()
       val out = new DebugOutputStream
       sink connectOut out
@@ -246,7 +267,7 @@ class ProcTest extends SpecificationWithJUnit {
       sink.isReleased mustEqual true
     }
 
-    "PipeSource and PipeSink must release resources when when waiting for sink.take()" in {
+    "must release resources when when waiting for sink.take()" in {
       val in = new DebugInputStream("aaa")
       val (source, sink) = sourceSink()
       source connectIn in
@@ -261,7 +282,7 @@ class ProcTest extends SpecificationWithJUnit {
       sink.isReleased mustEqual true
     }
 
-    "PipeSource and PipeSink must release resources when copying stream" in {
+    "must release resources when copying stream" in {
       val in = new DebugInfinityInputStream
       val (source, sink) = sourceSink()
       val out = new DebugOutputStream
@@ -279,244 +300,5 @@ class ProcTest extends SpecificationWithJUnit {
       source.isReleased mustEqual true
       sink.isReleased mustEqual true
     }
-
-    /*
-  "PipedProcesses.runAndExitValue() x10 return value within a second" in {
-    import scala.sys.patched.process.{Process, ProcessLogger}
-    import scala.concurrent.{Future, Await}
-    import scala.concurrent.duration.Duration
-    import scala.concurrent.duration.SECONDS
-    import java.io.ByteArrayInputStream
-
-    def input = new ByteArrayInputStream("a".getBytes())
-
-    val f = Future {
-      for (i <- 0 until 10) {
-        (Process("wc") #< input).run(ProcessLogger { _ => () }).exitValue()
-      }
-    }
-    Await.result(f, Duration(5, SECONDS))
-    success
-  }
-  */
-
-    /*
-  "Proc.escape" should {
-    def python(s: String) =
-      new Proc(Seq("python", "-c", "\"import sys; sys.stdout.write(sys.argv[1])\"", s)).exec().string
-
-    def echo(s: String) =
-      new Proc(Seq("echo", s)).exec().string.dropRight(1)
-
-    val patterns = Seq(
-      "",
-      "a",  //normal character
-      " ", "\t",  //spaces
-      "%DUMMY%", "%PATH%",   //windows environment parameters
-      "\\", "\"", "'", "^", "<", ">", "|", "[", "]", "&", "%" //windows cmd.exe's special characters
-    )
-
-    "escape given parameters" in {
-      patterns map { p =>
-        python(Proc.escape(p)) mustEqual p
-        echo(Proc.escape(p)) mustEqual p
-      }
-    }
-  }
-
-  "Proc.exec" should {
-    "throw IllegalArgumentException when commandStrings is '|'" in {
-      Seq("|")
-        .exec() must throwAn[IllegalArgumentException]
-    }
-
-    "throw IllegalArgumentException when commandStrings starts with '|'" in {
-      Seq("|", "a")
-        .exec() must throwAn[IllegalArgumentException]
-    }
-
-    "throw IllegalArgumentException when commandStrings ends with '|'" in {
-      Seq("a", "|")
-        .exec() must throwAn[IllegalArgumentException]
-    }
-
-    "throw IllegalArgumentException when commandStrings is empty" in {
-      Seq()
-        .exec() must throwAn[IllegalArgumentException]
-    }
-
-    /*
-    "process 1 pass" in {
-      import scala.sys.process._
-      val input = Patched.IStreamBuilder(new ByteArrayInputStream(("1").getBytes))
-      0 to 10 foreach { i =>
-        (new Patched.PipedBuilder(input, "wc", false)).!
-        println(s"p1p OK $i")
-      }
-      success
-    }
-
-    "process 2 pass" in {
-      import scala.sys.process._
-      0 to 10 foreach { i =>
-        ("echo 1" #| "find /v \"\"").!
-        println(s"p2p OK $i")
-      }
-      success
-    }
-    */
-
-    "process 2 pass" in {
-      import scala.sys.process._
-      import scala.concurrent.Future
-
-      val input = Patched.IStreamBuilder(new ByteArrayInputStream(("1").getBytes))
-      def command =
-        if (System.getProperty("os.name", "") startsWith "Windows")
-          new Patched.PipedBuilder(input, "find /v \"\"", false)
-        else
-          new Patched.PipedBuilder(input, "wc", false)
-      val f = Future {
-        for (i <- 0 until 10) {
-          println(s"p2p $i")
-          command.run(ProcessLogger { _ => () }).exitValue()
-        }
-      }
-      Thread.sleep(1000)
-      //println(f.isCompleted)
-      f.isCompleted must beTrue
-    }
-
-    /* x .check
-true
-     */
-
-    /* x .scala
-import scala.sys.process._
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
-import java.io.ByteArrayInputStream
-
-object Test {
-  def main(args: Array[String]) {
-    def input = new ByteArrayInputStream(("a").getBytes())
-    def process =
-      if (System.getProperty("os.name", "") startsWith "Windows")
-        "find /v \"\"" #< input
-      else
-        "wc" #< input
-    val f = Future {
-      for (i <- 0 until 10) {
-        process.run(ProcessLogger { _ => () }).exitValue()
-      }
-    }
-    Thread.sleep(1000)
-    println(f.isCompleted)
-  }
-}
-     */
-
-
-    "not found" in {
-      import scala.sys.process._
-      "aa".run().exitValue() must throwA[InterruptedException]
-    }
-
-    "process 2 fail" in {
-      import scala.sys.process._
-      import scala.concurrent.Future
-
-      def input = new ByteArrayInputStream(("1").getBytes)
-      def command =
-        if (System.getProperty("os.name", "") startsWith "Windows")
-          "find /v \"\"" #< input
-        else
-          "wc" #< input
-      val f = Future {
-        for (i <- 0 until 10) {
-          println(s"p2f $i")
-          command.run(ProcessLogger { _ => () }).exitValue()
-        }
-      }
-      Thread.sleep(1000)
-      //println(f.isCompleted)
-      f.isCompleted must beTrue
-    }
-
-    /*
-    "process 1" in {
-      import scala.sys.process._
-      val input = new ByteArrayInputStream(("1" * 10000).getBytes)
-      0 to 10000 foreach { i =>
-        ("wc" #< input).!
-        println(s"p1 OK $i")
-      }
-      success
-    }
-    */
-
-    /*
-    "process 2" in {
-      0 to 10000 foreach { i =>
-        Seq("wc").exec("1")
-        println(s"p2 OK $i")
-      }
-      success
-    }
-    */
-
-    "call a program 1" in {
-      Seq(Proc.escape("echo -n a"))
-        .exec().string mustEqual "a"
-    }
-
-    "call a program 2" in {
-      Seq(Proc.escape("echo"), "-n", "a")
-        .exec().string mustEqual "a"
-    }
-
-    "call a program 3" in {
-      Seq("echo -n a")
-        .exec().string mustEqual "a"
-    }
-
-    "call a program" in {
-      Seq("echo", "-n", "a")
-        .exec().string mustEqual "a"
-    }
-
-    "call a program with Int argunent" in {
-      Seq("echo", "-n", 1)
-        .exec().string mustEqual "1"
-    }
-
-    "call a program with arguments" in {
-      Seq("cat", "./src/test/scala/wok/process/resources/angel.txt")
-        .exec().string mustEqual "angel\r\néindʒəl\r\n"
-    }
-
-    "call a program with unicode encoded arguments" in {
-      Seq("cat", "./src/test/scala/wok/process/resources/angel.txt",
-        "|", "grep", "éindʒəl")
-        .exec().string mustEqual "éindʒəl\n"
-    }
-
-    "call a program with standard input" in {
-      Seq("cat", "./src/test/scala/wok/process/resources/angel.txt", "-")
-        .exec("stdin-data").string mustEqual "angel\r\néindʒəl\r\nstdin-data"
-    }
-
-    "call a program with unicode encoded standard input" in {
-      Seq("cat", "./src/test/scala/wok/process/resources/angel.txt", "-")
-        .exec("éindʒəl").string mustEqual "angel\r\néindʒəl\r\néindʒəl"
-    }
-
-    "connect programs" in {
-      Seq("cat", "./src/test/scala/wok/process/resources/angel.txt",
-        "|", "grep", "an")
-        .exec().string mustEqual "angel\n"
-    }
-  }
-  */
   }
 }

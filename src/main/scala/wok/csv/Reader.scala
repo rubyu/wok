@@ -29,17 +29,8 @@ class Reader {
 
   private val matchNothing = """(?!.).""".r
 
-  def FS(s: String) = {
-    fs = if (s.isEmpty) matchNothing else s.er
-    update()
-    this
-  }
-
-  def RS(s: String) = {
-    rs = if (s.isEmpty) matchNothing else s.er
-    update()
-    this
-  }
+  def FS(s: String): Reader = FS(if (s.isEmpty) matchNothing else s.er)
+  def RS(s: String): Reader = RS(if (s.isEmpty) matchNothing else s.er)
 
   def FQ(q: Quote) = { fq = q; update(); this }
 

@@ -18,8 +18,9 @@ object DynamicCompiler {
   def compile(before: List[String], process: Option[String], after: List[String]): DynamicClass = {
     val virtualDirectory = new VirtualDirectory("[memory]", None)
     val settings = new Settings
-    settings.deprecation.value = true
-    settings.unchecked.value = true
+    settings.deprecation.value = false
+    settings.unchecked.value = false
+    settings.feature.value = false
     settings.outputDirs.setSingleOutput(virtualDirectory)
     settings.bootclasspath.value = System.getProperty("java.class.path")
     settings.classpath.value = settings.bootclasspath.value

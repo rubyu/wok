@@ -2,6 +2,7 @@
 package wok.csv
 
 import java.io.OutputStream
+import wok.core.PrintableElement
 import wok.core.Helpers._
 import scala.util.matching.Regex.quoteReplacement //quoteReplacement(str) == str.escaped('\\', '$')
 import scalax.io.Codec
@@ -77,14 +78,9 @@ class Writer {
   private var escape = _escape
   private def update(): Unit = escape = _escape
 
-  def write(out: OutputStream, xs: Any *) {
-    out.write(ocd.encode(xs
-      .flatMap { case x: Seq[_] => x case x: Any => Seq(x) }
-      .map { s => escape(s.toString) }
-      .mkString(ofs)))
-  }
+  def write(out: OutputStream, xs: PrintableElement *): Unit = out.write(ocd.encode(xs.flatten.map(escape).mkString(ofs)))
 
-  def writeln(out: OutputStream, xs: Any *) {
+  def writeln(out: OutputStream, xs: PrintableElement *): Unit = {
     write(out, xs: _*)
     out.write(ocd.encode(ors))
   }
@@ -103,6 +99,6 @@ object Writer {
   def OFQ(q: Quote) = new Writer().OFQ(q)
   def OCD(c: Codec) = new Writer().OCD(c)
 
-  def write(out: OutputStream, xs: Any *) = new Writer().write(out, xs: _*)
-  def writeln(out: OutputStream, xs: Any *) = new Writer().writeln(out, xs: _*)
+  def write(out: OutputStream, xs: PrintableElement *) = new Writer().write(out, xs: _*)
+  def writeln(out: OutputStream, xs: PrintableElement *) = new Writer().writeln(out, xs: _*)
 }

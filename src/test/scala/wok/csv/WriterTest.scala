@@ -5,6 +5,7 @@ import org.specs2.mutable._
 import org.specs2.specification.Scope
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
+import wok.reflect.Helpers.{stringToPrintableElement, stringSeqToPrintableElement}
 import scalax.io.Codec
 
 

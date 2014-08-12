@@ -5,6 +5,7 @@ import org.specs2.mutable._
 import org.specs2.specification.Scope
 import wok.csv.{Quote, Writer, Reader}
 import wok.core.Stdio
+import wok.reflect.Helpers.{stringToPrintableElement, stringSeqToPrintableElement}
 import java.io._
 import scalax.file.Path
 import scalax.io.{StandardOpenOption, Resource, Codec}

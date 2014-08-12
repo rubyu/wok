@@ -3,6 +3,7 @@ package wok.reflect
 
 import util.matching.Regex
 import scalax.io.Codec
+import wok.core.PrintableElement
 import wok.core.Stdio.{out => STDOUT}
 import wok.csv.{Writer, Reader, Quote}
 import Helpers.ExtendedOutputStreamResource
@@ -13,8 +14,8 @@ trait AbstractWok {
 
   def runScript(): Unit
 
-  def print(x: Any *)(implicit w: Writer): Unit = { STDOUT.print(x: _*)(w) }
-  def println(x: Any *)(implicit w: Writer): Unit = { STDOUT.println(x: _*)(w) }
+  def print(x: PrintableElement *)(implicit w: Writer): Unit = { STDOUT.print(x: _*)(w) }
+  def println(x: PrintableElement *)(implicit w: Writer): Unit = { STDOUT.println(x: _*)(w) }
 
   implicit val defaultReader = Reader()
   implicit val defaultWriter = Writer()

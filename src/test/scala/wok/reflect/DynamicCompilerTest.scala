@@ -35,44 +35,162 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "provide implicit conversions" in {
-        "codecToCharset" in new scope {
-          Stdio.withOut(out) {
-            DynamicCompiler
-              .compile(List("val c = Codec(\"Windows-31J\"); print(new String(\"あ\".getBytes(c), c))"), None, Nil)
-              .create(Nil)
-              .runScript()
+        "to Charset" in {
+          "codecToCharset" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("val c = Codec(\"Windows-31J\"); print(new String(\"あ\".getBytes(c), c))"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString("utf-8") mustEqual "あ"
           }
-          out.toString("utf-8") mustEqual "あ"
         }
 
-        "stringSeq2process" in new scope {
-          Stdio.withOut(out) {
-            DynamicCompiler
-              .compile(List("print(Seq(\"echo\", \"-n\", \"a\").!>.string)"), None, Nil)
-              .create(Nil)
-              .runScript()
+        "to Process" in {
+          "stringSeq2process" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(Seq(\"echo\", \"-n\", \"a\").!>.string)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "a"
           }
-          out.toString mustEqual "a"
+
+          "string2process" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(\"echo -n a\".!>.string)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "a"
+          }
         }
 
-        "string2process" in new scope {
-          Stdio.withOut(out) {
-            DynamicCompiler
-              .compile(List("print(\"echo -n a\".!>.string)"), None, Nil)
-              .create(Nil)
-              .runScript()
+        "to Path" in {
+          "string2path" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("STDOUT.write(\"a\".name)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "a"
           }
-          out.toString mustEqual "a"
         }
 
-        "string2path" in new scope {
-          Stdio.withOut(out) {
-            DynamicCompiler
-              .compile(List("STDOUT.write(\"a\".name)"), None, Nil)
-              .create(Nil)
-              .runScript()
+        "to PrintableElement" in {
+          "stringSeqToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(Seq(\"a\"))"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "a"
           }
-          out.toString mustEqual "a"
+
+          "stringToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(\"a\")"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "a"
+          }
+
+          "byteToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(0.toByte)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "0"
+          }
+
+          "shortToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(0.toShort)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "0"
+          }
+
+          "intToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(0)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "0"
+          }
+
+          "floatToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(0.0f)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "0"
+          }
+
+          "doubleToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(0.0)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "0"
+          }
+
+          "charToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print('a')"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "a"
+          }
+
+          "booleanToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(true)"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "true"
+          }
+
+          "bigIntToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(BigInt(0))"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "0"
+          }
+
+          "bigDecimalToPrintableElement" in new scope {
+            Stdio.withOut(out) {
+              DynamicCompiler
+                .compile(List("print(BigDecimal(0))"), None, Nil)
+                .create(Nil)
+                .runScript()
+            }
+            out.toString mustEqual "0"
+          }
         }
       }
 

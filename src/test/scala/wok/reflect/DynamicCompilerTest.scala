@@ -139,7 +139,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
                 .create(Nil)
                 .runScript()
             }
-            out.toString mustEqual "0"
+            out.toString mustEqual "0.0"
           }
 
           "doubleToPrintableElement" in new scope {
@@ -149,7 +149,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
                 .create(Nil)
                 .runScript()
             }
-            out.toString mustEqual "0"
+            out.toString mustEqual "0.0"
           }
 
           "charToPrintableElement" in new scope {

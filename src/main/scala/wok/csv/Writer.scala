@@ -84,6 +84,16 @@ class Writer {
     write(out, xs: _*)
     out.write(ocd.encode(ors))
   }
+
+  def copy(OFS: String = this.ofs, ORS: String = this.ors, OFQ: Quote = this.ofq, OCD: Codec = this.ocd): Writer = {
+    new Writer().OFS(OFS).ORS(ORS).OFQ(OFQ).OCD(OCD)
+  }
+
+  override def equals(other: Any) = other match {
+    case that: Writer if that.isInstanceOf[Writer] =>
+      this.OFS == that.OFS && this.ORS == that.ORS && this.OFQ == that.OFQ && this.OCD.name == that.OCD.name
+    case _ => false
+  }
 }
 
 object Writer {

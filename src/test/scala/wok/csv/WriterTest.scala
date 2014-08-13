@@ -269,4 +269,28 @@ class WriterTest extends SpecificationWithJUnit {
       }
     }
   }
+
+  "Writer.equals" should {
+    "return true" in {
+      Writer() mustEqual Writer()
+      Writer.OFS("a") mustEqual Writer.OFS("a")
+      Writer.ORS("a") mustEqual Writer.ORS("a")
+      Writer.OFQ(Quote.All()) mustEqual Writer.OFQ(Quote.All())
+      Writer.OCD(Codec("Windows-31J")) mustEqual Writer.OCD(Codec("Windows-31J"))
+    }
+  }
+
+  "Writer.copy" should {
+    "return copied instances" in {
+      val w = Writer()
+      w == w.copy() must beTrue
+      w eq w.copy() must beFalse
+    }
+    "set values" in {
+      Writer.OFS("a") mustEqual Writer().copy(OFS = "a")
+      Writer.ORS("a") mustEqual Writer().copy(ORS = "a")
+      Writer.OFQ(Quote.All()) mustEqual Writer().copy(OFQ = Quote.All())
+      Writer.OCD(Codec("Windows-31J")) mustEqual Writer().copy(OCD = Codec("Windows-31J"))
+    }
+  }
 }

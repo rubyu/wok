@@ -38,6 +38,17 @@ class Reader {
   def CD(c: Codec) = { cd = c; this }
 
   def open(in: InputStream) = new RowIterator(new BufferedReader(new InputStreamReader(in, cd.charSet)), this)
+
+  def copy(FS: Regex = this.fs, RS: Regex = this.rs, FQ: Quote = this.fq, CD: Codec = this.cd): Reader = {
+    new Reader().FS(FS).RS(RS).FQ(FQ).CD(CD)
+  }
+
+  override def equals(other: Any) = other match {
+    case that: Reader if that.isInstanceOf[Reader] =>
+      this.FS.toString() == that.FS.toString() && this.RS.toString() == that.RS.toString() &&
+        this.FQ == that.FQ && this.CD.name == that.CD.name
+    case _ => false
+  }
 }
 
 object Reader {

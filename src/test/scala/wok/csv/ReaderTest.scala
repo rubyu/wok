@@ -109,4 +109,28 @@ class ReaderTest extends SpecificationWithJUnit {
       )
     }
   }
+
+  "Reader.equals" should {
+    "return true" in {
+      Reader() mustEqual Reader()
+      Reader.FS("a") mustEqual Reader.FS("a")
+      Reader.RS("a") mustEqual Reader.RS("a")
+      Reader.FQ(Quote.All()) mustEqual Reader.FQ(Quote.All())
+      Reader.CD(Codec("Windows-31J")) mustEqual Reader.CD(Codec("Windows-31J"))
+    }
+  }
+
+  "Writer.copy" should {
+    "return copied instances" in {
+      val w = Reader()
+      w == w.copy() must beTrue
+      w eq w.copy() must beFalse
+    }
+    "set values" in {
+      Reader.FS("a".r) mustEqual Reader().copy(FS = "a".r)
+      Reader.RS("a".r) mustEqual Reader().copy(RS = "a".r)
+      Reader.FQ(Quote.All()) mustEqual Reader().copy(FQ = Quote.All())
+      Reader.CD(Codec("Windows-31J")) mustEqual Reader().copy(CD = Codec("Windows-31J"))
+    }
+  }
 }

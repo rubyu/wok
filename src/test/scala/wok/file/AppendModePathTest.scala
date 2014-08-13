@@ -19,6 +19,18 @@ class AppendModePathTest extends SpecificationWithJUnit {
     }
   }
 
+  "AppendModePath.printf" should {
+    "print data to the last of a file" in {
+      val p = Path.createTempFile()
+      p.write("a")
+      val rp = new AppendModePath(p)
+      rp.string mustEqual "a"
+      rp.printf("b")(Writer())
+      rp.printf("c")(Writer())
+      rp.string mustEqual "ab c "
+    }
+  }
+
   "AppendModePath.print" should {
     "print data to the last of a file" in {
       val p = Path.createTempFile()

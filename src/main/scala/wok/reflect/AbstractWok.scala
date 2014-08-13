@@ -14,6 +14,7 @@ trait AbstractWok {
   def runScript(): Unit
 
   def print(x: Any *)(implicit w: Writer): Unit = { STDOUT.print(x: _*)(w) }
+  def printf(x: Any *)(implicit w: Writer): Unit = { STDOUT.printf(x: _*)(w) }
   def println(x: Any *)(implicit w: Writer): Unit = { STDOUT.println(x: _*)(w) }
 
   implicit val defaultReader = Reader()

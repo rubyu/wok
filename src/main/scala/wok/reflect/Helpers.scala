@@ -16,7 +16,8 @@ object Helpers {
 
   implicit class ExtendedOutputStream(val out: OutputStream) extends AnyVal {
     def print(x: Any *)(implicit w: Writer): Unit = w.write(out, x: _*)
-    def println(x: Any *)(implicit w: Writer): Unit = w.writeln(out, x: _*)
+    def printf(x: Any *)(implicit w: Writer): Unit = w.writeField(out, x: _*)
+    def println(x: Any *)(implicit w: Writer): Unit = w.writeRow(out, x: _*)
   }
 
   implicit class ExtendedInputStreamResource(val in: InputStreamResource[InputStream]) extends AnyVal {
@@ -26,6 +27,7 @@ object Helpers {
   implicit class ExtendedOutputStreamResource(val out: OutputStreamResource[OutputStream]) extends AnyVal {
     def #<<[A](f: OutputStream => A): A = out.acquireAndGet(f)
     def print(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.print(x: _*)(w) }
+    def printf(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.printf(x: _*)(w) }
     def println(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.println(x: _*)(w) }
   }
 

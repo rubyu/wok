@@ -83,7 +83,12 @@ class Writer {
     ))
   }
 
-  def writeln(out: OutputStream, xs: Any *): Unit = {
+  def writeField(out: OutputStream, xs: Any *): Unit = {
+    write(out, xs: _*)
+    out.write(ocd.encode(ofs))
+  }
+
+  def writeRow(out: OutputStream, xs: Any *): Unit = {
     write(out, xs: _*)
     out.write(ocd.encode(ors))
   }
@@ -113,5 +118,6 @@ object Writer {
   def OCD(c: Codec) = new Writer().OCD(c)
 
   def write(out: OutputStream, xs: Any *) = new Writer().write(out, xs: _*)
-  def writeln(out: OutputStream, xs: Any *) = new Writer().writeln(out, xs: _*)
+  def writeField(out: OutputStream, xs: Any *) = new Writer().writeField(out, xs: _*)
+  def writeRow(out: OutputStream, xs: Any *) = new Writer().writeRow(out, xs: _*)
 }

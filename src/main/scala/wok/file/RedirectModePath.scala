@@ -15,6 +15,14 @@ class RedirectModePath(defaultPath: DefaultPath) extends AppendModePath(defaultP
     super.print(x: _*)(w)
   }
 
+  override def printf(x: Any *)(implicit w: Writer): Unit = {
+    if (firstOp) {
+      truncate(0)
+      firstOp = false
+    }
+    super.printf(x: _*)(w)
+  }
+
   override def println(x: Any *)(implicit w: Writer): Unit = {
     if (firstOp) {
       truncate(0)

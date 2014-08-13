@@ -32,8 +32,13 @@ class WriterTest extends SpecificationWithJUnit {
           result mustEqual "a"
         }
 
-        "writeln String" in new scope {
-          Writer.writeln(out, "a")
+        "writeField String" in new scope {
+          Writer.writeField(out, "a")
+          result mustEqual "a "
+        }
+
+        "writeRow String" in new scope {
+          Writer.writeRow(out, "a")
           result mustEqual "a\n"
         }
       }
@@ -52,24 +57,24 @@ class WriterTest extends SpecificationWithJUnit {
       val writer = Writer OFS(",") ORS("\n") OFQ(Quote All() E('\\'))
       
       "write String" in new scope {
-        writer.writeln(out, "a")
-        result mustEqual "\"a\"\n"
+        writer.write(out, "a")
+        result mustEqual "\"a\""
       }
       "write E" in new scope {
-        writer.writeln(out, "\\")
-        result mustEqual "\"\\\"\n" //compatible with Python
+        writer.write(out, "\\")
+        result mustEqual "\"\\\"" //compatible with Python
       }
       "write Q" in new scope {
-        writer.writeln(out, "\"")
-        result mustEqual "\"\"\"\"\n" //compatible with Python
+        writer.write(out, "\"")
+        result mustEqual "\"\"\"\"" //compatible with Python
       }
       "write OFS" in new scope {
-        writer.writeln(out, ",")
-        result mustEqual "\",\"\n"
+        writer.write(out, ",")
+        result mustEqual "\",\""
       }
       "write ORS" in new scope {
-        writer.writeln(out, "\n")
-        result mustEqual "\"\n\"\n"
+        writer.write(out, "\n")
+        result mustEqual "\"\n\""
       }
     }
 
@@ -78,20 +83,20 @@ class WriterTest extends SpecificationWithJUnit {
       val writer = Writer OFS(",") ORS("\n") OFQ(Quote All() Q('"'))
       
       "write String" in new scope {
-        writer.writeln(out, "a")
-        result mustEqual "\"a\"\n"
+        writer.write(out, "a")
+        result mustEqual "\"a\""
       }
       "write Q" in new scope {
-        writer.writeln(out, "\"")
-        result mustEqual "\"\"\"\"\n"
+        writer.write(out, "\"")
+        result mustEqual "\"\"\"\""
       }
       "write OFS" in new scope {
-        writer.writeln(out, ",")
-        result mustEqual "\",\"\n"
+        writer.write(out, ",")
+        result mustEqual "\",\""
       }
       "write ORS" in new scope {
-        writer.writeln(out, "\n")
-        result mustEqual "\"\n\"\n"
+        writer.write(out, "\n")
+        result mustEqual "\"\n\""
       }
     }
 
@@ -100,24 +105,24 @@ class WriterTest extends SpecificationWithJUnit {
       val writer = Writer OFS(",") ORS("\n") OFQ(Quote Min() Q('"') E('\\'))
 
       "write String" in new scope {
-        writer.writeln(out, "a")
-        result mustEqual "a\n"
+        writer.write(out, "a")
+        result mustEqual "a"
       }
       "write Q" in new scope {
-        writer.writeln(out, "\"")
-        result mustEqual "\"\"\"\"\n" //compatible with Python
+        writer.write(out, "\"")
+        result mustEqual "\"\"\"\"" //compatible with Python
       }
       "write E" in new scope {
-        writer.writeln(out, "\\")
-        result mustEqual "\"\\\"\n" //compatible with Python
+        writer.write(out, "\\")
+        result mustEqual "\"\\\"" //compatible with Python
       }
       "write OFS" in new scope {
-        writer.writeln(out, ",")
-        result mustEqual "\",\"\n"
+        writer.write(out, ",")
+        result mustEqual "\",\""
       }
       "write ORS" in new scope {
-        writer.writeln(out, "\n")
-        result mustEqual "\"\n\"\n"
+        writer.write(out, "\n")
+        result mustEqual "\"\n\""
       }
     }
 
@@ -126,20 +131,20 @@ class WriterTest extends SpecificationWithJUnit {
       val writer = Writer OFS(",") ORS("\n") OFQ(Quote Min() Q('"'))
       
       "write String" in new scope {
-        writer.writeln(out, "a")
-        result mustEqual "a\n"
+        writer.write(out, "a")
+        result mustEqual "a"
       }
       "write Q" in new scope {
-        writer.writeln(out, "\"")
-        result mustEqual "\"\"\"\"\n"
+        writer.write(out, "\"")
+        result mustEqual "\"\"\"\""
       }
       "write OFS" in new scope {
-        writer.writeln(out, ",")
-        result mustEqual "\",\"\n"
+        writer.write(out, ",")
+        result mustEqual "\",\""
       }
       "write ORS" in new scope {
-        writer.writeln(out, "\n")
-        result mustEqual "\"\n\"\n"
+        writer.write(out, "\n")
+        result mustEqual "\"\n\""
       }
     }
 
@@ -148,24 +153,24 @@ class WriterTest extends SpecificationWithJUnit {
       val writer = Writer OFS(",") ORS("\n") OFQ(Quote None() Q('"') E('\\'))
 
       "write String" in new scope {
-        writer.writeln(out, "a")
-        result mustEqual "a\n"
+        writer.write(out, "a")
+        result mustEqual "a"
       }
       "write Q" in new scope {
-        writer.writeln(out, "\"")
-        result mustEqual "\\\"\n" //compatible with Python
+        writer.write(out, "\"")
+        result mustEqual "\\\"" //compatible with Python
       }
       "write E" in new scope {
-        writer.writeln(out, "\\")
-        result mustEqual "\\\\\n"
+        writer.write(out, "\\")
+        result mustEqual "\\\\"
       }
       "write OFS" in new scope {
-        writer.writeln(out, ",")
-        result mustEqual "\\,\n"
+        writer.write(out, ",")
+        result mustEqual "\\,"
       }
       "write ORS" in new scope {
-        writer.writeln(out, "\n")
-        result mustEqual "\\\n\n"
+        writer.write(out, "\n")
+        result mustEqual "\\\n"
       }
     }
 
@@ -174,20 +179,20 @@ class WriterTest extends SpecificationWithJUnit {
       val writer = Writer OFS(",") ORS("\n") OFQ(Quote None() E('\\'))
       
       "write String" in new scope {
-        writer.writeln(out, "a")
-        result mustEqual "a\n"
+        writer.write(out, "a")
+        result mustEqual "a"
       }
       "write E" in new scope {
-        writer.writeln(out, "\\")
-        result mustEqual "\\\\\n"
+        writer.write(out, "\\")
+        result mustEqual "\\\\"
       }
       "write OFS" in new scope {
-        writer.writeln(out, ",")
-        result mustEqual "\\,\n"
+        writer.write(out, ",")
+        result mustEqual "\\,"
       }
       "write ORS" in new scope {
-        writer.writeln(out, "\n")
-        result mustEqual "\\\n\n"
+        writer.write(out, "\n")
+        result mustEqual "\\\n"
       }
     }
 
@@ -196,17 +201,17 @@ class WriterTest extends SpecificationWithJUnit {
       val writer = Writer OFS(",") ORS("\n") OFQ(Quote None() Q('"'))
 
       "write String" in new scope {
-        writer.writeln(out, "a")
-        result mustEqual "a\n"
+        writer.write(out, "a")
+        result mustEqual "a"
       }
       "throw EncodingException when given string contains Q" in new scope {
-        writer.writeln(out, "\"") must throwA[EncodingException] //compatible with Python
+        writer.write(out, "\"") must throwA[EncodingException] //compatible with Python
       }
       "throw EncodingException when given string contains OFS" in new scope {
-        writer.writeln(out, ",") must throwA[EncodingException]
+        writer.write(out, ",") must throwA[EncodingException]
       }
       "throw EncodingException when given string contains ORS" in new scope {
-        writer.writeln(out, "\n") must throwA[EncodingException]
+        writer.write(out, "\n") must throwA[EncodingException]
       }
     }
 
@@ -215,14 +220,14 @@ class WriterTest extends SpecificationWithJUnit {
       val writer = Writer OFS(",") ORS("\n") OFQ(Quote None())
 
       "write String" in new scope {
-        writer.writeln(out, "a")
-        result mustEqual "a\n"
+        writer.write(out, "a")
+        result mustEqual "a"
       }
       "throw EncodingException when given string contains OFS" in new scope {
-        writer.writeln(out, ",") must throwA[EncodingException]
+        writer.write(out, ",") must throwA[EncodingException]
       }
       "throw EncodingException when given string contains ORS" in new scope {
-        writer.writeln(out, "\n") must throwA[EncodingException]
+        writer.write(out, "\n") must throwA[EncodingException]
       }
     }
   }

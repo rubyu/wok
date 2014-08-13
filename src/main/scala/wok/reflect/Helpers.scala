@@ -2,7 +2,6 @@
 package wok.reflect
 
 import scalax.file.Path
-import wok.core.PrintableElement
 import wok.csv.{Row, Reader, Writer}
 import scalax.file.defaultfs.{DefaultPath, RedirectModePath => RMPath, AppendModePath => AMPath}
 import scalax.io.managed.{OutputStreamResource, InputStreamResource}
@@ -16,8 +15,8 @@ object Helpers {
   }
 
   implicit class ExtendedOutputStream(val out: OutputStream) extends AnyVal {
-    def print(x: PrintableElement *)(implicit w: Writer): Unit = w.write(out, x: _*)
-    def println(x: PrintableElement *)(implicit w: Writer): Unit = w.writeln(out, x: _*)
+    def print(x: Any *)(implicit w: Writer): Unit = w.write(out, x: _*)
+    def println(x: Any *)(implicit w: Writer): Unit = w.writeln(out, x: _*)
   }
 
   implicit class ExtendedInputStreamResource(val in: InputStreamResource[InputStream]) extends AnyVal {
@@ -26,8 +25,8 @@ object Helpers {
 
   implicit class ExtendedOutputStreamResource(val out: OutputStreamResource[OutputStream]) extends AnyVal {
     def #<<[A](f: OutputStream => A): A = out.acquireAndGet(f)
-    def print(x: PrintableElement *)(implicit w: Writer): Unit = out.acquireAndGet{ _.print(x: _*)(w) }
-    def println(x: PrintableElement *)(implicit w: Writer): Unit = out.acquireAndGet{ _.println(x: _*)(w) }
+    def print(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.print(x: _*)(w) }
+    def println(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.println(x: _*)(w) }
   }
 
   implicit class ExtendedPath[T <: Path](val path: T) extends AnyVal {
@@ -45,19 +44,6 @@ object Helpers {
     def `<!` = new RMPath(Path.fromString(s))
     def #<[A](f: OutputStream => A): A = Path.fromString(s).outputStream(StandardOpenOption.Write).acquireAndGet(f)
   }
-
-  implicit def stringSeqToPrintableElement(seq: Seq[String]) = new PrintableElement(seq)
-  implicit def stringToPrintableElement(v: String) = new PrintableElement(Seq(v))
-  implicit def byteToPrintableElement(v: Byte) = new PrintableElement(Seq(v.toString))
-  implicit def shortToPrintableElement(v: Short) = new PrintableElement(Seq(v.toString))
-  implicit def intToPrintableElement(v: Int) = new PrintableElement(Seq(v.toString))
-  implicit def longToPrintableElement(v: Long) = new PrintableElement(Seq(v.toString))
-  implicit def floatToPrintableElement(v: Float) = new PrintableElement(Seq(v.toString))
-  implicit def doubleToPrintableElement(v: Double) = new PrintableElement(Seq(v.toString))
-  implicit def charToPrintableElement(v: Char) = new PrintableElement(Seq(v.toString))
-  implicit def booleanToPrintableElement(v: Boolean) = new PrintableElement(Seq(v.toString))
-  implicit def bigIntToPrintableElement(v: BigInt) = new PrintableElement(Seq(v.toString))
-  implicit def bigDecimalToPrintableElement(v: BigDecimal) = new PrintableElement(Seq(v.toString))
 
   implicit def codecToCharset(c: Codec) = c.charSet
 }

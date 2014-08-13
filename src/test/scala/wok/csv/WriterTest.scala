@@ -5,7 +5,6 @@ import org.specs2.mutable._
 import org.specs2.specification.Scope
 import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
-import wok.reflect.Helpers.{stringToPrintableElement, stringSeqToPrintableElement}
 import scalax.io.Codec
 
 
@@ -33,18 +32,8 @@ class WriterTest extends SpecificationWithJUnit {
           result mustEqual "a"
         }
 
-        "write Seq" in new scope {
-          Writer.write(out, Seq("a"))
-          result mustEqual "a"
-        }
-
         "writeln String" in new scope {
           Writer.writeln(out, "a")
-          result mustEqual "a\n"
-        }
-
-        "writeln Seq" in new scope {
-          Writer.writeln(out, Seq("a"))
           result mustEqual "a\n"
         }
       }
@@ -65,10 +54,6 @@ class WriterTest extends SpecificationWithJUnit {
       "write String" in new scope {
         writer.writeln(out, "a")
         result mustEqual "\"a\"\n"
-      }
-      "write Seq" in new scope {
-        writer.writeln(out, Seq("a", "b"))
-        result mustEqual "\"a\",\"b\"\n"
       }
       "write E" in new scope {
         writer.writeln(out, "\\")
@@ -96,10 +81,6 @@ class WriterTest extends SpecificationWithJUnit {
         writer.writeln(out, "a")
         result mustEqual "\"a\"\n"
       }
-      "write Seq" in new scope {
-        writer.writeln(out, Seq("a", "b"))
-        result mustEqual "\"a\",\"b\"\n"
-      }
       "write Q" in new scope {
         writer.writeln(out, "\"")
         result mustEqual "\"\"\"\"\n"
@@ -121,10 +102,6 @@ class WriterTest extends SpecificationWithJUnit {
       "write String" in new scope {
         writer.writeln(out, "a")
         result mustEqual "a\n"
-      }
-      "write Seq" in new scope {
-        writer.writeln(out, Seq("a", "b"))
-        result mustEqual "a,b\n"
       }
       "write Q" in new scope {
         writer.writeln(out, "\"")
@@ -152,10 +129,6 @@ class WriterTest extends SpecificationWithJUnit {
         writer.writeln(out, "a")
         result mustEqual "a\n"
       }
-      "write Seq" in new scope {
-        writer.writeln(out, Seq("a", "b"))
-        result mustEqual "a,b\n"
-      }
       "write Q" in new scope {
         writer.writeln(out, "\"")
         result mustEqual "\"\"\"\"\n"
@@ -177,10 +150,6 @@ class WriterTest extends SpecificationWithJUnit {
       "write String" in new scope {
         writer.writeln(out, "a")
         result mustEqual "a\n"
-      }
-      "write Seq" in new scope {
-        writer.writeln(out, Seq("a", "b"))
-        result mustEqual "a,b\n"
       }
       "write Q" in new scope {
         writer.writeln(out, "\"")
@@ -208,10 +177,6 @@ class WriterTest extends SpecificationWithJUnit {
         writer.writeln(out, "a")
         result mustEqual "a\n"
       }
-      "write Seq" in new scope {
-        writer.writeln(out, Seq("a", "b"))
-        result mustEqual "a,b\n"
-      }
       "write E" in new scope {
         writer.writeln(out, "\\")
         result mustEqual "\\\\\n"
@@ -234,10 +199,6 @@ class WriterTest extends SpecificationWithJUnit {
         writer.writeln(out, "a")
         result mustEqual "a\n"
       }
-      "write Seq" in new scope {
-        writer.writeln(out, Seq("a", "b"))
-        result mustEqual "a,b\n"
-      }
       "throw EncodingException when given string contains Q" in new scope {
         writer.writeln(out, "\"") must throwA[EncodingException] //compatible with Python
       }
@@ -256,10 +217,6 @@ class WriterTest extends SpecificationWithJUnit {
       "write String" in new scope {
         writer.writeln(out, "a")
         result mustEqual "a\n"
-      }
-      "write Seq" in new scope {
-        writer.writeln(out, Seq("a", "b"))
-        result mustEqual "a,b\n"
       }
       "throw EncodingException when given string contains OFS" in new scope {
         writer.writeln(out, ",") must throwA[EncodingException]

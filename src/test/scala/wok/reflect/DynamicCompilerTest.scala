@@ -80,118 +80,6 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             out.toString mustEqual "a"
           }
         }
-
-        "to PrintableElement" in {
-          "stringSeqToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(Seq(\"a\"))"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "a"
-          }
-
-          "stringToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(\"a\")"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "a"
-          }
-
-          "byteToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(0.toByte)"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "0"
-          }
-
-          "shortToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(0.toShort)"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "0"
-          }
-
-          "intToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(0)"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "0"
-          }
-
-          "floatToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(0.0f)"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "0.0"
-          }
-
-          "doubleToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(0.0)"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "0.0"
-          }
-
-          "charToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print('a')"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "a"
-          }
-
-          "booleanToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(true)"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "true"
-          }
-
-          "bigIntToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(BigInt(0))"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "0"
-          }
-
-          "bigDecimalToPrintableElement" in new scope {
-            Stdio.withOut(out) {
-              DynamicCompiler
-                .compile(List("print(BigDecimal(0))"), None, Nil)
-                .create(Nil)
-                .runScript()
-            }
-            out.toString mustEqual "0"
-          }
-        }
       }
 
       "provide access to" in {
@@ -199,7 +87,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withIn("a b c") {
             Stdio.withOut(out) {
               DynamicCompiler
-                .compile(Nil, Some("foreach { row => print(row) }"), Nil)
+                .compile(Nil, Some("foreach { row => print(row: _*) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
@@ -235,7 +123,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withIn("a b c") {
             Stdio.withOut(out) {
               DynamicCompiler
-                .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(FT) }"), Nil)
+                .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(FT: _*) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
@@ -258,7 +146,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         "args" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("print(args)"), None, Nil)
+              .compile(List("print(args: _*)"), None, Nil)
               .create(List("1", "2", "3"))
               .runScript()
           }
@@ -269,7 +157,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withIn("a\\ b\\ c") {
             Stdio.withOut(out) {
               DynamicCompiler
-                .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), Some("foreach { row => print(row) }"), Nil)
+                .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), Some("foreach { row => print(row: _*) }"), Nil)
                 .create(Nil)
                 .runScript()
             }
@@ -281,7 +169,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withIn("a b c") {
             Stdio.withOut(out) {
               DynamicCompiler
-                .compile(List("STDIN #> { _.csv(Reader()) foreach { row => print(row) } }"), None, Nil)
+                .compile(List("STDIN #> { _.csv(Reader()) foreach { row => print(row: _*) } }"), None, Nil)
                 .create(Nil)
                 .runScript()
             }
@@ -303,7 +191,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withIn("あ".getBytes("Windows-31J")) {
             Stdio.withOut(out) {
               DynamicCompiler
-                .compile(List("CD(Codec(\"Windows-31J\"))"), Some("foreach { row => print(row) }"), Nil)
+                .compile(List("CD(Codec(\"Windows-31J\"))"), Some("foreach { row => print(row: _*) }"), Nil)
                 .create(Nil)
                 .runScript()
             }

@@ -2,7 +2,6 @@ package scalax.file.defaultfs
 
 import org.specs2.mutable._
 import wok.csv.Writer
-import wok.reflect.Helpers.{stringToPrintableElement, stringSeqToPrintableElement}
 import scalax.file.Path
 
 

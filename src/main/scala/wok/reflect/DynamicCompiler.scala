@@ -32,7 +32,7 @@ object DynamicCompiler {
       DynamicClass(new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader)))
   }
 
-  private def sourceString(before: List[String], process: Option[String], after: List[String]): String = {
+  def sourceString(before: List[String], process: Option[String], after: List[String]): String = {
 
     def indent(xs: List[String]): Option[String] =
       if (xs.isEmpty) None
@@ -50,7 +50,8 @@ object DynamicCompiler {
           |      STDIN #> {
           |        _.csv.map { row => currentRow = row; row } %s
           |      }
-          |    }""".stripMargin.format(str.get))
+          |    }
+          |""".stripMargin.format(str.get))
 
     val b = new StringBuilder
     b.append(
@@ -68,17 +69,11 @@ object DynamicCompiler {
         |class Wok(val args: List[String]) extends AbstractWok {
         |  def runScript(): Unit = {""".stripMargin)
     val scripts = List(indent(before), script(process), indent(after))
-    if (scripts.exists(_.isDefined))
-      b.append("\n")
+    if (scripts.exists(_.isDefined)) b.append("\n")
     scripts.zipWithIndex.map { case (s, idx) =>
-      if (s.isDefined) {
-        b.append(s.get)
-        if (scripts.drop(idx+1).exists(_.isDefined))
-          b.append("\n")
-      }
+      if (s.isDefined) b.append(s.get)
     }
-    if (scripts.exists(_.isDefined))
-      b.append(" " * 2)
+    if (scripts.exists(_.isDefined)) b.append(" " * 2)
     b.append(
       """|}
         |}""".stripMargin)

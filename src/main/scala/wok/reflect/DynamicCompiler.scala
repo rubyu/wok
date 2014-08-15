@@ -36,7 +36,7 @@ object DynamicCompiler {
 
     def indent(xs: List[String]): Option[String] =
       if (xs.isEmpty) None
-      else Some(xs map { "    " + _ } mkString("\n" * 2))
+      else Some(xs map { (" " * 4) + _ } mkString("", " ;\n", " ;\n"))
 
     def script(str: Option[String]): Option[String] =
       if (str.isEmpty) None
@@ -73,13 +73,12 @@ object DynamicCompiler {
     scripts.zipWithIndex.map { case (s, idx) =>
       if (s.isDefined) {
         b.append(s.get)
-        b.append("\n")
         if (scripts.drop(idx+1).exists(_.isDefined))
           b.append("\n")
       }
     }
     if (scripts.exists(_.isDefined))
-      b.append("  ")
+      b.append(" " * 2)
     b.append(
       """|}
         |}""".stripMargin)

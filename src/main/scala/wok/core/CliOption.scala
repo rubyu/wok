@@ -4,7 +4,7 @@ import scala.collection.mutable.ListBuffer
 import scala.util.control.Breaks.{break, breakable}
 
 
-case class CliOption(arg: List[String], before: List[String], process: Option[String], after: List[String])
+case class CliOption(arg: List[String], before: List[String], process: Option[String], after: List[String], diag: Boolean)
 
 
 object CliOption {
@@ -13,6 +13,7 @@ object CliOption {
     var i = 0
     val before, after = ListBuffer[String]()
     var process: Option[String] = None
+    var diag = false
 
     breakable {
       while(true) {
@@ -50,6 +51,9 @@ object CliOption {
           case "--" =>
             i += 1
             break
+          case "--diag" =>
+            diag = true
+            i += 1
           case str =>
             process = Some(str)
             i += 1
@@ -57,6 +61,6 @@ object CliOption {
         }
       }
     }
-    CliOption(arg.drop(i), before.toList, process, after.toList)
+    CliOption(arg.drop(i), before.toList, process, after.toList, diag)
   }
 }

@@ -15,7 +15,7 @@ object DynamicCompiler {
     new global.Run().compileSources(List(new BatchSourceFile("Wok.scala", source)))
   }
 
-  def compile(before: List[String], process: Option[String], after: List[String]): Either[Report, DynamicClass] = {
+  def compile(before: List[String], process: Option[String], after: List[String]): (Report, DynamicClass) = {
     val virtualDirectory = new VirtualDirectory("[memory]", None)
     val settings = new Settings
     settings.deprecation.value = false
@@ -28,9 +28,8 @@ object DynamicCompiler {
     val reporter = new StoreReporter
     compile(settings, reporter, source)
 
-    val report = new Report(source, reporter)
-    if (report.hasErrors) Left(report)
-    else Right(DynamicClass(new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader)))
+    (new Report(source, reporter),
+      DynamicClass(new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader)))
   }
 
   private def sourceString(before: List[String], process: Option[String], after: List[String]): String = {

@@ -26,7 +26,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("STDOUT.write(\"a\".getBytes)"), None, Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
             out.toString mustEqual "a"
@@ -40,7 +40,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("val c = Codec(\"Windows-31J\"); print(new String(\"あ\".getBytes(c), c))"), None, Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
             out.toString("utf-8") mustEqual "あ"
@@ -52,7 +52,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("print(Seq(\"echo\", \"-n\", \"a\").!>.string)"), None, Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
             out.toString mustEqual "a"
@@ -62,7 +62,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("print(\"echo -n a\".!>.string)"), None, Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
             out.toString mustEqual "a"
@@ -74,7 +74,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("STDOUT.write(\"a\".name)"), None, Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
             out.toString mustEqual "a"
@@ -88,7 +88,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(row: _*) }"), Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -100,7 +100,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(NF) }"), Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -112,7 +112,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(Nil, Some("foreach { row => print(NR) }"), Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -124,7 +124,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(FT: _*) }"), Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -136,7 +136,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(RT) }"), Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -147,7 +147,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("print(args: _*)"), None, Nil)
-              .right.get.create(List("1", "2", "3"))
+              ._2.create(List("1", "2", "3"))
               .runScript()
           }
           out.toString mustEqual "1 2 3"
@@ -158,7 +158,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), Some("foreach { row => print(row: _*) }"), Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -170,7 +170,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("STDIN #> { _.csv(Reader()) foreach { row => print(row: _*) } }"), None, Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -181,7 +181,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("print(\"a\")"), None, Nil)
-              .right.get.create(Nil)
+              ._2.create(Nil)
               .runScript()
           }
           out.toString mustEqual "a"
@@ -192,7 +192,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("CD(Codec(\"Windows-31J\"))"), Some("foreach { row => print(row: _*) }"), Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -203,7 +203,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("val p = Path(\"test\"); p.write(\"a\"); print(p.string); p.delete()"), None, Nil)
-              .right.get.create(Nil)
+              ._2.create(Nil)
               .runScript()
           }
           out.toString mustEqual "a"
@@ -213,7 +213,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("val out = Resource.fromFile(\"test\"); out.write(\"a\"); print(out.string); Path(\"test\").delete()"), None, Nil)
-              .right.get.create(Nil)
+              ._2.create(Nil)
               .runScript()
           }
           out.toString mustEqual "a"
@@ -224,7 +224,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withOut(out) {
               DynamicCompiler
                 .compile(List("STDOUT.write(STDIN.string)"), None, Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }
@@ -236,7 +236,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             Stdio.withErr(err) {
               DynamicCompiler
                 .compile(List("STDERR.write(STDIN.string)"), None, Nil)
-                .right.get.create(Nil)
+                ._2.create(Nil)
                 .runScript()
             }
           }

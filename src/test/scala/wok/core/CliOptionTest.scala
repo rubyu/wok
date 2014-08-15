@@ -37,34 +37,37 @@ class CliOptionTest extends SpecificationWithJUnit {
     }
 
     "parse -v a=b" in {
-      CliOption.parse(List("-v", "a=b")) mustEqual CliOption(Nil, List("var a = b"), None, Nil)
+      CliOption.parse(List("-v", "a=b")) mustEqual CliOption(Nil, List("var a = b"), None, Nil, false)
     }
     "parse -v@str a=b" in {
-      CliOption.parse(List("-v@str", "a=b")) mustEqual CliOption(Nil, List("var a = \"b\""), None, Nil)
+      CliOption.parse(List("-v@str", "a=b")) mustEqual CliOption(Nil, List("var a = \"b\""), None, Nil, false)
     }
     "parse -v@rawstr a=b" in {
-      CliOption.parse(List("-v@rawstr", "a=b")) mustEqual CliOption(Nil, List("var a = \"\"\"b\"\"\""), None, Nil)
+      CliOption.parse(List("-v@rawstr", "a=b")) mustEqual CliOption(Nil, List("var a = \"\"\"b\"\"\""), None, Nil, false)
     }
     "parse -v@char a=b" in {
-      CliOption.parse(List("-v@char", "a=b")) mustEqual CliOption(Nil, List("var a = 'b'"), None, Nil)
+      CliOption.parse(List("-v@char", "a=b")) mustEqual CliOption(Nil, List("var a = 'b'"), None, Nil, false)
     }
     "parse -b a" in {
-      CliOption.parse(List("-b", "a")) mustEqual CliOption(Nil, List("a"), None, Nil)
+      CliOption.parse(List("-b", "a")) mustEqual CliOption(Nil, List("a"), None, Nil, false)
     }
     "parse -e a" in {
-      CliOption.parse(List("-e", "a")) mustEqual CliOption(Nil, Nil, None, List("a"))
+      CliOption.parse(List("-e", "a")) mustEqual CliOption(Nil, Nil, None, List("a"), false)
     }
     "parse a" in {
-      CliOption.parse(List("a")) mustEqual CliOption(Nil, Nil, Some("a"), Nil)
+      CliOption.parse(List("a")) mustEqual CliOption(Nil, Nil, Some("a"), Nil, false)
     }
     "parse a b" in {
-      CliOption.parse(List("a", "b")) mustEqual CliOption(List("b"), Nil, Some("a"), Nil)
+      CliOption.parse(List("a", "b")) mustEqual CliOption(List("b"), Nil, Some("a"), Nil, false)
     }
     "parse --" in {
-      CliOption.parse(List("--")) mustEqual CliOption(Nil, Nil, None, Nil)
+      CliOption.parse(List("--")) mustEqual CliOption(Nil, Nil, None, Nil, false)
+    }
+    "parse --diag" in {
+      CliOption.parse(List("--diag")) mustEqual CliOption(Nil, Nil, None, Nil, true)
     }
     "parse -- a" in {
-      CliOption.parse(List("--", "a")) mustEqual CliOption(List("a"), Nil, None, Nil)
+      CliOption.parse(List("--", "a")) mustEqual CliOption(List("a"), Nil, None, Nil, false)
     }
   }
 }

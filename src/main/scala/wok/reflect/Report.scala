@@ -11,7 +11,7 @@ class Report(source: String, reporter: StoreReporter) {
   private def errors = messages.count(i => i.severity == reporter.ERROR)
   private def warning = messages.count(i => i.severity == reporter.WARNING)
 
-  def hasErrors = errors > 0
+  def hasError = errors > 0
 
   override def toString = {
     val ls = System.lineSeparator()
@@ -31,7 +31,7 @@ class Report(source: String, reporter: StoreReporter) {
       b.append(ls * 2)
     }
     else {
-      b.append("No errors and warning.")
+      b.append("No errors and warning found.")
       b.append(ls * 2)
     }
 

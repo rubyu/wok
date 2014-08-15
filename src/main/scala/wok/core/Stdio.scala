@@ -15,6 +15,7 @@ object Stdio {
 
     class CloseGuardInputStream(in: InputStream) extends InputStream {
       def read(): Int = in.read()
+      override def available(): Int = in.available()
     }
     class CloseGuardOutputStream(out: OutputStream) extends OutputStream {
       def write(b: Int) = out.write(b)

@@ -4,18 +4,18 @@ package wok.reflect
 import scala.tools.nsc.{Global, Settings}
 import scala.tools.nsc.interpreter.AbstractFileClassLoader
 import scala.tools.nsc.io.VirtualDirectory
-import scala.tools.nsc.reporters.ConsoleReporter
+import scala.tools.nsc.reporters.StoreReporter
 import scala.reflect.internal.util.BatchSourceFile
 
 
 object DynamicCompiler {
 
-  private def compile(settings: Settings, source: String) {
-    val global = new Global(settings, new ConsoleReporter(settings))
+  private def compile(settings: Settings, reporter: StoreReporter, source: String) {
+    val global = new Global(settings, reporter)
     new global.Run().compileSources(List(new BatchSourceFile("Wok.scala", source)))
   }
 
-  def compile(before: List[String], process: Option[String], after: List[String]): DynamicClass = {
+  def compile(before: List[String], process: Option[String], after: List[String]): Either[Report, DynamicClass] = {
     val virtualDirectory = new VirtualDirectory("[memory]", None)
     val settings = new Settings
     settings.deprecation.value = false
@@ -24,12 +24,16 @@ object DynamicCompiler {
     settings.outputDirs.setSingleOutput(virtualDirectory)
     settings.bootclasspath.value = System.getProperty("java.class.path")
     settings.classpath.value = settings.bootclasspath.value
+    val source = sourceString(before, process, after)
+    val reporter = new StoreReporter
+    compile(settings, reporter, source)
 
-    compile(settings, source(before, process, after))
-    DynamicClass(new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader))
+    val report = new Report(source, reporter)
+    if (report.hasErrors) Left(report)
+    else Right(DynamicClass(new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader)))
   }
 
-  private def source(before: List[String], process: Option[String], after: List[String]): String = {
+  private def sourceString(before: List[String], process: Option[String], after: List[String]): String = {
 
     def indent(xs: List[String]) = xs.map { "    " + _ } .mkString("\n")
 

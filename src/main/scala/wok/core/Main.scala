@@ -13,9 +13,7 @@ object Main {
       * use case, some wok.jar can be cascaded.
       */
     if (cli.process.isDefined) {
-      Stdio.in #> { in =>
-        while (in.available() == 0) Thread.sleep(1)
-      }
+      while (Stdio.in.open().get.available() == 0) Thread.sleep(1)
     }
 
     val (report, classWok) = DynamicCompiler.compile(cli.before, cli.process, cli.after)

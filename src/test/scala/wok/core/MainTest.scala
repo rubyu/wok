@@ -1,9 +1,8 @@
 package wok.core
 
-import java.io.ByteArrayOutputStream
-
 import org.specs2.mutable._
 import org.specs2.specification.Scope
+import java.io.{ByteArrayInputStream, ByteArrayOutputStream, IOException, Closeable}
 
 
 class MainTest extends SpecificationWithJUnit {
@@ -11,6 +10,26 @@ class MainTest extends SpecificationWithJUnit {
   "Main.main" should {
 
     sequential
+
+    trait CloseCheck extends Closeable {
+      def closed = _closed
+      private var _closed = false
+      override def close() = _closed = true
+    }
+
+    class TestOutputStream extends ByteArrayOutputStream with CloseCheck {
+      override def write(b: Int) = {
+        if (closed) throw new IOException()
+        super.write(b)
+      }
+    }
+
+    class TestInputStream(s: String) extends ByteArrayInputStream(s.getBytes()) with CloseCheck {
+      override def read() = {
+        if (closed) throw new IOException()
+        super.read()
+      }
+    }
 
     class AttemptToExitException(val status: Int) extends RuntimeException
 
@@ -27,16 +46,50 @@ class MainTest extends SpecificationWithJUnit {
       }
     }
 
-    "execute a script of Wok" in new scope {
-      val out = new ByteArrayOutputStream()
+    "execute begin" in new scope {
+      val out = new TestOutputStream()
       Stdio.withOut(out) {
         Main.main(Array("-b" ,"print(\"a\")"))
       }
       out.toString mustEqual "a"
     }
 
+    "execute script" in new scope {
+      val in = new TestInputStream("a b c")
+      val out = new TestOutputStream()
+      Stdio.withIn(in) {
+        Stdio.withOut(out) {
+          Main.main(Array("foreach { row => print(row: _*) }"))
+        }
+      }
+      out.toString mustEqual "a b c"
+    }
+
+    "execute end" in new scope {
+      val out = new TestOutputStream()
+      Stdio.withOut(out) {
+        Main.main(Array("-e" ,"print(\"a\")"))
+      }
+      out.toString mustEqual "a"
+    }
+
+    "execute begin, script, end" in new scope {
+      val in = new TestInputStream("b")
+      val out = new TestOutputStream()
+      Stdio.withIn(in) {
+        Stdio.withOut(out) {
+          Main.main(Array(
+              "-b", "print(args(0))",
+              "-e", "print(args(1))",
+              "foreach { row => print(row: _*) }",
+              "a", "c"))
+        }
+      }
+      out.toString mustEqual "abc"
+    }
+
     "do diagnosis with no error" in new scope {
-      val out = new ByteArrayOutputStream()
+      val out = new TestOutputStream()
       Console.withOut(out) {
         Main.main(Array("--diag"))
       }
@@ -64,7 +117,7 @@ class MainTest extends SpecificationWithJUnit {
     }
 
     "do diagnosis with error" in new scope {
-      val out = new ByteArrayOutputStream()
+      val out = new TestOutputStream()
       Console.withOut(out) {
         Main.main(Array("--diag", "-b" ,"nonExistentIdentifier"))
       }
@@ -98,7 +151,7 @@ class MainTest extends SpecificationWithJUnit {
     }
 
     "print error messages to Console.err" in new scope {
-      val out = new ByteArrayOutputStream()
+      val out = new TestOutputStream()
       Console.withErr(out) {
         Main.main(Array("-b" ,"nonExistentIdentifier")) must throwAn(new AttemptToExitException(1))
       }

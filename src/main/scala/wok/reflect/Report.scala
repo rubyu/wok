@@ -27,8 +27,9 @@ class Report(source: String, reporter: StoreReporter) {
             " " * (info.pos.column - 1) + "^"
           ) mkString(ls)
         )
+        b.append(ls)
       }
-      b.append(ls * 2)
+      b.append(ls)
     }
     else {
       b.append("No errors and warning found.")

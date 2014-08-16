@@ -119,15 +119,18 @@ class MainTest extends SpecificationWithJUnit {
     "do diagnosis with error" in new scope {
       val out = new TestOutputStream()
       Console.withOut(out) {
-        Main.main(Array("--diag", "-b" ,"nonExistentIdentifier"))
+        Main.main(Array("--diag", "-b" ,"foo", "-b", "bar"))
       }
       out.toString mustEqual
         List(
           "The results of diagnosis are:",
-          "Errors: 1, Warning: 0",
+          "Errors: 2, Warning: 0",
           "",
-          "14: ERROR: not found: value nonExistentIdentifier",
-          "    nonExistentIdentifier ;",
+          "14: ERROR: not found: value foo",
+          "    foo ;",
+          "    ^",
+          "15: ERROR: not found: value bar",
+          "    bar ;",
           "    ^",
           "",
           "| 1| package wok",
@@ -143,9 +146,10 @@ class MainTest extends SpecificationWithJUnit {
           "|11| ",
           "|12| class Wok(val args: List[String]) extends AbstractWok {",
           "|13|   def runScript(): Unit = {",
-          "|14|     nonExistentIdentifier ;",
-          "|15|   }",
-          "|16| }",
+          "|14|     foo ;",
+          "|15|     bar ;",
+          "|16|   }",
+          "|17| }",
           ""
         ).mkString(System.lineSeparator())
     }
@@ -153,15 +157,18 @@ class MainTest extends SpecificationWithJUnit {
     "print error messages to Console.err" in new scope {
       val out = new TestOutputStream()
       Console.withErr(out) {
-        Main.main(Array("-b" ,"nonExistentIdentifier")) must throwAn(new AttemptToExitException(1))
+        Main.main(Array("-b" ,"foo", "-b", "bar")) must throwAn(new AttemptToExitException(1))
       }
       out.toString mustEqual
         List(
           "Compilation failed. The details are:",
-          "Errors: 1, Warning: 0",
+          "Errors: 2, Warning: 0",
           "",
-          "14: ERROR: not found: value nonExistentIdentifier",
-          "    nonExistentIdentifier ;",
+          "14: ERROR: not found: value foo",
+          "    foo ;",
+          "    ^",
+          "15: ERROR: not found: value bar",
+          "    bar ;",
           "    ^",
           "",
           "| 1| package wok",
@@ -177,9 +184,10 @@ class MainTest extends SpecificationWithJUnit {
           "|11| ",
           "|12| class Wok(val args: List[String]) extends AbstractWok {",
           "|13|   def runScript(): Unit = {",
-          "|14|     nonExistentIdentifier ;",
-          "|15|   }",
-          "|16| }",
+          "|14|     foo ;",
+          "|15|     bar ;",
+          "|16|   }",
+          "|17| }",
           ""
       ).mkString(System.lineSeparator())
     }

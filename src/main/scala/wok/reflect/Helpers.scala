@@ -5,7 +5,7 @@ import scalax.file.Path
 import wok.csv.{Row, Reader, Writer}
 import scalax.file.defaultfs.{DefaultPath, RedirectModePath => RMPath, AppendModePath => AMPath}
 import scalax.io.managed.{OutputStreamResource, InputStreamResource}
-import scalax.io.{StandardOpenOption, Codec}
+import scalax.io.{AppendModeOutputStreamResource, StandardOpenOption, Codec}
 import java.io.{OutputStream, InputStream}
 
 
@@ -25,10 +25,8 @@ object Helpers {
   }
 
   implicit class ExtendedOutputStreamResource(val out: OutputStreamResource[OutputStream]) extends AnyVal {
+    def `<<!` = new AppendModeOutputStreamResource(out.open().get)
     def #<<[A](f: OutputStream => A): A = out.acquireAndGet(f)
-    def print(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.print(x: _*)(w) }
-    def printf(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.printf(x: _*)(w) }
-    def println(x: Any *)(implicit w: Writer): Unit = out.acquireAndGet{ _.println(x: _*)(w) }
   }
 
   implicit class ExtendedPath[T <: Path](val path: T) extends AnyVal {

@@ -28,6 +28,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         wok.FS("a".r).FS.toString mustEqual "a"
         wok.FS("a").FS.toString mustEqual "a"
         wok.FS("").FS.toString mustEqual "(?!.)."
+        wok.FS('a').FS.toString mustEqual "a"
       }
 
       "RS" in {
@@ -36,6 +37,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         wok.RS("a".r).RS.toString mustEqual "a"
         wok.RS("a").RS.toString mustEqual "a"
         wok.RS("").RS.toString mustEqual "(?!.)."
+        wok.RS('a').RS.toString mustEqual "a"
       }
 
       "FQ" in {
@@ -56,12 +58,14 @@ class AbstractWokTest extends SpecificationWithJUnit {
         val wok = new Wok()
         wok.OFS mustEqual " "
         wok.OFS("a").OFS mustEqual "a"
+        wok.OFS('a').OFS mustEqual "a"
       }
 
       "ORS" in {
         val wok = new Wok()
         wok.ORS mustEqual "\n"
         wok.ORS("a").ORS mustEqual "a"
+        wok.ORS('a').ORS mustEqual "a"
       }
 
       "OFQ" in {

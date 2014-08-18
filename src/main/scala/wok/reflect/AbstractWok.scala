@@ -28,6 +28,8 @@ trait AbstractWok {
   def RS(r: Regex) = { defaultReader.RS(r); this }
   def FS(s: String) = { defaultReader.FS(s); this }
   def RS(s: String) = { defaultReader.RS(s); this }
+  def FS(c: Char) = { defaultReader.FS(c); this }
+  def RS(c: Char) = { defaultReader.RS(c); this }
   def FQ(q: Quote) = { defaultReader.FQ(q); this }
   def CD(c: Codec) = { defaultReader.CD(c); this }
 
@@ -38,6 +40,8 @@ trait AbstractWok {
 
   def OFS(s: String) = { defaultWriter.OFS(s); this }
   def ORS(s: String) = { defaultWriter.ORS(s); this }
+  def OFS(c: Char) = { defaultWriter.OFS(c); this }
+  def ORS(c: Char) = { defaultWriter.ORS(c); this }
   def OFQ(q: Quote) = { defaultWriter.OFQ(q); this }
   def OCD(c: Codec) = { defaultWriter.OCD(c); this }
 }

@@ -5,12 +5,12 @@ import wok.csv.Writer
 import java.io.ByteArrayOutputStream
 
 
-class AppendModeOutputStreamResourceTest extends SpecificationWithJUnit {
+class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
 
-  "AppendModeOutputStreamResource.println" should {
+  "PrintableOutputStreamResource.println" should {
     "println data to the last of a OutputStream" in {
       val out = new ByteArrayOutputStream()
-      val res = new AppendModeOutputStreamResource(out)
+      val res = new PrintableOutputStreamResource(out)
       out.write("a\n".getBytes())
       out.toString() mustEqual "a\n"
       res.println("b")(Writer())
@@ -19,10 +19,10 @@ class AppendModeOutputStreamResourceTest extends SpecificationWithJUnit {
     }
   }
 
-  "AppendModeOutputStreamResource.printf" should {
+  "PrintableOutputStreamResource.printf" should {
     "print data to the last of a OutputStream" in {
       val out = new ByteArrayOutputStream()
-      val res = new AppendModeOutputStreamResource(out)
+      val res = new PrintableOutputStreamResource(out)
       out.write("a".getBytes())
       out.toString() mustEqual "a"
       res.printf("b")(Writer())
@@ -31,10 +31,10 @@ class AppendModeOutputStreamResourceTest extends SpecificationWithJUnit {
     }
   }
 
-  "AppendModeOutputStreamResource.print" should {
+  "PrintableOutputStreamResource.print" should {
     "print data to the last of a OutputStream" in {
       val out = new ByteArrayOutputStream()
-      val res = new AppendModeOutputStreamResource(out)
+      val res = new PrintableOutputStreamResource(out)
       out.write("a".getBytes())
       out.toString() mustEqual "a"
       res.print("b")(Writer())

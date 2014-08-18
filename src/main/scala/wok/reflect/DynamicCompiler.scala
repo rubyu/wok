@@ -42,13 +42,13 @@ object DynamicCompiler {
       if (str.isEmpty) None
       else Some(
         """|    {
-          |      var currentRow = Row(0, Nil, Nil, "", "")
-          |      def NF = currentRow.size
-          |      def NR = currentRow.id
-          |      def FT = currentRow.sep
-          |      def RT = currentRow.term
+          |      var currentRow: Option[Row] = None
+          |      def NF = currentRow.get.size
+          |      def NR = currentRow.get.id
+          |      def FT = currentRow.get.sep
+          |      def RT = currentRow.get.term
           |      STDIN #> {
-          |        _.csv.map { row => currentRow = row; row } %s
+          |        _.csv.map { row => currentRow = Some(row); row } %s
           |      }
           |    }
           |""".stripMargin.format(str.get))

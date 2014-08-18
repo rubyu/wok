@@ -1,15 +1,16 @@
 package scalax.io
 
 import org.specs2.mutable._
+import wok.Helpers._
 import wok.csv.Writer
-import java.io.ByteArrayOutputStream
+
 
 
 class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
 
   "PrintableOutputStreamResource.println" should {
     "println data to the last of a OutputStream" in {
-      val out = new ByteArrayOutputStream()
+      val out = new TestOutputStream()
       val res = new PrintableOutputStreamResource(out)
       out.write("a\n".getBytes())
       out.toString() mustEqual "a\n"
@@ -21,7 +22,7 @@ class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
 
   "PrintableOutputStreamResource.printf" should {
     "print data to the last of a OutputStream" in {
-      val out = new ByteArrayOutputStream()
+      val out = new TestOutputStream()
       val res = new PrintableOutputStreamResource(out)
       out.write("a".getBytes())
       out.toString() mustEqual "a"
@@ -33,7 +34,7 @@ class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
 
   "PrintableOutputStreamResource.print" should {
     "print data to the last of a OutputStream" in {
-      val out = new ByteArrayOutputStream()
+      val out = new TestOutputStream()
       val res = new PrintableOutputStreamResource(out)
       out.write("a".getBytes())
       out.toString() mustEqual "a"

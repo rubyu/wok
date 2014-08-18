@@ -2,8 +2,7 @@
 package wok.csv
 
 import org.specs2.mutable._
-import java.io.ByteArrayInputStream
-
+import wok.Helpers._
 import scalax.io.Codec
 
 
@@ -22,7 +21,7 @@ class ReaderTest extends SpecificationWithJUnit {
         Reader.RS("a").RS.toString mustEqual "a".r.toString
         Reader.FQ(Quote E('a')).FQ mustEqual Quote.E('a')
         Reader.CD(Codec.ISO8859).CD mustEqual Codec.ISO8859
-        Reader.open(new ByteArrayInputStream("a".getBytes)).isInstanceOf[Iterator[_]] must beTrue
+        Reader.open(new TestInputStream("a")).isInstanceOf[Iterator[_]] must beTrue
       }
 
       "'new' less constructor" in {
@@ -39,7 +38,7 @@ class ReaderTest extends SpecificationWithJUnit {
         .FS("""\t""".r)
         .RS("""(\r\n|\r|\n)""".r)
         .FQ(Quote None())
-        .open(new ByteArrayInputStream("a1\ta2\ta3\nb1\tb2\tb3".getBytes))
+        .open(new TestInputStream("a1\ta2\ta3\nb1\tb2\tb3"))
         .toList mustEqual List(
         Row(0, List("a1", "a2", "a3"), List("\t", "\t"), "\n", "a1\ta2\ta3\n"),
         Row(1, List("b1", "b2", "b3"), List("\t", "\t"), "", "b1\tb2\tb3"))
@@ -50,7 +49,7 @@ class ReaderTest extends SpecificationWithJUnit {
         .FS("")
         .RS("""(\r\n|\r|\n)""".r)
         .FQ(Quote None())
-        .open(new ByteArrayInputStream("a1\ta2\nb1\tb2".getBytes))
+        .open(new TestInputStream("a1\ta2\nb1\tb2"))
         .toList mustEqual List(
         Row(0, List("a1\ta2"), Nil, "\n", "a1\ta2\n"),
         Row(1, List("b1\tb2"), Nil, "", "b1\tb2"))
@@ -61,7 +60,7 @@ class ReaderTest extends SpecificationWithJUnit {
         .FS("""\t""".r)
         .RS("")
         .FQ(Quote None())
-        .open(new ByteArrayInputStream("a1\ta2\nb1\tb2".getBytes))
+        .open(new TestInputStream("a1\ta2\nb1\tb2"))
         .toList mustEqual List(
         Row(0, List("a1", "a2\nb1", "b2"), List("\t", "\t"), "", "a1\ta2\nb1\tb2"))
     }
@@ -72,7 +71,7 @@ class ReaderTest extends SpecificationWithJUnit {
         .FS("""\t""".r)
         .RS("\n")
         .FQ(Quote None())
-        .open(new ByteArrayInputStream("a1\ta2\nb1 b2".getBytes))
+        .open(new TestInputStream("a1\ta2\nb1 b2"))
         .map { row => reader.FS(" "); row }
         .toList mustEqual List(
           Row(0, List("a1", "a2"), Nil, "\n", "a1\ta2\n"),
@@ -86,7 +85,7 @@ class ReaderTest extends SpecificationWithJUnit {
         .FS("""\t""".r)
         .RS("\n")
         .FQ(Quote None())
-        .open(new ByteArrayInputStream("a\nb c".getBytes))
+        .open(new TestInputStream("a\nb c"))
         .map { row => reader.RS(" "); row }
         .toList mustEqual List(
         Row(0, List("a"), Nil, "\n", "a\n"),
@@ -101,7 +100,7 @@ class ReaderTest extends SpecificationWithJUnit {
         .FS("""\t""".r)
         .RS("\n")
         .FQ(Quote None())
-        .open(new ByteArrayInputStream("\"a\"\n\"b\"".getBytes))
+        .open(new TestInputStream("\"a\"\n\"b\""))
         .map { row => reader.FQ(Quote Min()); row }
         .toList mustEqual List(
         Row(0, List("\"a\""), Nil, "\n", "\"a\"\n"),

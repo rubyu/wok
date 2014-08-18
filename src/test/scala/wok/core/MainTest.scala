@@ -2,7 +2,7 @@ package wok.core
 
 import org.specs2.mutable._
 import org.specs2.specification.Scope
-import java.io.{ByteArrayInputStream, ByteArrayOutputStream, IOException, Closeable}
+import wok.Helpers._
 
 
 class MainTest extends SpecificationWithJUnit {
@@ -10,33 +10,6 @@ class MainTest extends SpecificationWithJUnit {
   "Main.main" should {
 
     sequential
-
-    trait CloseCheck extends Closeable {
-      def closed = _closed
-      private var _closed = false
-      override def close() = _closed = true
-    }
-
-    class TestOutputStream extends ByteArrayOutputStream with CloseCheck {
-      override def write(b: Int) = {
-        if (closed) throw new IOException()
-        super.write(b)
-      }
-    }
-
-    class TestInputStream(s: String) extends ByteArrayInputStream(s.getBytes()) with CloseCheck {
-      override def read() = {
-        if (closed) throw new IOException()
-        super.read()
-      }
-    }
-
-    class AttemptToExitException(val status: Int) extends RuntimeException
-
-    class MockExitSecurityManager extends java.rmi.RMISecurityManager {
-      override def checkExit(status: Int) { throw new AttemptToExitException(status) }
-      override def checkPermission(perm: java.security.Permission) {}
-    }
 
     trait scope extends Scope with After {
       val _sm = System.getSecurityManager

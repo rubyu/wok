@@ -3,15 +3,16 @@ package wok.csv
 
 import org.specs2.mutable._
 import org.specs2.specification.Scope
-import java.io.ByteArrayOutputStream
 import java.nio.charset.StandardCharsets
+import wok.Helpers._
+
 import scalax.io.Codec
 
 
 class WriterTest extends SpecificationWithJUnit {
 
   class scope extends Scope {
-    val out = new ByteArrayOutputStream
+    val out = new TestOutputStream
     def result = new String(out.toByteArray, StandardCharsets.UTF_8)
   }
 

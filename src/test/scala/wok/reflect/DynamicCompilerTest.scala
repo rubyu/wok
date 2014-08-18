@@ -1,9 +1,11 @@
 package wok.reflect
 
+import java.nio.charset.StandardCharsets
+
 import org.specs2.mutable._
 import org.specs2.specification.Scope
+import wok.Helpers._
 import wok.core.Stdio
-import java.io.{ByteArrayOutputStream, ByteArrayInputStream}
 
 
 class DynamicCompilerTest extends SpecificationWithJUnit {
@@ -148,12 +150,9 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
     sequential
 
     trait scope extends Scope {
-      val out = new ByteArrayOutputStream
-      val err = new ByteArrayOutputStream
+      val out = new TestOutputStream
+      val err = new TestOutputStream
     }
-
-    implicit def stringToByteArrayInputStream(s: String) = new ByteArrayInputStream(s.getBytes("utf-8"))
-    implicit def bytesToByteArrayInputStream(bytes: Array[Byte]) = new ByteArrayInputStream(bytes)
 
     "provide implicit scalax.io.OutputConverter" in {
       "" in new scope {
@@ -219,7 +218,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
 
     "provide access to" in {
       "Row" in new scope {
-        Stdio.withIn("a b c") {
+        Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(Nil, Some("foreach { row => print(row: _*) }"), Nil)
@@ -231,7 +230,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "NF" in new scope {
-        Stdio.withIn("a b c") {
+        Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(Nil, Some("foreach { row => print(NF) }"), Nil)
@@ -243,7 +242,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "NR" in new scope {
-        Stdio.withIn("a b c") {
+        Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(Nil, Some("foreach { row => print(NR) }"), Nil)
@@ -255,7 +254,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "FT" in new scope {
-        Stdio.withIn("a b c") {
+        Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(FT: _*) }"), Nil)
@@ -267,7 +266,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "RT" in new scope {
-        Stdio.withIn("a b c\n") {
+        Stdio.withIn(new TestInputStream("a b c\n")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(RT) }"), Nil)
@@ -289,7 +288,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "Quote" in new scope {
-        Stdio.withIn("a\\ b\\ c") {
+        Stdio.withIn(new TestInputStream("a\\ b\\ c")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), Some("foreach { row => print(row: _*) }"), Nil)
@@ -301,7 +300,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "Reader" in new scope {
-        Stdio.withIn("a b c") {
+        Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("STDIN #> { _.csv(Reader()) foreach { row => print(row: _*) } }"), None, Nil)
@@ -323,7 +322,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "Codec" in new scope {
-        Stdio.withIn("あ".getBytes("Windows-31J")) {
+        Stdio.withIn(new TestInputStream("あ", "Windows-31J")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("CD(Codec(\"Windows-31J\"))"), Some("foreach { row => print(row: _*) }"), Nil)
@@ -355,7 +354,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "STDIN" in new scope {
-        Stdio.withIn("あ") {
+        Stdio.withIn(new TestInputStream("あ")) {
           Stdio.withOut(out) {
             DynamicCompiler
               .compile(List("STDOUT.write(STDIN.string)"), None, Nil)
@@ -367,7 +366,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "STDERR" in new scope {
-        Stdio.withIn("あ") {
+        Stdio.withIn(new TestInputStream("あ")) {
           Stdio.withErr(err) {
             DynamicCompiler
               .compile(List("STDERR.write(STDIN.string)"), None, Nil)

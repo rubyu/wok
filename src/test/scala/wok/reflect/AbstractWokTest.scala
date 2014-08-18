@@ -1,13 +1,16 @@
 
 package wok.reflect
 
+import java.nio.charset.StandardCharsets
+
 import org.specs2.mutable._
 import org.specs2.specification.Scope
+import wok.Helpers._
 import wok.csv.{Quote, Writer, Reader}
 import wok.core.Stdio
 import java.io._
 import scalax.file.Path
-import scalax.io.{StandardOpenOption, Resource, Codec}
+import scalax.io.{StandardOpenOption, Codec}
 
 
 class AbstractWokTest extends SpecificationWithJUnit {
@@ -78,7 +81,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.ExtendedInputStream
 
       "open an InputStream" in {
-        val in = new ByteArrayInputStream("a b c".getBytes)
+        val in = new TestInputStream("a b c")
         val wok = new Wok {
           def open = in.csv
         }
@@ -86,7 +89,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
 
       "open an InputStream with Reader" in {
-        val in = new ByteArrayInputStream("a-b-c".getBytes)
+        val in = new TestInputStream("a-b-c")
         val wok = new Wok {
           def open = in.csv(Reader.FS("-"))
         }
@@ -98,8 +101,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       import Helpers.ExtendedOutputStream
 
       trait scope extends Scope {
-        val out = new ByteArrayOutputStream()
-        def result = new String(out.toByteArray)
+        val out = new TestOutputStream()
+        def result = new String(out.toByteArray, StandardCharsets.UTF_8)
       }
 
       "println()" in new scope {
@@ -622,8 +625,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
     "provide functions print/println" in {
 
       trait scope extends Scope {
-        val out = new ByteArrayOutputStream
-        def result = new String(out.toByteArray, "utf-8")
+        val out = new TestOutputStream
+        def result = new String(out.toByteArray, StandardCharsets.UTF_8)
       }
 
       "println()" in new scope {

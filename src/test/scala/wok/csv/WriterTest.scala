@@ -25,6 +25,8 @@ class WriterTest extends SpecificationWithJUnit {
         Writer.OCD mustEqual Codec.default
         Writer.OFS("a").OFS mustEqual "a"
         Writer.ORS("a").ORS mustEqual "a"
+        Writer.OFS('a').OFS mustEqual "a"
+        Writer.ORS('a').ORS mustEqual "a"
         Writer.OFQ(Quote E('a')).OFQ mustEqual Quote.E('a')
         Writer.OCD(Codec.ISO8859).OCD mustEqual Codec.ISO8859
 

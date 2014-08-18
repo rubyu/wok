@@ -20,6 +20,9 @@ class Writer {
 
   def OFS(s: String) = { ofs = s; update(); this }
   def ORS(s: String) = { ors = s; update(); this }
+  def OFS(c: Char): Writer = OFS(c.toString)
+  def ORS(c: Char): Writer = ORS(c.toString)
+
   def OFQ(q: Quote) = { ofq = q; update(); this }
   def OCD(c: Codec) = { ocd = c; this }
 
@@ -114,6 +117,8 @@ object Writer {
 
   def OFS(s: String) = new Writer().OFS(s)
   def ORS(s: String) = new Writer().ORS(s)
+  def OFS(c: Char) = new Writer().OFS(c)
+  def ORS(c: Char) = new Writer().ORS(c)
   def OFQ(q: Quote) = new Writer().OFQ(q)
   def OCD(c: Codec) = new Writer().OCD(c)
 

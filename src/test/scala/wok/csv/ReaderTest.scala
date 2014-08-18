@@ -11,14 +11,16 @@ class ReaderTest extends SpecificationWithJUnit {
   "Reader" should {
     "support shortcuts" in {
       "access without parens" in {
-        Reader.FS.toString mustEqual """[ \t]+""".r.toString
-        Reader.RS.toString mustEqual """\r\n|\r|\n""".r.toString
+        Reader.FS.toString mustEqual """[ \t]+"""
+        Reader.RS.toString mustEqual """\r\n|\r|\n"""
         Reader.FQ mustEqual Quote.None()
         Reader.CD mustEqual Codec.default
-        Reader.FS("a".r).FS.toString mustEqual "a".r.toString
-        Reader.RS("a".r).RS.toString mustEqual "a".r.toString
-        Reader.FS("a").FS.toString mustEqual "a".r.toString
-        Reader.RS("a").RS.toString mustEqual "a".r.toString
+        Reader.FS("a".r).FS.toString mustEqual "a"
+        Reader.RS("a".r).RS.toString mustEqual "a"
+        Reader.FS("a").FS.toString mustEqual "a"
+        Reader.RS("a").RS.toString mustEqual "a"
+        Reader.FS('a').FS.toString mustEqual "a"
+        Reader.RS('a').RS.toString mustEqual "a"
         Reader.FQ(Quote E('a')).FQ mustEqual Quote.E('a')
         Reader.CD(Codec.ISO8859).CD mustEqual Codec.ISO8859
         Reader.open(new TestInputStream("a")).isInstanceOf[Iterator[_]] must beTrue

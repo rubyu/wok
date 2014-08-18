@@ -32,6 +32,9 @@ class Reader {
   def FS(s: String): Reader = FS(if (s.isEmpty) matchNothing else s.er)
   def RS(s: String): Reader = RS(if (s.isEmpty) matchNothing else s.er)
 
+  def FS(c: Char): Reader = FS(c.er)
+  def RS(c: Char): Reader = RS(c.er)
+
   def FQ(q: Quote) = { fq = q; update(); this }
 
   /** Restriction: This method do not reflect the changes of CD to the action of a RowIterator opened before. */
@@ -59,6 +62,8 @@ object Reader {
   def FQ = new Reader().FQ
   def CD = new Reader().CD
 
+  def FS(c: Char) = new Reader().FS(c)
+  def RS(c: Char) = new Reader().RS(c)
   def FS(s: String) = new Reader().FS(s)
   def RS(s: String) = new Reader().RS(s)
   def FS(r: Regex) = new Reader().FS(r)

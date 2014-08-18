@@ -199,11 +199,11 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "add a extended function <! to Path" in {
+    "add a extended function !< to Path" in {
       import Helpers.ExtendedPath
 
       trait scope extends Scope {
-        val out = Path.createTempFile().<!
+        val out = Path.createTempFile().!<
         def result = out.string
       }
 
@@ -304,11 +304,11 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "add a extended function <<! to Path" in {
+    "add a extended function !<< to Path" in {
       import Helpers.ExtendedPath
 
       trait scope extends Scope {
-        val out = Path.createTempFile().<<!
+        val out = Path.createTempFile().!<<
         def result = out.string
       }
 
@@ -409,11 +409,11 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "add a extended function <! to String" in {
+    "add a extended function !< to String" in {
       import Helpers.ExtendedPathString
 
       trait scope extends Scope {
-        val out = Path.createTempFile().path.<!
+        val out = Path.createTempFile().path.!<
         def result = out.string
       }
 
@@ -514,11 +514,11 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "add a extended function <<! to String" in {
+    "add a extended function !<< to String" in {
       import Helpers.ExtendedPathString
 
       trait scope extends Scope {
-        val out = Path.createTempFile().path.<<!
+        val out = Path.createTempFile().path.!<<
         def result = out.string
       }
 

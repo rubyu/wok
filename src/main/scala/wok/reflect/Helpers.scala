@@ -30,17 +30,17 @@ object Helpers {
 
   implicit class ExtendedPath[T <: Path](val path: T) extends AnyVal {
     def #>[A](f: InputStream => A): A = path.inputStream().acquireAndGet(f)
-    def `<<!` = new AMPath(path.asInstanceOf[DefaultPath])
+    def `!<<` = new AMPath(path.asInstanceOf[DefaultPath])
     def #<<[A](f: OutputStream => A): A = path.outputStream(StandardOpenOption.Append).acquireAndGet(f)
-    def `<!` = new RMPath(path.asInstanceOf[DefaultPath])
+    def `!<` = new RMPath(path.asInstanceOf[DefaultPath])
     def #<[A](f: OutputStream => A): A = path.outputStream(StandardOpenOption.Write).acquireAndGet(f)
   }
 
   implicit class ExtendedPathString(val s: String) extends AnyVal {
     def #>[A](f: InputStream => A): A = Path.fromString(s).inputStream.acquireAndGet(f(_))
-    def `<<!` = new AMPath(Path.fromString(s))
+    def `!<<` = new AMPath(Path.fromString(s))
     def #<<[A](f: OutputStream => A): A = Path.fromString(s).outputStream(StandardOpenOption.Append).acquireAndGet(f)
-    def `<!` = new RMPath(Path.fromString(s))
+    def `!<` = new RMPath(Path.fromString(s))
     def #<[A](f: OutputStream => A): A = Path.fromString(s).outputStream(StandardOpenOption.Write).acquireAndGet(f)
   }
 

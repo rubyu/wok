@@ -12,7 +12,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
   "DynamicCompiler.sourceString" should {
     "gerarate pretty formatted Wok.scala" in {
       "when empty data given" in {
-        DynamicCompiler.sourceString(Nil, None, Nil) mustEqual
+        DynamicCompiler.sourceString(Nil, Nil, Nil) mustEqual
           List(
             "package wok",
             "",
@@ -32,7 +32,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       }
 
       "when before given" in {
-        DynamicCompiler.sourceString(List("a", "b"), None, Nil) mustEqual
+        DynamicCompiler.sourceString(List("a", "b"), Nil, Nil) mustEqual
           List(
             "package wok",
             "",
@@ -47,15 +47,15 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "class Wok(val args: List[String]) extends AbstractWok {",
             "  def runScript(): Unit = {",
-            "    a ;",
-            "    b ;",
+            "    a",
+            "    b",
             "  }",
             "}"
           ).mkString("\n")
       }
 
       "when script given" in {
-        DynamicCompiler.sourceString(Nil, Some("a"), Nil) mustEqual
+        DynamicCompiler.sourceString(Nil, List("a"), Nil) mustEqual
           List(
             "package wok",
             "",
@@ -70,7 +70,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "class Wok(val args: List[String]) extends AbstractWok {",
             "  def runScript(): Unit = {",
-            "    {",
+            "    ;{",
             "      var currentRow: Option[Row] = None",
             "      def NF = currentRow.get.size",
             "      def NR = currentRow.get.id",
@@ -79,14 +79,14 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "      STDIN #> {",
             "        _.csv.map { row => currentRow = Some(row); row } a",
             "      }",
-            "    }",
+            "    };",
             "  }",
             "}"
           ).mkString("\n")
       }
 
       "when before given" in {
-        DynamicCompiler.sourceString(Nil, None, List("a", "b")) mustEqual
+        DynamicCompiler.sourceString(Nil, Nil, List("a", "b")) mustEqual
           List(
             "package wok",
             "",
@@ -101,15 +101,15 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "class Wok(val args: List[String]) extends AbstractWok {",
             "  def runScript(): Unit = {",
-            "    a ;",
-            "    b ;",
+            "    a",
+            "    b",
             "  }",
             "}"
           ).mkString("\n")
       }
 
       "when all the data given" in {
-        DynamicCompiler.sourceString(List("a", "b"), Some("c"), List("d", "e")) mustEqual
+        DynamicCompiler.sourceString(List("a", "b"), List("c"), List("d", "e")) mustEqual
           List(
             "package wok",
             "",
@@ -124,9 +124,9 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "class Wok(val args: List[String]) extends AbstractWok {",
             "  def runScript(): Unit = {",
-            "    a ;",
-            "    b ;",
-            "    {",
+            "    a",
+            "    b",
+            "    ;{",
             "      var currentRow: Option[Row] = None",
             "      def NF = currentRow.get.size",
             "      def NR = currentRow.get.id",
@@ -135,9 +135,9 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "      STDIN #> {",
             "        _.csv.map { row => currentRow = Some(row); row } c",
             "      }",
-            "    }",
-            "    d ;",
-            "    e ;",
+            "    };",
+            "    d",
+            "    e",
             "  }",
             "}"
           ).mkString("\n")
@@ -159,7 +159,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         "ByteArrayConverter" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("STDOUT.write(\"a\".getBytes)"), None, Nil)
+              .compile(List("STDOUT.write(\"a\".getBytes)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -173,7 +173,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         "codecToCharset" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("val c = Codec(\"Windows-31J\"); print(new String(\"あ\".getBytes(c), c))"), None, Nil)
+              .compile(List("val c = Codec(\"Windows-31J\"); print(new String(\"あ\".getBytes(c), c))"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -185,7 +185,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         "stringSeq2process" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("print(Seq(\"echo\", \"-n\", \"a\").!>.string)"), None, Nil)
+              .compile(List("print(Seq(\"echo\", \"-n\", \"a\").!>.string)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -195,7 +195,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         "string2process" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("print(\"echo -n a\".!>.string)"), None, Nil)
+              .compile(List("print(\"echo -n a\".!>.string)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -207,7 +207,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         "string2path" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("STDOUT.write(\"a\".name)"), None, Nil)
+              .compile(List("STDOUT.write(\"a\".name)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -221,7 +221,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(Nil, Some("foreach { row => print(row: _*) }"), Nil)
+              .compile(Nil, List("foreach { row => print(row: _*) }"), Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -233,7 +233,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(Nil, Some("foreach { row => print(NF) }"), Nil)
+              .compile(Nil, List("foreach { row => print(NF) }"), Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -245,7 +245,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(Nil, Some("foreach { row => print(NR) }"), Nil)
+              .compile(Nil, List("foreach { row => print(NR) }"), Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -257,7 +257,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(FT: _*) }"), Nil)
+              .compile(List("OFQ(Quote() Min())"), List("foreach { row => print(FT: _*) }"), Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -269,7 +269,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c\n")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("OFQ(Quote() Min())"), Some("foreach { row => print(RT) }"), Nil)
+              .compile(List("OFQ(Quote() Min())"), List("foreach { row => print(RT) }"), Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -280,7 +280,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       "args" in new scope {
         Stdio.withOut(out) {
           DynamicCompiler
-            .compile(List("print(args: _*)"), None, Nil)
+            .compile(List("print(args: _*)"), Nil, Nil)
             ._2.create(List("1", "2", "3"))
             .runScript()
         }
@@ -291,7 +291,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a\\ b\\ c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), Some("foreach { row => print(row: _*) }"), Nil)
+              .compile(List("FQ(Quote() None() E('\\\\'))", "OFQ(FQ)"), List("foreach { row => print(row: _*) }"), Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -303,7 +303,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("STDIN #> { _.csv(Reader()) foreach { row => print(row: _*) } }"), None, Nil)
+              .compile(List("STDIN #> { _.csv(Reader()) foreach { row => print(row: _*) } }"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -314,7 +314,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       "Writer" in new scope {
         Stdio.withOut(out) {
           DynamicCompiler
-            .compile(List("print(\"a\")"), None, Nil)
+            .compile(List("print(\"a\")"), Nil, Nil)
             ._2.create(Nil)
             .runScript()
         }
@@ -325,7 +325,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("あ", "Windows-31J")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("CD(Codec(\"Windows-31J\"))"), Some("foreach { row => print(row: _*) }"), Nil)
+              .compile(List("CD(Codec(\"Windows-31J\"))"), List("foreach { row => print(row: _*) }"), Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -336,7 +336,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       "Path" in new scope {
         Stdio.withOut(out) {
           DynamicCompiler
-            .compile(List("val p = Path(\"test\"); p.write(\"a\"); print(p.string); p.delete()"), None, Nil)
+            .compile(List("val p = Path(\"test\"); p.write(\"a\"); print(p.string); p.delete()"), Nil, Nil)
             ._2.create(Nil)
             .runScript()
         }
@@ -346,7 +346,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
       "Resource" in new scope {
         Stdio.withOut(out) {
           DynamicCompiler
-            .compile(List("val out = Resource.fromFile(\"test\"); out.write(\"a\"); print(out.string); Path(\"test\").delete()"), None, Nil)
+            .compile(List("val out = Resource.fromFile(\"test\"); out.write(\"a\"); print(out.string); Path(\"test\").delete()"), Nil, Nil)
             ._2.create(Nil)
             .runScript()
         }
@@ -357,7 +357,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("あ")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("STDOUT.write(STDIN.string)"), None, Nil)
+              .compile(List("STDOUT.write(STDIN.string)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -369,7 +369,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("あ")) {
           Stdio.withErr(err) {
             DynamicCompiler
-              .compile(List("STDERR.write(STDIN.string)"), None, Nil)
+              .compile(List("STDERR.write(STDIN.string)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }

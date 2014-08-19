@@ -15,7 +15,7 @@ object DynamicCompiler {
     new global.Run().compileSources(List(new BatchSourceFile("Wok.scala", source)))
   }
 
-  def compile(before: List[String], process: Option[String], after: List[String]): (Report, DynamicClass) = {
+  def compile(before: List[String], process: List[String], after: List[String]): (Report, DynamicClass) = {
     val virtualDirectory = new VirtualDirectory("[memory]", None)
     val settings = new Settings
     settings.deprecation.value = false
@@ -32,16 +32,16 @@ object DynamicCompiler {
       DynamicClass(new AbstractFileClassLoader(virtualDirectory, getClass.getClassLoader)))
   }
 
-  def sourceString(before: List[String], process: Option[String], after: List[String]): String = {
+  def sourceString(before: List[String], process: List[String], after: List[String]): String = {
 
     def indent(xs: List[String]): Option[String] =
       if (xs.isEmpty) None
-      else Some(xs map { (" " * 4) + _ } mkString("", " ;\n", " ;\n"))
+      else Some(xs mkString(" " * 4, "\n" + " " * 4, "\n"))
 
-    def script(str: Option[String]): Option[String] =
-      if (str.isEmpty) None
+    def script(xs: List[String]): Option[String] =
+      if (xs.isEmpty) None
       else Some(
-        """|    {
+        """|    ;{
           |      var currentRow: Option[Row] = None
           |      def NF = currentRow.get.size
           |      def NR = currentRow.get.id
@@ -50,8 +50,8 @@ object DynamicCompiler {
           |      STDIN #> {
           |        _.csv.map { row => currentRow = Some(row); row } %s
           |      }
-          |    }
-          |""".stripMargin.format(str.get))
+          |    };
+          |""".stripMargin.format(xs mkString "\n" + " " * 8))
 
     val b = new StringBuilder
     b.append(
@@ -70,9 +70,7 @@ object DynamicCompiler {
         |  def runScript(): Unit = {""".stripMargin)
     val scripts = List(indent(before), script(process), indent(after))
     if (scripts.exists(_.isDefined)) b.append("\n")
-    scripts.zipWithIndex.map { case (s, idx) =>
-      if (s.isDefined) b.append(s.get)
-    }
+    scripts foreach { s => if (s.isDefined) b.append(s.get) }
     if (scripts.exists(_.isDefined)) b.append(" " * 2)
     b.append(
       """|}

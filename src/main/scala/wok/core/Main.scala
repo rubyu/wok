@@ -12,7 +12,7 @@ object Main {
       * need to be compiled, but it was desirable that the compilation will be just-in-time because in the real
       * use case, some wok.jar can be cascaded.
       */
-    if (!cli.diag && cli.process.isDefined) {
+    if (!cli.diag && cli.process.nonEmpty) {
       while (Stdio.in.open().get.available() == 0) Thread.sleep(1)
     }
 

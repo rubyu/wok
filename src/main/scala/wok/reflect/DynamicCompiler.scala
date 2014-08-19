@@ -47,8 +47,8 @@ object DynamicCompiler {
           |      def NR = currentRow.get.id
           |      def FT = currentRow.get.sep
           |      def RT = currentRow.get.term
-          |      STDIN #> {
-          |        _.csv.map { row => currentRow = Some(row); row } %s
+          |      STDIN #> { _.csv
+          |        .map { row => currentRow = Some(row); row } %s
           |      }
           |    };
           |""".stripMargin.format(xs mkString "\n" + " " * 8))

@@ -92,12 +92,12 @@ class MainTest extends SpecificationWithJUnit {
     "do diagnosis with error" in new scope {
       val out = new TestOutputStream()
       Console.withOut(out) {
-        Main.main(Array("--diag", "-b" ,"foo", "-b", "bar"))
+        Main.main(Array("--diag", "-b" ,"foo", "-b", "bar", "baz"))
       }
       out.toString mustEqual
         List(
           "The results of diagnosis are:",
-          "Errors: 2, Warning: 0",
+          "Errors: 3, Warning: 0",
           "",
           "14: ERROR: not found: value foo",
           "    foo ;",
@@ -105,6 +105,9 @@ class MainTest extends SpecificationWithJUnit {
           "15: ERROR: not found: value bar",
           "    bar ;",
           "    ^",
+          "23: ERROR: value baz is not a member of Iterator[wok.csv.Row]",
+          "        _.csv.map { row => currentRow = Some(row); row } baz",
+          "                                                         ^",
           "",
           "| 1| package wok",
           "| 2| ",
@@ -121,21 +124,34 @@ class MainTest extends SpecificationWithJUnit {
           "|13|   def runScript(): Unit = {",
           "|14|     foo ;",
           "|15|     bar ;",
-          "|16|   }",
-          "|17| }",
+          "|16|     {",
+          "|17|       var currentRow: Option[Row] = None",
+          "|18|       def NF = currentRow.get.size",
+          "|19|       def NR = currentRow.get.id",
+          "|20|       def FT = currentRow.get.sep",
+          "|21|       def RT = currentRow.get.term",
+          "|22|       STDIN #> {",
+          "|23|         _.csv.map { row => currentRow = Some(row); row } baz",
+          "|24|       }",
+          "|25|     }",
+          "|26|   }",
+          "|27| }",
           ""
         ).mkString(System.lineSeparator())
     }
 
     "print error messages to Console.err" in new scope {
       val out = new TestOutputStream()
-      Console.withErr(out) {
-        Main.main(Array("-b" ,"foo", "-b", "bar")) must throwAn(new AttemptToExitException(1))
+      val in = new TestInputStream("a")
+      Stdio.withIn(in) {
+        Console.withErr(out) {
+          Main.main(Array("-b" ,"foo", "-b", "bar", "baz")) must throwAn(new AttemptToExitException(1))
+        }
       }
       out.toString mustEqual
         List(
           "Compilation failed. The details are:",
-          "Errors: 2, Warning: 0",
+          "Errors: 3, Warning: 0",
           "",
           "14: ERROR: not found: value foo",
           "    foo ;",
@@ -143,6 +159,9 @@ class MainTest extends SpecificationWithJUnit {
           "15: ERROR: not found: value bar",
           "    bar ;",
           "    ^",
+          "23: ERROR: value baz is not a member of Iterator[wok.csv.Row]",
+          "        _.csv.map { row => currentRow = Some(row); row } baz",
+          "                                                         ^",
           "",
           "| 1| package wok",
           "| 2| ",
@@ -159,8 +178,18 @@ class MainTest extends SpecificationWithJUnit {
           "|13|   def runScript(): Unit = {",
           "|14|     foo ;",
           "|15|     bar ;",
-          "|16|   }",
-          "|17| }",
+          "|16|     {",
+          "|17|       var currentRow: Option[Row] = None",
+          "|18|       def NF = currentRow.get.size",
+          "|19|       def NR = currentRow.get.id",
+          "|20|       def FT = currentRow.get.sep",
+          "|21|       def RT = currentRow.get.term",
+          "|22|       STDIN #> {",
+          "|23|         _.csv.map { row => currentRow = Some(row); row } baz",
+          "|24|       }",
+          "|25|     }",
+          "|26|   }",
+          "|27| }",
           ""
       ).mkString(System.lineSeparator())
     }

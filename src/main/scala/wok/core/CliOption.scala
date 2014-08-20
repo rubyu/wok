@@ -60,8 +60,8 @@ object CliOption {
               case s if s.startsWith("-e ") => 1
               case _ => 2
             } foreach {
-              case (0, xs) => xs foreach { s => before.append(s drop 3) }
-              case (1, xs) => xs foreach { s => after.append(s drop 3) }
+              case (0, xs) => before.appendAll(xs map (_ drop 3))
+              case (1, xs) => after.prependAll(xs map (_ drop 3))
               case (2, xs) => process.appendAll(xs)
             }
             i += 2

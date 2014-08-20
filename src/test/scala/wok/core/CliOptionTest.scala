@@ -92,15 +92,15 @@ class CliOptionTest extends SpecificationWithJUnit {
       }
       "marge with -b" in {
         val temp = Path.createTempFile()
-        temp.write(List("-b b2") mkString "\n")
-        CliOption.parse(List("-b", "b1", "-f", temp.path)) mustEqual
-          CliOption(Nil, List("b1", "b2"), Nil, Nil, false)
+        temp.write(List("-b b3", "-b b4") mkString "\n")
+        CliOption.parse(List("-b", "b1", "-b", "b2", "-f", temp.path)) mustEqual
+          CliOption(Nil, List("b1", "b2", "b3", "b4"), Nil, Nil, false)
       }
       "marge with -e" in {
         val temp = Path.createTempFile()
-        temp.write(List("-e e2") mkString "\n")
-        CliOption.parse(List("-e", "e1", "-f", temp.path)) mustEqual
-          CliOption(Nil, Nil, Nil, List("e1", "e2"), false)
+        temp.write(List("-e e1", "-e e2") mkString "\n")
+        CliOption.parse(List("-e", "e3", "-e", "e4", "-f", temp.path)) mustEqual
+          CliOption(Nil, Nil, Nil, List("e1", "e2", "e3", "e4"), false)
       }
     }
     "parse -- a" in {

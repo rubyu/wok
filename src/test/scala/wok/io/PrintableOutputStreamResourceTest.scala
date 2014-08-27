@@ -1,12 +1,16 @@
 package scalax.io
 
 import org.specs2.mutable._
+import wok.reflect.AbstractWok
 import wok.Helpers._
-import wok.csv.Writer
-
 
 
 class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
+
+  val wok = new AbstractWok {
+    val args = List()
+    def runScript(){}
+  }
 
   "PrintableOutputStreamResource.println" should {
     "println data to the last of a OutputStream" in {
@@ -14,8 +18,8 @@ class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
       val res = new PrintableOutputStreamResource(out)
       out.write("a\n".getBytes())
       out.toString() mustEqual "a\n"
-      res.println("b")(Writer())
-      res.println("c")(Writer())
+      res.println("b")(wok)
+      res.println("c")(wok)
       out.toString() mustEqual "a\nb\nc\n"
     }
   }
@@ -26,8 +30,8 @@ class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
       val res = new PrintableOutputStreamResource(out)
       out.write("a".getBytes())
       out.toString() mustEqual "a"
-      res.printf("b")(Writer())
-      res.printf("c")(Writer())
+      res.printf("b")(wok)
+      res.printf("c")(wok)
       out.toString() mustEqual "ab c "
     }
   }
@@ -38,8 +42,8 @@ class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
       val res = new PrintableOutputStreamResource(out)
       out.write("a".getBytes())
       out.toString() mustEqual "a"
-      res.print("b")(Writer())
-      res.print("c")(Writer())
+      res.print("b")(wok)
+      res.print("c")(wok)
       out.toString() mustEqual "abc"
     }
   }

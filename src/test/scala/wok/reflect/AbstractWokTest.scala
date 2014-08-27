@@ -6,9 +6,8 @@ import java.nio.charset.StandardCharsets
 import org.specs2.mutable._
 import org.specs2.specification.Scope
 import wok.Helpers._
-import wok.csv.{Quote, Writer, Reader}
+import wok.csv.Quote
 import wok.core.Stdio
-import java.io._
 import scalax.file.Path
 import scalax.io.{StandardOpenOption, Codec}
 
@@ -19,6 +18,37 @@ class AbstractWokTest extends SpecificationWithJUnit {
     class Wok extends AbstractWok {
       val args = List()
       def runScript(){}
+    }
+
+    "Guard" in {
+      val out = new TestOutputStream()
+      Stdio.withOut(out) {
+        val wok = new Wok {
+          OFS("|")
+          printf("a", "b")
+          Guard {
+            OFS("-")
+            printf("c", "d")
+          }
+          print("e", "f")
+        }
+      }
+      out.toString mustEqual "a|b|c-d-e|f"
+    }
+
+    "Reset" in {
+      val out = new TestOutputStream()
+      Stdio.withOut(out) {
+        val wok = new Wok {
+          OFS("|")
+          printf("a", "b")
+          Reset {
+            printf("c", "d")
+          }
+          print("e", "f")
+        }
+      }
+      out.toString mustEqual "a|b|c d e|f"
     }
 
     "support accesses for Reader's parameters" in {
@@ -81,31 +111,12 @@ class AbstractWokTest extends SpecificationWithJUnit {
       }
     }
 
-    "privide a function InputStream.csv" in {
-      import Helpers.ExtendedInputStream
-
-      "open an InputStream" in {
-        val in = new TestInputStream("a b c")
-        val wok = new Wok {
-          def open = in.csv
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-
-      "open an InputStream with Reader" in {
-        val in = new TestInputStream("a-b-c")
-        val wok = new Wok {
-          def open = in.csv(Reader.FS("-"))
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-    }
-
     "add extended functions print/println to OutputStream" in {
       import Helpers.ExtendedOutputStream
 
       trait scope extends Scope {
         val out = new TestOutputStream()
+
         def result = new String(out.toByteArray, StandardCharsets.UTF_8)
       }
 
@@ -156,54 +167,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
         result mustEqual "ab"
       }
-
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
-      }
     }
 
     "add a extended function !< to Path" in {
@@ -211,6 +174,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       trait scope extends Scope {
         val out = Path.createTempFile().!<
+
         def result = out.string
       }
 
@@ -260,54 +224,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
           out.print("b")
         }
         result mustEqual "ab"
-      }
-
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
       }
     }
 
@@ -367,53 +283,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
         result mustEqual "ab"
       }
 
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
-      }
     }
 
     "add a extended function !< to String" in {
@@ -471,54 +340,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
         result mustEqual "ab"
       }
-
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
-      }
     }
 
     "add a extended function !<< to String" in {
@@ -575,54 +396,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
           out.print("b")
         }
         result mustEqual "ab"
-      }
-
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
       }
     }
 
@@ -691,66 +464,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
           }
         }
         result mustEqual "ab"
-      }
-
-      "println() with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            println()(Writer OFQ (Quote All()))
-            println()(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            printf()(Writer OFQ (Quote All()))
-            printf()(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            print()(Writer OFQ (Quote All()))
-            print()(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            println("a")(Writer OFQ (Quote All()))
-            println("b")(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            printf("a")(Writer OFQ (Quote All()))
-            printf("b")(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            print("a")(Writer OFQ (Quote All()))
-            print("b")(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "\"a\"\"b\""
       }
     }
 

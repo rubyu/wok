@@ -11,7 +11,7 @@ import java.io.{OutputStream, InputStream}
 
 object Helpers {
   implicit class ExtendedInputStream(val in: InputStream) extends AnyVal {
-    def csv(implicit r: Reader): Iterator[Row] = r.open(in)
+    def csv(implicit wok: AbstractWok): Iterator[Row] = wok.reader.open(in)
   }
 
   implicit class ExtendedOutputStream(val out: OutputStream) extends AnyVal {

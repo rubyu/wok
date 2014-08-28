@@ -13,65 +13,134 @@ import scalax.io.{StandardOpenOption, Codec}
 
 
 class AbstractWokTest extends SpecificationWithJUnit {
-  "AbstractWok" should {
 
-    class Wok extends AbstractWok {
-      val args = List()
-      def runScript(){}
-    }
-
-    "In" in {
-      val p1 = Path.createTempFile()
-      p1.write("a b c")
-      val p2 = Path.createTempFile()
-      p2.write("d e f")
-      "protect iherited mutable parameters" in {
-        val wok = new AbstractWok {
-          val args = List()
-          def runScript(){}
-          def in = In(p1.path, p2.path) { row => FS("-") OFS("-") } .toList
-        }
-        wok.in
-        wok.FS mustNotEqual "-"
-        wok.OFS mustNotEqual "-"
-      }
-    }
-
-    "In" in {
-      val p1 = Path.createTempFile()
-      p1.write("a b c")
-      val p2 = Path.createTempFile()
-      p2.write("d e f")
+  "PathStringInputProcessor.process" should {
+    val p1 = Path.createTempFile()
+    p1.write("a b c")
+    val p2 = Path.createTempFile()
+    p2.write("d e f")
+    "protect inherited mutable variables" in {
       val wok = new AbstractWok {
-        val args = List()
+        val args = Nil
+        def runScript(){
+          In(p1.path, p2.path) { row =>
+            FS("-")
+            FS mustEqual "-"
+            OFS("-")
+            OFS mustEqual "-"
+          }
+        }
+      }
+      wok.runScript()
+      wok.FS mustNotEqual "-"
+      wok.OFS mustNotEqual "-"
+    }
+    "provide immutable variables" in {
+      val wok = new AbstractWok {
+        val args = Nil
         def runScript(){}
         def in = In(p1.path, p2.path) { row => (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT) } .toList
       }
       val result = wok.in
       result.size mustEqual 2
-      result(0)._1.size mustEqual 3
-      result(0)._1.source mustEqual "a b c"
-      result(0)._2 mustEqual List(p1.path, p2.path)
-      result(0)._3 mustEqual 2
-      result(0)._4 mustEqual 0
-      result(0)._5 mustEqual p1.path
-      result(0)._6 mustEqual 0
-      result(0)._7 mustEqual 0
-      result(0)._8 mustEqual 3
-      result(0)._9 mustEqual List(" ", " ")
-      result(0)._10 mustEqual ""
 
-      result(1)._1.size mustEqual 3
-      result(1)._1.source mustEqual "d e f"
-      result(1)._2 mustEqual List(p1.path, p2.path)
-      result(1)._3 mustEqual 2
-      result(1)._4 mustEqual 1
-      result(1)._5 mustEqual p2.path
-      result(1)._6 mustEqual 0
-      result(1)._7 mustEqual 1
-      result(1)._8 mustEqual 3
-      result(1)._9 mustEqual List(" ", " ")
-      result(1)._10 mustEqual ""
+      {
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt) = result(0)
+        row.size mustEqual 3
+        row.source mustEqual "a b c"
+        argv mustEqual List(p1.path, p2.path)
+        argc mustEqual 2
+        argind mustEqual 0
+        filename mustEqual p1.path
+        fnr mustEqual 0
+        nr mustEqual 0
+        nf mustEqual 3
+        ft mustEqual List(" ", " ")
+        rt mustEqual ""
+      }
+
+      {
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt) = result(1)
+        row.size mustEqual 3
+        row.source mustEqual "d e f"
+        argv mustEqual List(p1.path, p2.path)
+        argc mustEqual 2
+        argind mustEqual 1
+        filename mustEqual p2.path
+        fnr mustEqual 0
+        nr mustEqual 1
+        nf mustEqual 3
+        ft mustEqual List(" ", " ")
+        rt mustEqual ""
+      }
+    }
+  }
+
+  "StreamInputProcessor.process" should {
+    val s1 = new TestInputStream("a b c")
+    val s2 = new TestInputStream("d e f")
+    "protect inherited mutable variables" in {
+      val wok = new AbstractWok {
+        val args = Nil
+        def runScript(){
+          In(s1, s2) { row =>
+            FS("-")
+            FS mustEqual "-"
+            OFS("-")
+            OFS mustEqual "-"
+          }
+        }
+      }
+      wok.runScript()
+      wok.FS mustNotEqual "-"
+      wok.OFS mustNotEqual "-"
+    }
+    "provide immutable variables" in {
+      val wok = new AbstractWok {
+        val args = Nil
+        def runScript(){}
+        def in = In(s1, s2) { row => (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT) } .toList
+      }
+      val result = wok.in
+      result.size mustEqual 2
+
+      {
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt) = result(0)
+        row.size mustEqual 3
+        row.source mustEqual "a b c"
+        argv mustEqual List("-", "-")
+        argc mustEqual 2
+        argind mustEqual 0
+        filename mustEqual "-"
+        fnr mustEqual 0
+        nr mustEqual 0
+        nf mustEqual 3
+        ft mustEqual List(" ", " ")
+        rt mustEqual ""
+      }
+
+      {
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt) = result(1)
+        row.size mustEqual 3
+        row.source mustEqual "d e f"
+        argv mustEqual List("-", "-")
+        argc mustEqual 2
+        argind mustEqual 1
+        filename mustEqual "-"
+        fnr mustEqual 0
+        nr mustEqual 1
+        nf mustEqual 3
+        ft mustEqual List(" ", " ")
+        rt mustEqual ""
+      }
+    }
+  }
+
+  "AbstractWok" should {
+
+    class Wok extends AbstractWok {
+      val args = List()
+      def runScript(){}
     }
 
     "support accesses for Reader's parameters" in {

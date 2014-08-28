@@ -1,6 +1,7 @@
 
 package wok.reflect
 
+import java.io.InputStream
 import scalax.file.Path
 import util.DynamicVariable
 import util.matching.Regex
@@ -70,28 +71,23 @@ trait AbstractWok {
   def OFQ(q: Quote) = { WRITER.OFQ(q); this }
   def OCD(c: Codec) = { WRITER.OCD(c); this }
 
-  trait InputProcessor[T] {
+  trait InputProcessor[-T] {
     def process[A](xs: T *)(f: Row => A): Iterator[A]
-  }
-
-  implicit object PathStringInputProcessor extends InputProcessor[String] {
-    def process[A](xs: String *)(f: Row => A): Iterator[A] = {
+    def process[A](files: List[String], streams: List[InputStream])(f: Row => A): Iterator[A] = {
       val reader = READER.copy()
       val writer = WRITER.copy()
       var __NR = -1
-      xs.map (Path.fromString)
-        .map (_.inputStream.open().get)
+      streams
         .map (READER.open)
         .toIterator
         .zipWithIndex
-        .map { case (itr, i) =>
-        itr map { row =>
+        .map { case (itr, i) => itr map { row =>
           _READER.withValue(reader) {
             _WRITER.withValue(writer) {
-              _ARGV.withValue(xs.toList) {
-                _ARGC.withValue(xs.size) {
+              _ARGV.withValue(files) {
+                _ARGC.withValue(files.size) {
                   _ARGIND.withValue(i) {
-                    _FILENAME.withValue(xs(i)) {
+                    _FILENAME.withValue(files(i)) {
                       __NR += 1
                       _NR.withValue(__NR) {
                         _FNR.withValue(row.id) {
@@ -116,6 +112,15 @@ trait AbstractWok {
     }
   }
 
-  def In[T: InputProcessor, A](xs: T *)(f: Row => A) = implicitly[InputProcessor[T]].process(xs: _*)(f)
+  implicit object StreamInputProcessor extends InputProcessor[InputStream] {
+    def process[A](streams: InputStream *)(f: Row => A) =
+      process(streams map (x => "-") toList, streams.toList)(f)
+  }
 
+  implicit object PathStringInputProcessor extends InputProcessor[String] {
+    def process[A](files: String *)(f: Row => A) =
+      process(files.toList, files map (file => Path.fromString(file).inputStream.open().get) toList)(f)
+  }
+
+  def In[T: InputProcessor, A](xs: T *)(f: Row => A) = implicitly[InputProcessor[T]].process(xs: _*)(f)
 }

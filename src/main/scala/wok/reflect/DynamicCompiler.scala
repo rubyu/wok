@@ -47,7 +47,7 @@ object DynamicCompiler {
           |      def NR = currentRow.get.id
           |      def FT = currentRow.get.sep
           |      def RT = currentRow.get.term
-          |      STDIN #> { _.csv
+          |      Stdin #> { _.csv
           |        .map { row => currentRow = Some(row); row } %s
           |      }
           |    };
@@ -59,7 +59,7 @@ object DynamicCompiler {
         |
         |import wok.reflect.AbstractWok
         |import wok.reflect.Helpers._
-        |import wok.core.Stdio.{in => STDIN, out => STDOUT, err => STDERR}
+        |import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}
         |import wok.csv.{Quote, Reader, Row, Writer}
         |import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}
         |import scalax.io.{Codec, Resource}

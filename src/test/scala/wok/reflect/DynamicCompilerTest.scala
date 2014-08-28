@@ -18,7 +18,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "import wok.reflect.AbstractWok",
             "import wok.reflect.Helpers._",
-            "import wok.core.Stdio.{in => STDIN, out => STDOUT, err => STDERR}",
+            "import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}",
             "import wok.csv.{Quote, Reader, Row, Writer}",
             "import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}",
             "import scalax.io.{Codec, Resource}",
@@ -38,7 +38,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "import wok.reflect.AbstractWok",
             "import wok.reflect.Helpers._",
-            "import wok.core.Stdio.{in => STDIN, out => STDOUT, err => STDERR}",
+            "import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}",
             "import wok.csv.{Quote, Reader, Row, Writer}",
             "import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}",
             "import scalax.io.{Codec, Resource}",
@@ -61,7 +61,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "import wok.reflect.AbstractWok",
             "import wok.reflect.Helpers._",
-            "import wok.core.Stdio.{in => STDIN, out => STDOUT, err => STDERR}",
+            "import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}",
             "import wok.csv.{Quote, Reader, Row, Writer}",
             "import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}",
             "import scalax.io.{Codec, Resource}",
@@ -76,7 +76,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "      def NR = currentRow.get.id",
             "      def FT = currentRow.get.sep",
             "      def RT = currentRow.get.term",
-            "      STDIN #> { _.csv",
+            "      Stdin #> { _.csv",
             "        .map { row => currentRow = Some(row); row } a",
             "      }",
             "    };",
@@ -92,7 +92,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "import wok.reflect.AbstractWok",
             "import wok.reflect.Helpers._",
-            "import wok.core.Stdio.{in => STDIN, out => STDOUT, err => STDERR}",
+            "import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}",
             "import wok.csv.{Quote, Reader, Row, Writer}",
             "import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}",
             "import scalax.io.{Codec, Resource}",
@@ -115,7 +115,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "",
             "import wok.reflect.AbstractWok",
             "import wok.reflect.Helpers._",
-            "import wok.core.Stdio.{in => STDIN, out => STDOUT, err => STDERR}",
+            "import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}",
             "import wok.csv.{Quote, Reader, Row, Writer}",
             "import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}",
             "import scalax.io.{Codec, Resource}",
@@ -132,7 +132,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "      def NR = currentRow.get.id",
             "      def FT = currentRow.get.sep",
             "      def RT = currentRow.get.term",
-            "      STDIN #> { _.csv",
+            "      Stdin #> { _.csv",
             "        .map { row => currentRow = Some(row); row } c",
             "      }",
             "    };",
@@ -207,7 +207,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         "string2path" in new scope {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("STDOUT.write(\"a\".name)"), Nil, Nil)
+              .compile(List("Stdout.write(\"a\".name)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -303,7 +303,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("STDIN #> { in => Reader().open(in) foreach { row => print(row: _*) } }"), Nil, Nil)
+              .compile(List("Stdin #> { in => Reader().open(in) foreach { row => print(row: _*) } }"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -353,11 +353,11 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         out.toString mustEqual "a"
       }
 
-      "STDIN" in new scope {
+      "Stdin" in new scope {
         Stdio.withIn(new TestInputStream("あ")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile(List("STDOUT.write(STDIN.string)"), Nil, Nil)
+              .compile(List("Stdout.write(Stdin.string)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }
@@ -369,7 +369,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("あ")) {
           Stdio.withErr(err) {
             DynamicCompiler
-              .compile(List("STDERR.write(STDIN.string)"), Nil, Nil)
+              .compile(List("Stderr.write(Stdin.string)"), Nil, Nil)
               ._2.create(Nil)
               .runScript()
           }

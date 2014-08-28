@@ -6,7 +6,7 @@ import scalax.file.Path
 import util.DynamicVariable
 import util.matching.Regex
 import scalax.io.Codec
-import wok.core.Stdio.{out => STDOUT}
+import wok.core.Stdio.{out => Stdout}
 import wok.csv.{Row, Writer, Reader, Quote}
 
 
@@ -17,9 +17,9 @@ trait AbstractWok {
 
   implicit val wokInstance: AbstractWok = this
 
-  def print(x: Any *): Unit = STDOUT.print(x: _*)
-  def printf(x: Any *): Unit = STDOUT.printf(x: _*)
-  def println(x: Any *): Unit = STDOUT.println(x: _*)
+  def print(x: Any *): Unit = Stdout.print(x: _*)
+  def printf(x: Any *): Unit = Stdout.printf(x: _*)
+  def println(x: Any *): Unit = Stdout.println(x: _*)
 
   val _ARGV = new DynamicVariable[List[String]](Nil)
   val _ARGC = new DynamicVariable[Int](0)

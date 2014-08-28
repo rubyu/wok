@@ -22,18 +22,60 @@ class AbstractWokTest extends SpecificationWithJUnit {
     "protect inherited mutable variables" in {
       val wok = new AbstractWok {
         val args = Nil
-        def runScript(){
-          In(p1.path, p2.path) { row =>
-            FS("-")
-            FS mustEqual "-"
-            OFS("-")
-            OFS mustEqual "-"
-          }
-        }
+        def runScript(){}
+        def in = In(p1.path, p2.path) { row =>
+          FS("=")
+          OFS("=")
+          (row, FS, OFS)
+        } toList
       }
-      wok.runScript()
-      wok.FS mustNotEqual "-"
-      wok.OFS mustNotEqual "-"
+      val result = wok.in
+
+      {
+        val (row, fs, ofs) = result(0)
+        row.size mustEqual 3
+        row.source mustEqual "a b c"
+        fs.toString mustEqual "="
+        ofs.toString mustEqual "="
+      }
+
+      {
+        val (row, fs, ofs) = result(1)
+        row.size mustEqual 1
+        row.source mustEqual "d e f"
+        fs.toString mustEqual "="
+        ofs.toString mustEqual "="
+      }
+
+      wok.FS.toString mustEqual "[ \\t]+"
+      wok.OFS.toString mustEqual " "
+    }
+    "provide access to Reader's property" in {
+      val wok = new AbstractWok {
+        val args = Nil
+        def runScript(){}
+        def in = In(p1.path, p2.path) { row =>
+          try {
+            (row, FS)
+          }
+          finally FS("=")
+        } .toList
+      }
+      val result = wok.in
+
+      {
+        val (row, fs) = result(0)
+        row.size mustEqual 3
+        row.source mustEqual "a b c"
+        fs.toString mustEqual "[ \\t]+"
+      }
+
+      {
+        val (row, fs) = result(1)
+        row.size mustEqual 1
+        row.source mustEqual "d e f"
+        fs.toString mustEqual "="
+      }
     }
     "provide immutable variables" in {
       val wok = new AbstractWok {
@@ -77,25 +119,71 @@ class AbstractWokTest extends SpecificationWithJUnit {
   }
 
   "StreamInputProcessor.process" should {
-    val s1 = new TestInputStream("a b c")
-    val s2 = new TestInputStream("d e f")
     "protect inherited mutable variables" in {
+      val s1 = new TestInputStream("a b c")
+      val s2 = new TestInputStream("d e f")
       val wok = new AbstractWok {
         val args = Nil
-        def runScript(){
-          In(s1, s2) { row =>
-            FS("-")
-            FS mustEqual "-"
-            OFS("-")
-            OFS mustEqual "-"
-          }
-        }
+        def runScript(){}
+        def in = In(s1, s2) { row =>
+          FS("=")
+          OFS("=")
+          (row, FS, OFS)
+        } toList
       }
-      wok.runScript()
-      wok.FS mustNotEqual "-"
-      wok.OFS mustNotEqual "-"
+      val result = wok.in
+
+      {
+        val (row, fs, ofs) = result(0)
+        row.size mustEqual 3
+        row.source mustEqual "a b c"
+        fs.toString mustEqual "="
+        ofs.toString mustEqual "="
+      }
+
+      {
+        val (row, fs, ofs) = result(1)
+        row.size mustEqual 1
+        row.source mustEqual "d e f"
+        fs.toString mustEqual "="
+        ofs.toString mustEqual "="
+      }
+
+      wok.FS.toString mustEqual "[ \\t]+"
+      wok.OFS.toString mustEqual " "
+    }
+    "provide access to Reader's property" in {
+      val s1 = new TestInputStream("a b c")
+      val s2 = new TestInputStream("d e f")
+      val wok = new AbstractWok {
+        val args = Nil
+        def runScript(){}
+        def in = In(s1, s2) { row =>
+          try {
+            (row, FS)
+          }
+          finally FS("=")
+        } .toList
+      }
+      val result = wok.in
+
+      {
+        val (row, fs) = result(0)
+        row.size mustEqual 3
+        row.source mustEqual "a b c"
+        fs.toString mustEqual "[ \\t]+"
+      }
+
+      {
+        val (row, fs) = result(1)
+        row.size mustEqual 1
+        row.source mustEqual "d e f"
+        fs.toString mustEqual "="
+      }
     }
     "provide immutable variables" in {
+      val s1 = new TestInputStream("a b c")
+      val s2 = new TestInputStream("d e f")
       val wok = new AbstractWok {
         val args = Nil
         def runScript(){}

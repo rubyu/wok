@@ -78,7 +78,7 @@ trait AbstractWok {
       val writer = WRITER.copy()
       var __NR = -1
       streams
-        .map (READER.open)
+        .map (reader.open)
         .toIterator
         .zipWithIndex
         .map { case (itr, i) => itr map { row =>

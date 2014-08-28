@@ -11,13 +11,13 @@ import java.io.{OutputStream, InputStream}
 
 object Helpers {
   implicit class ExtendedInputStream(val in: InputStream) extends AnyVal {
-    def csv(implicit wok: AbstractWok): Iterator[Row] = wok.reader.open(in)
+    def csv(implicit wok: AbstractWok): Iterator[Row] = wok.READER.open(in)
   }
 
   implicit class ExtendedOutputStream(val out: OutputStream) extends AnyVal {
-    def print(x: Any *)(implicit wok: AbstractWok): Unit = wok.writer.write(out, x: _*)
-    def printf(x: Any *)(implicit wok: AbstractWok): Unit = wok.writer.writeField(out, x: _*)
-    def println(x: Any *)(implicit wok: AbstractWok): Unit = wok.writer.writeRow(out, x: _*)
+    def print(x: Any *)(implicit wok: AbstractWok): Unit = wok.WRITER.write(out, x: _*)
+    def printf(x: Any *)(implicit wok: AbstractWok): Unit = wok.WRITER.writeField(out, x: _*)
+    def println(x: Any *)(implicit wok: AbstractWok): Unit = wok.WRITER.writeRow(out, x: _*)
   }
 
   implicit class ExtendedInputStreamResource(val in: InputStreamResource[InputStream]) extends AnyVal {

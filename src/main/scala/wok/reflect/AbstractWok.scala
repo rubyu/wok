@@ -1,11 +1,12 @@
 
 package wok.reflect
 
+import scalax.file.Path
 import util.DynamicVariable
 import util.matching.Regex
 import scalax.io.Codec
 import wok.core.Stdio.{out => STDOUT}
-import wok.csv.{Writer, Reader, Quote}
+import wok.csv.{Row, Writer, Reader, Quote}
 
 
 trait AbstractWok {
@@ -19,51 +20,102 @@ trait AbstractWok {
   def printf(x: Any *): Unit = STDOUT.printf(x: _*)
   def println(x: Any *): Unit = STDOUT.println(x: _*)
 
-  val _reader = new DynamicVariable[Reader](Reader())
-  val _writer = new DynamicVariable[Writer](Writer())
+  val _ARGV = new DynamicVariable[List[String]](List[String]())
+  val _ARGC = new DynamicVariable[Int](0)
+  val _ARGIND = new DynamicVariable[Int](-1)
+  val _FILENAME = new DynamicVariable[String]("")
+  val _FNR = new DynamicVariable[Long](-1)
+  val _NR = new DynamicVariable[Long](-1)
+  val _NF = new DynamicVariable[Int](-1)
+  val _FT = new DynamicVariable[List[String]](List[String]())
+  val _RT = new DynamicVariable[String]("")
+  val _READER = new DynamicVariable[Reader](Reader())
+  val _WRITER = new DynamicVariable[Writer](Writer())
 
-  def reader = _reader.value
-  def writer = _writer.value
+  def ARGV = _ARGV.value
+  def ARGC = _ARGC.value
+  def ARGIND = _ARGIND.value
+  def FILENAME = _FILENAME.value
+  def FNR = _FNR.value
+  def NR = _NR.value
+  def NF = _NF.value
+  def FT = _FT.value
+  def RT = _RT.value
+  def READER = _READER.value
+  def WRITER = _WRITER.value
 
-  def Guard[T](f: => T): T = {
-    _reader.withValue(reader.copy()) {
-      _writer.withValue(writer.copy()) {
-        f
+  def FS: Regex = READER.FS
+  def RS: Regex = READER.RS
+  def FQ: Quote = READER.FQ
+  def CD: Codec = READER.CD
+
+  def FS(r: Regex) = { READER.FS(r); this }
+  def RS(r: Regex) = { READER.RS(r); this }
+  def FS(s: String) = { READER.FS(s); this }
+  def RS(s: String) = { READER.RS(s); this }
+  def FS(c: Char) = { READER.FS(c); this }
+  def RS(c: Char) = { READER.RS(c); this }
+  def FQ(q: Quote) = { READER.FQ(q); this }
+  def CD(c: Codec) = { READER.CD(c); this }
+
+  def OFS: String = WRITER.OFS
+  def ORS: String = WRITER.ORS
+  def OFQ: Quote = WRITER.OFQ
+  def OCD: Codec = WRITER.OCD
+
+  def OFS(s: String) = { WRITER.OFS(s); this }
+  def ORS(s: String) = { WRITER.ORS(s); this }
+  def OFS(c: Char) = { WRITER.OFS(c); this }
+  def ORS(c: Char) = { WRITER.ORS(c); this }
+  def OFQ(q: Quote) = { WRITER.OFQ(q); this }
+  def OCD(c: Codec) = { WRITER.OCD(c); this }
+
+  trait InputProcessor[T] {
+    def process[A](xs: T *)(f: Row => A): Iterator[A]
+  }
+
+  implicit object PathStringInputProcessor extends InputProcessor[String] {
+    def process[A](xs: String *)(f: Row => A): Iterator[A] = {
+      val reader = READER.copy()
+      val writer = WRITER.copy()
+      var __NR = -1
+      xs.map (Path.fromString)
+        .map (_.inputStream.open().get)
+        .map (READER.open)
+        .toIterator
+        .zipWithIndex
+        .map { case (itr, i) =>
+        itr map { row =>
+          _READER.withValue(reader) {
+            _WRITER.withValue(writer) {
+              _ARGV.withValue(xs.toList) {
+                _ARGC.withValue(xs.size) {
+                  _ARGIND.withValue(i) {
+                    _FILENAME.withValue(xs(i)) {
+                      __NR += 1
+                      _NR.withValue(__NR) {
+                        _FNR.withValue(row.id) {
+                          _NF.withValue(row.size) {
+                            _FT.withValue(row.sep) {
+                              _RT.withValue(row.term) {
+                                f(row)
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
+      .flatten
     }
   }
 
-  def Reset[T](f: => T): T = {
-    _reader.withValue(Reader()) {
-      _writer.withValue(Writer()) {
-        f
-      }
-    }
-  }
+  def In[T: InputProcessor, A](xs: T *)(f: Row => A) = implicitly[InputProcessor[T]].process(xs: _*)(f)
 
-  def FS: Regex = reader.FS
-  def RS: Regex = reader.RS
-  def FQ: Quote = reader.FQ
-  def CD: Codec = reader.CD
-
-  def FS(r: Regex) = { reader.FS(r); this }
-  def RS(r: Regex) = { reader.RS(r); this }
-  def FS(s: String) = { reader.FS(s); this }
-  def RS(s: String) = { reader.RS(s); this }
-  def FS(c: Char) = { reader.FS(c); this }
-  def RS(c: Char) = { reader.RS(c); this }
-  def FQ(q: Quote) = { reader.FQ(q); this }
-  def CD(c: Codec) = { reader.CD(c); this }
-
-  def OFS: String = writer.OFS
-  def ORS: String = writer.ORS
-  def OFQ: Quote = writer.OFQ
-  def OCD: Codec = writer.OCD
-
-  def OFS(s: String) = { writer.OFS(s); this }
-  def ORS(s: String) = { writer.ORS(s); this }
-  def OFS(c: Char) = { writer.OFS(c); this }
-  def ORS(c: Char) = { writer.ORS(c); this }
-  def OFQ(q: Quote) = { writer.OFQ(q); this }
-  def OCD(c: Codec) = { writer.OCD(c); this }
 }

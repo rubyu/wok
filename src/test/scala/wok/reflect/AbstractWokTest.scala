@@ -20,35 +20,58 @@ class AbstractWokTest extends SpecificationWithJUnit {
       def runScript(){}
     }
 
-    "Guard" in {
-      val out = new TestOutputStream()
-      Stdio.withOut(out) {
-        val wok = new Wok {
-          OFS("|")
-          printf("a", "b")
-          Guard {
-            OFS("-")
-            printf("c", "d")
-          }
-          print("e", "f")
+    "In" in {
+      val p1 = Path.createTempFile()
+      p1.write("a b c")
+      val p2 = Path.createTempFile()
+      p2.write("d e f")
+      "protect iherited mutable parameters" in {
+        val wok = new AbstractWok {
+          val args = List()
+          def runScript(){}
+          def in = In(p1.path, p2.path) { row => FS("-") OFS("-") } .toList
         }
+        wok.in
+        wok.FS mustNotEqual "-"
+        wok.OFS mustNotEqual "-"
       }
-      out.toString mustEqual "a|b|c-d-e|f"
     }
 
-    "Reset" in {
-      val out = new TestOutputStream()
-      Stdio.withOut(out) {
-        val wok = new Wok {
-          OFS("|")
-          printf("a", "b")
-          Reset {
-            printf("c", "d")
-          }
-          print("e", "f")
-        }
+    "In" in {
+      val p1 = Path.createTempFile()
+      p1.write("a b c")
+      val p2 = Path.createTempFile()
+      p2.write("d e f")
+      val wok = new AbstractWok {
+        val args = List()
+        def runScript(){}
+        def in = In(p1.path, p2.path) { row => (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT) } .toList
       }
-      out.toString mustEqual "a|b|c d e|f"
+      val result = wok.in
+      result.size mustEqual 2
+      result(0)._1.size mustEqual 3
+      result(0)._1.source mustEqual "a b c"
+      result(0)._2 mustEqual List(p1.path, p2.path)
+      result(0)._3 mustEqual 2
+      result(0)._4 mustEqual 0
+      result(0)._5 mustEqual p1.path
+      result(0)._6 mustEqual 0
+      result(0)._7 mustEqual 0
+      result(0)._8 mustEqual 3
+      result(0)._9 mustEqual List(" ", " ")
+      result(0)._10 mustEqual ""
+
+      result(1)._1.size mustEqual 3
+      result(1)._1.source mustEqual "d e f"
+      result(1)._2 mustEqual List(p1.path, p2.path)
+      result(1)._3 mustEqual 2
+      result(1)._4 mustEqual 1
+      result(1)._5 mustEqual p2.path
+      result(1)._6 mustEqual 0
+      result(1)._7 mustEqual 1
+      result(1)._8 mustEqual 3
+      result(1)._9 mustEqual List(" ", " ")
+      result(1)._10 mustEqual ""
     }
 
     "support accesses for Reader's parameters" in {

@@ -8,7 +8,6 @@ import scalax.file.Path
 class AppendModePathTest extends SpecificationWithJUnit {
 
   val wok = new AbstractWok {
-    val args = List()
     def runScript(){}
   }
 

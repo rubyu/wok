@@ -6,12 +6,12 @@ import scalax.file.Path
 import util.DynamicVariable
 import util.matching.Regex
 import scalax.io.Codec
-import wok.core.Stdio.{out => Stdout}
+import wok.core.Stdio.{in => Stdin, out => Stdout}
 import wok.csv.{Row, Writer, Reader, Quote}
 
 
 trait AbstractWok {
-  val args: List[String]
+  val args: List[String] = Nil
 
   def runScript(): Unit
 
@@ -21,8 +21,8 @@ trait AbstractWok {
   def printf(x: Any *): Unit = Stdout.printf(x: _*)
   def println(x: Any *): Unit = Stdout.println(x: _*)
 
-  val _ARGV = new DynamicVariable[List[String]](Nil)
-  val _ARGC = new DynamicVariable[Int](0)
+  lazy val _ARGV = new DynamicVariable[List[String]](args)
+  lazy val _ARGC = new DynamicVariable[Int](args.size)
   val _ARGIND = new DynamicVariable[Int](0)
   val _FILENAME = new DynamicVariable[String]("")
   val _FNR = new DynamicVariable[Long](0)
@@ -72,55 +72,83 @@ trait AbstractWok {
   def OCD(c: Codec) = { WRITER.OCD(c); this }
 
   trait InputProcessor[-T] {
-    def process[A](xs: T *)(f: Row => A): Iterator[A]
-    def process[A](files: List[String], streams: List[InputStream])(f: Row => A): Iterator[A] = {
-      val reader = READER.copy()
-      val writer = WRITER.copy()
-      var __NR = -1
-      streams
-        .map (reader.open)
+    def process[A](xs: T *)(f: Iterator[Row] => A): A
+    def process[A](files: List[String], streams: List[InputStream])(f: Iterator[Row] => A): A = {
+      // backup dynamic variables
+      val __ARGV = ARGV
+      val __ARGC = ARGC
+      val __ARGIND = ARGIND
+      val __FILENAME = FILENAME
+      val __FNR = FNR
+      val __NR = NR
+      val __NF = NF
+      val __FT = FT
+      val __RT = RT
+      val __READER = READER
+      val __WRITER = WRITER
+
+      // use copied reader/writer to guard inherited reader/writer
+      _READER.value = READER.copy()
+      _WRITER.value = WRITER.copy()
+
+      // update dynamic variables
+      _ARGV.value = files
+      _ARGC.value = files.size
+      _NR.value = -1
+
+      val itr = streams
+        .map (READER.open)
         .toIterator
         .zipWithIndex
-        .map { case (itr, i) => itr map { row =>
-          _READER.withValue(reader) {
-            _WRITER.withValue(writer) {
-              _ARGV.withValue(files) {
-                _ARGC.withValue(files.size) {
-                  _ARGIND.withValue(i) {
-                    _FILENAME.withValue(files(i)) {
-                      __NR += 1
-                      _NR.withValue(__NR) {
-                        _FNR.withValue(row.id) {
-                          _NF.withValue(row.size) {
-                            _FT.withValue(row.sep) {
-                              _RT.withValue(row.term) {
-                                f(row)
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
+        .map { case (rows, i) =>
+          _ARGIND.value = i
+          _FILENAME.value = files(i)
+          rows map { row =>
+            _NR.value += 1
+            _FNR.value = row.id
+            _NF.value = row.size
+            _FT.value = row.sep
+            _RT.value = row.term
+            row
           }
         }
-      }
       .flatten
+
+      try f(itr)
+      finally {
+        // restore dynamic variables
+        _ARGV.value = __ARGV
+        _ARGC.value = __ARGC
+        _ARGIND.value = __ARGIND
+        _FILENAME.value = __FILENAME
+        _FNR.value = __FNR
+        _NR.value = __NR
+        _NF.value = __NF
+        _FT.value = __FT
+        _RT.value = __RT
+        _READER.value = __READER
+        _WRITER.value = __WRITER
+      }
     }
   }
 
   implicit object StreamInputProcessor extends InputProcessor[InputStream] {
-    def process[A](streams: InputStream *)(f: Row => A) =
+    def process[A](streams: InputStream *)(f: Iterator[Row] => A): A =
       process(streams map (x => "-") toList, streams.toList)(f)
   }
 
   implicit object PathStringInputProcessor extends InputProcessor[String] {
-    def process[A](files: String *)(f: Row => A) =
+    def process[A](files: String *)(f: Iterator[Row] => A): A =
       process(files.toList, files map (file => Path.fromString(file).inputStream.open().get) toList)(f)
   }
 
-  def In[T: InputProcessor, A](xs: T *)(f: Row => A) = implicitly[InputProcessor[T]].process(xs: _*)(f)
+  object In {
+    def apply[A](f: Iterator[Row] => A): A = {
+      if (ARGC == 0)
+        from(Stdin.inputStream.open().get)(f)
+      else
+        from(ARGV: _*)(f)
+    }
+    def from[T: InputProcessor, A](xs: T *)(f: Iterator[Row] => A): A = implicitly[InputProcessor[T]].process(xs: _*)(f)
+  }
 }

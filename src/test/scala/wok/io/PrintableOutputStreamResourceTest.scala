@@ -8,7 +8,6 @@ import wok.Helpers._
 class PrintableOutputStreamResourceTest extends SpecificationWithJUnit {
 
   val wok = new AbstractWok {
-    val args = List()
     def runScript(){}
   }
 

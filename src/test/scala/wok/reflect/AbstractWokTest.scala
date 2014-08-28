@@ -14,6 +14,30 @@ import scalax.io.{StandardOpenOption, Codec}
 
 class AbstractWokTest extends SpecificationWithJUnit {
 
+  "AbstractWok.In" should {
+    "read data from Stdin when no argument given" in {
+      Stdio.withIn(new TestInputStream("a b c")) {
+        val wok = new AbstractWok {
+          def runScript(){}
+          def in = In { _ map (_ mkString) mkString }
+        }
+        wok.in mustEqual "abc"
+      }
+    }
+    "read data from files when arguments given" in {
+      val f1 = Path.createTempFile()
+      f1.write("a b c")
+      val f2 = Path.createTempFile()
+      f2.write("d e f")
+      val wok = new AbstractWok {
+        override val args = List(f1.path, f2.path)
+        def runScript(){}
+        def in = In { _ map (_ mkString) mkString }
+      }
+      wok.in mustEqual "abcdef"
+    }
+  }
+
   "PathStringInputProcessor.process" should {
     val p1 = Path.createTempFile()
     p1.write("a b c")
@@ -21,13 +45,14 @@ class AbstractWokTest extends SpecificationWithJUnit {
     p2.write("d e f")
     "protect inherited mutable variables" in {
       val wok = new AbstractWok {
-        val args = Nil
         def runScript(){}
-        def in = In(p1.path, p2.path) { row =>
-          FS("=")
-          OFS("=")
-          (row, FS, OFS)
-        } toList
+        def in = In.from(p1.path, p2.path) {
+          _ map { row =>
+            FS("=")
+            OFS("=")
+            (row, FS, OFS)
+          } toList
+        }
       }
       val result = wok.in
 
@@ -52,14 +77,15 @@ class AbstractWokTest extends SpecificationWithJUnit {
     }
     "provide access to Reader's property" in {
       val wok = new AbstractWok {
-        val args = Nil
         def runScript(){}
-        def in = In(p1.path, p2.path) { row =>
-          try {
-            (row, FS)
-          }
-          finally FS("=")
-        } .toList
+        def in = In.from(p1.path, p2.path) {
+          _ map { row =>
+            try {
+              (row, FS)
+            }
+            finally FS("=")
+          } toList
+        }
       }
       val result = wok.in
 
@@ -79,9 +105,12 @@ class AbstractWokTest extends SpecificationWithJUnit {
     }
     "provide immutable variables" in {
       val wok = new AbstractWok {
-        val args = Nil
         def runScript(){}
-        def in = In(p1.path, p2.path) { row => (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT) } .toList
+        def in = In.from(p1.path, p2.path) {
+          _ map { row =>
+            (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT)
+          } toList
+        }
       }
       val result = wok.in
       result.size mustEqual 2
@@ -123,13 +152,14 @@ class AbstractWokTest extends SpecificationWithJUnit {
       val s1 = new TestInputStream("a b c")
       val s2 = new TestInputStream("d e f")
       val wok = new AbstractWok {
-        val args = Nil
         def runScript(){}
-        def in = In(s1, s2) { row =>
-          FS("=")
-          OFS("=")
-          (row, FS, OFS)
-        } toList
+        def in = In.from(s1, s2) {
+          _ map { row =>
+            FS("=")
+            OFS("=")
+            (row, FS, OFS)
+          } toList
+        }
       }
       val result = wok.in
 
@@ -156,14 +186,15 @@ class AbstractWokTest extends SpecificationWithJUnit {
       val s1 = new TestInputStream("a b c")
       val s2 = new TestInputStream("d e f")
       val wok = new AbstractWok {
-        val args = Nil
         def runScript(){}
-        def in = In(s1, s2) { row =>
-          try {
-            (row, FS)
-          }
-          finally FS("=")
-        } .toList
+        def in = In.from(s1, s2) {
+          _ map { row =>
+            try {
+              (row, FS)
+            }
+            finally FS("=")
+          } toList
+        }
       }
       val result = wok.in
 
@@ -185,9 +216,12 @@ class AbstractWokTest extends SpecificationWithJUnit {
       val s1 = new TestInputStream("a b c")
       val s2 = new TestInputStream("d e f")
       val wok = new AbstractWok {
-        val args = Nil
         def runScript(){}
-        def in = In(s1, s2) { row => (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT) } .toList
+        def in = In.from(s1, s2) {
+          _ map { row =>
+            (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT)
+          } toList
+        }
       }
       val result = wok.in
       result.size mustEqual 2
@@ -227,7 +261,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
   "AbstractWok" should {
 
     class Wok extends AbstractWok {
-      val args = List()
       def runScript(){}
     }
 

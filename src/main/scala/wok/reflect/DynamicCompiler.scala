@@ -66,7 +66,7 @@ object DynamicCompiler {
         |import scalax.file.Path
         |import scalax.file.ImplicitConversions.string2path
         |
-        |class Wok(val args: List[String]) extends AbstractWok {
+        |class Wok(override val args: List[String]) extends AbstractWok {
         |  def runScript(): Unit = {""".stripMargin)
     val scripts = List(indent(before), script(process), indent(after))
     if (scripts.exists(_.isDefined)) b.append("\n")

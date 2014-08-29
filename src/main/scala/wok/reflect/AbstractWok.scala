@@ -3,10 +3,10 @@ package wok.reflect
 
 import java.io.InputStream
 import java.util.concurrent.ForkJoinPool
-import util.DynamicVariable
 import util.matching.Regex
 import scalax.io.Codec
 import scalax.file.Path
+import wok.core.{ThreadSafeVariable => ThreadSafe}
 import wok.core.Stdio.{in => Stdin, out => Stdout}
 import wok.csv.{Row, Writer, Reader, Quote}
 
@@ -22,17 +22,17 @@ trait AbstractWok {
   def printf(x: Any *): Unit = Stdout.printf(x: _*)
   def println(x: Any *): Unit = Stdout.println(x: _*)
 
-  lazy val _ARGV = new DynamicVariable[List[String]](args)
-  lazy val _ARGC = new DynamicVariable[Int](args.size)
-  val _ARGIND = new DynamicVariable[Int](0)
-  val _FILENAME = new DynamicVariable[String]("")
-  val _FNR = new DynamicVariable[Long](0)
-  val _NR = new DynamicVariable[Long](0)
-  val _NF = new DynamicVariable[Int](0)
-  val _FT = new DynamicVariable[List[String]](Nil)
-  val _RT = new DynamicVariable[String]("")
-  val _READER = new DynamicVariable[Reader](Reader())
-  val _WRITER = new DynamicVariable[Writer](Writer())
+  lazy val _ARGV = new ThreadSafe[List[String]](args)
+  lazy val _ARGC = new ThreadSafe[Int](args.size)
+  val _ARGIND = new ThreadSafe[Int](0)
+  val _FILENAME = new ThreadSafe[String]("")
+  val _FNR = new ThreadSafe[Long](0)
+  val _NR = new ThreadSafe[Long](0)
+  val _NF = new ThreadSafe[Int](0)
+  val _FT = new ThreadSafe[List[String]](Nil)
+  val _RT = new ThreadSafe[String]("")
+  val _READER = new ThreadSafe[Reader](Reader()) withCopy(v => v.copy())
+  val _WRITER = new ThreadSafe[Writer](Writer()) withCopy(v => v.copy())
 
   def ARGV = _ARGV.value
   def ARGC = _ARGC.value
@@ -155,33 +155,30 @@ trait AbstractWok {
 
   class ThreadSafeExecutor extends ForkJoinPool {
     override def execute(task: Runnable) {
-      // copy
-      val __ARGV = ARGV
-      val __ARGC = ARGC
-      val __ARGIND = ARGIND
-      val __FILENAME = FILENAME
-      val __FNR = FNR
-      val __NR = NR
-      val __NF = NF
-      val __FT = FT
-      val __RT = RT
-      val __READER = READER
-      val __WRITER = WRITER
-
+      val parent = Thread.currentThread()
       super.execute(new Runnable {
         override def run() {
-          // inject
-          _ARGV.value = __ARGV
-          _ARGC.value = __ARGC
-          _ARGIND.value = __ARGIND
-          _FILENAME.value = __FILENAME
-          _FNR.value = __FNR
-          _NR.value = __NR
-          _NF.value = __NF
-          _FT.value = __FT
-          _RT.value = __RT
-          _READER.value = __READER.copy()
-          _WRITER.value = __WRITER.copy()
+          val current = Thread.currentThread()
+          val threadClass = classOf[Thread]
+          val threadLocalClass = classOf[ThreadLocal[_]]
+          val threadLocalMapClass = ClassLoader.getSystemClassLoader.loadClass("java.lang.ThreadLocal$ThreadLocalMap")
+
+          val threadLocals = threadClass.getDeclaredField("threadLocals")
+          threadLocals.setAccessible(true)
+
+          val inheritableThreadLocals = threadClass.getDeclaredField("inheritableThreadLocals")
+          inheritableThreadLocals.setAccessible(true)
+
+          val createInheritedMap = threadLocalClass.getDeclaredMethod("createInheritedMap", threadLocalMapClass)
+          createInheritedMap.setAccessible(true)
+
+          // initialize threadLocals
+          threadLocals.set(current, null)
+
+          // initialize inheritableThreadLocals
+          val parentMap = inheritableThreadLocals.get(parent)
+          val currentMap = createInheritedMap.invoke(current, parentMap)
+          inheritableThreadLocals.set(current, currentMap)
 
           task.run()
         }

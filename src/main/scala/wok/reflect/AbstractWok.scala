@@ -2,10 +2,11 @@
 package wok.reflect
 
 import java.io.InputStream
-import scalax.file.Path
+import java.util.concurrent.ForkJoinPool
 import util.DynamicVariable
 import util.matching.Regex
 import scalax.io.Codec
+import scalax.file.Path
 import wok.core.Stdio.{in => Stdin, out => Stdout}
 import wok.csv.{Row, Writer, Reader, Quote}
 
@@ -88,8 +89,8 @@ trait AbstractWok {
       val __WRITER = WRITER
 
       // use copied reader/writer to guard inherited reader/writer
-      _READER.value = READER.copy()
-      _WRITER.value = WRITER.copy()
+      _READER.value = __READER.copy()
+      _WRITER.value = __WRITER.copy()
 
       // update dynamic variables
       _ARGV.value = files
@@ -151,4 +152,41 @@ trait AbstractWok {
     }
     def from[T: InputProcessor, A](xs: T *)(f: Iterator[Row] => A): A = implicitly[InputProcessor[T]].process(xs: _*)(f)
   }
+
+  class ThreadSafeExecutor extends ForkJoinPool {
+    override def execute(task: Runnable) {
+      // copy
+      val __ARGV = ARGV
+      val __ARGC = ARGC
+      val __ARGIND = ARGIND
+      val __FILENAME = FILENAME
+      val __FNR = FNR
+      val __NR = NR
+      val __NF = NF
+      val __FT = FT
+      val __RT = RT
+      val __READER = READER
+      val __WRITER = WRITER
+
+      super.execute(new Runnable {
+        override def run() {
+          // inject
+          _ARGV.value = __ARGV
+          _ARGC.value = __ARGC
+          _ARGIND.value = __ARGIND
+          _FILENAME.value = __FILENAME
+          _FNR.value = __FNR
+          _NR.value = __NR
+          _NF.value = __NF
+          _FT.value = __FT
+          _RT.value = __RT
+          _READER.value = __READER.copy()
+          _WRITER.value = __WRITER.copy()
+
+          task.run()
+        }
+      })
+    }
+  }
+  implicit val executionContext = scala.concurrent.ExecutionContext.fromExecutorService(new ThreadSafeExecutor)
 }

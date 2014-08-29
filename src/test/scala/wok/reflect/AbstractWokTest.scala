@@ -8,11 +8,44 @@ import org.specs2.specification.Scope
 import wok.Helpers._
 import wok.csv.Quote
 import wok.core.Stdio
+import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.{Await, Future}
 import scalax.file.Path
 import scalax.io.{StandardOpenOption, Codec}
 
 
 class AbstractWokTest extends SpecificationWithJUnit {
+
+  "ThreadSafeVariables" should {
+    "pass value to child thread" in {
+      val wok = new AbstractWok {
+        def runScript() {}
+        def value = Future { FILENAME }
+      }
+      val v1 = wok.FILENAME
+      val v2 = Await.result(wok.value, Duration(1, SECONDS))
+      v1 eq v2 must beTrue
+    }
+    "pass value to child thread when a change given" in {
+      val wok = new AbstractWok {
+        def runScript() {}
+        def value = Future { FILENAME }
+      }
+      wok._FILENAME.value = "a"
+      val v1 = wok.FILENAME
+      val v2 = Await.result(wok.value, Duration(1, SECONDS))
+      v1 eq v2 must beTrue
+    }
+    "pass copied value to chid thread" in {
+      val wok = new AbstractWok {
+        def runScript() {}
+        def value = Future { READER }
+      }
+      val v1 = wok.READER
+      val v2 = Await.result(wok.value, Duration(1, SECONDS))
+      v1 ne v2 must beTrue
+    }
+  }
 
   "AbstractWok.In" should {
     "read data from Stdin when no argument given" in {

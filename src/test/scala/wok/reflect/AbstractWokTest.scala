@@ -81,8 +81,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
         def runScript(){}
         def in = In.from(p1.path, p2.path) {
           _ map { row =>
-            FS("=")
-            OFS("=")
+            FS = "="
+            OFS = "="
             (row, FS, OFS)
           } toList
         }
@@ -116,7 +116,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
             try {
               (row, FS)
             }
-            finally FS("=")
+            finally FS = "="
           } toList
         }
       }
@@ -188,8 +188,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
         def runScript(){}
         def in = In.from(s1, s2) {
           _ map { row =>
-            FS("=")
-            OFS("=")
+            FS = "="
+            OFS = "="
             (row, FS, OFS)
           } toList
         }
@@ -225,7 +225,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
             try {
               (row, FS)
             }
-            finally FS("=")
+            finally FS = "="
           } toList
         }
       }
@@ -301,31 +301,41 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "FS" in {
         val wok = new Wok()
         wok.FS.toString mustEqual "[ \\t]+"
-        wok.FS("a".r).FS.toString mustEqual "a"
-        wok.FS("a").FS.toString mustEqual "a"
-        wok.FS("").FS.toString mustEqual "(?!.)."
-        wok.FS('a').FS.toString mustEqual "a"
+        wok.FS = "a".r
+        wok.FS.toString mustEqual "a"
+        wok.FS = "a"
+        wok.FS.toString mustEqual "a"
+        wok.FS = ""
+        wok.FS.toString mustEqual "(?!.)."
+        wok.FS = 'a'
+        wok.FS.toString mustEqual "a"
       }
 
       "RS" in {
         val wok = new Wok()
         wok.RS.toString mustEqual "\\r\\n|\\r|\\n"
-        wok.RS("a".r).RS.toString mustEqual "a"
-        wok.RS("a").RS.toString mustEqual "a"
-        wok.RS("").RS.toString mustEqual "(?!.)."
-        wok.RS('a').RS.toString mustEqual "a"
+        wok.RS = "a".r
+        wok.RS.toString mustEqual "a"
+        wok.RS = "a"
+        wok.RS.toString mustEqual "a"
+        wok.RS = ""
+        wok.RS.toString mustEqual "(?!.)."
+        wok.RS = 'a'
+        wok.RS.toString mustEqual "a"
       }
 
       "FQ" in {
         val wok = new Wok()
         wok.FQ mustEqual Quote.None()
-        wok.FQ(Quote All()).FQ mustEqual Quote.All()
+        wok.FQ = Quote All()
+        wok.FQ mustEqual Quote.All()
       }
 
       "CD" in {
         val wok = new Wok()
         wok.CD mustEqual Codec.default
-        wok.CD(Codec.ISO8859).CD mustEqual Codec.ISO8859
+        wok.CD = Codec.ISO8859
+        wok.CD mustEqual Codec.ISO8859
       }
     }
 
@@ -333,27 +343,33 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "OFS" in {
         val wok = new Wok()
         wok.OFS mustEqual " "
-        wok.OFS("a").OFS mustEqual "a"
-        wok.OFS('a').OFS mustEqual "a"
+        wok.OFS = "a"
+        wok.OFS mustEqual "a"
+        wok.OFS = 'a'
+        wok.OFS mustEqual "a"
       }
 
       "ORS" in {
         val wok = new Wok()
         wok.ORS mustEqual "\n"
-        wok.ORS("a").ORS mustEqual "a"
-        wok.ORS('a').ORS mustEqual "a"
+        wok.ORS = "a"
+        wok.ORS mustEqual "a"
+        wok.ORS = 'a'
+        wok.ORS mustEqual "a"
       }
 
       "OFQ" in {
         val wok = new Wok()
         wok.OFQ mustEqual Quote.None()
-        wok.OFQ(Quote All()).OFQ mustEqual Quote.All()
+        wok.OFQ = Quote All()
+        wok.OFQ mustEqual Quote.All()
       }
 
       "OCD" in {
         val wok = new Wok()
         wok.OCD mustEqual Codec.default
-        wok.OCD(Codec.ISO8859).OCD mustEqual Codec.ISO8859
+        wok.OCD = Codec.ISO8859
+        wok.OCD mustEqual Codec.ISO8859
       }
     }
 

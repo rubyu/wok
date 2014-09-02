@@ -50,26 +50,26 @@ trait AbstractWok {
   def FQ: Quote = READER.FQ
   def CD: Codec = READER.CD
 
-  def FS(r: Regex) = { READER.FS(r); this }
-  def RS(r: Regex) = { READER.RS(r); this }
-  def FS(s: String) = { READER.FS(s); this }
-  def RS(s: String) = { READER.RS(s); this }
-  def FS(c: Char) = { READER.FS(c); this }
-  def RS(c: Char) = { READER.RS(c); this }
-  def FQ(q: Quote) = { READER.FQ(q); this }
-  def CD(c: Codec) = { READER.CD(c); this }
+  def FS_=(r: Regex): Unit = READER.FS(r)
+  def RS_=(r: Regex): Unit = READER.RS(r)
+  def FS_=(s: String): Unit = READER.FS(s)
+  def RS_=(s: String): Unit = READER.RS(s)
+  def FS_=(c: Char): Unit = READER.FS(c)
+  def RS_=(c: Char): Unit = READER.RS(c)
+  def FQ_=(q: Quote): Unit = READER.FQ(q)
+  def CD_=(c: Codec): Unit = READER.CD(c)
 
   def OFS: String = WRITER.OFS
   def ORS: String = WRITER.ORS
   def OFQ: Quote = WRITER.OFQ
   def OCD: Codec = WRITER.OCD
 
-  def OFS(s: String) = { WRITER.OFS(s); this }
-  def ORS(s: String) = { WRITER.ORS(s); this }
-  def OFS(c: Char) = { WRITER.OFS(c); this }
-  def ORS(c: Char) = { WRITER.ORS(c); this }
-  def OFQ(q: Quote) = { WRITER.OFQ(q); this }
-  def OCD(c: Codec) = { WRITER.OCD(c); this }
+  def OFS_=(s: String): Unit = WRITER.OFS(s)
+  def ORS_=(s: String): Unit = WRITER.ORS(s)
+  def OFS_=(c: Char): Unit = WRITER.OFS(c)
+  def ORS_=(c: Char): Unit = WRITER.ORS(c)
+  def OFQ_=(q: Quote): Unit = WRITER.OFQ(q)
+  def OCD_=(c: Codec): Unit = WRITER.OCD(c)
 
   trait InputProcessor[-T] {
     def process[A](xs: T *)(f: Iterator[Row] => A): A

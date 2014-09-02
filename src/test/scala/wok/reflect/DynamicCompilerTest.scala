@@ -169,7 +169,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile("OFQ(Quote() Min()); In { _ foreach { row => print(FT: _*) }}")
+              .compile("OFQ = Quote Min(); In { _ foreach { row => print(FT: _*) }}")
               ._2.create(Nil)
               .runScript()
           }
@@ -181,7 +181,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a b c\n")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile("OFQ(Quote() Min()); In { _ foreach { row => print(RT) }}")
+              .compile("OFQ = Quote Min(); In { _ foreach { row => print(RT) }}")
               ._2.create(Nil)
               .runScript()
           }
@@ -203,7 +203,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("a\\ b\\ c")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile("FQ(Quote() None() E('\\\\')); OFQ(FQ); In { _ foreach { row => print(row: _*) }}")
+              .compile("FQ = Quote None() E('\\\\'); OFQ = FQ; In { _ foreach { row => print(row: _*) }}")
               ._2.create(Nil)
               .runScript()
           }
@@ -215,7 +215,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
         Stdio.withIn(new TestInputStream("あ", "Windows-31J")) {
           Stdio.withOut(out) {
             DynamicCompiler
-              .compile("CD(Codec(\"Windows-31J\")); In { _ foreach { row => print(row: _*) }}")
+              .compile("CD = Codec(\"Windows-31J\"); In { _ foreach { row => print(row: _*) }}")
               ._2.create(Nil)
               .runScript()
           }

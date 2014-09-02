@@ -30,81 +30,49 @@ class CliOptionTest extends SpecificationWithJUnit {
       "when parse -v@non_supported_type value" in {
         CliOption.parse(List("-v@non_supported_type", "a=b")) must throwAn[AssertionError]
       }
-      "when parse -b" in {
-        CliOption.parse(List("-b")) must throwAn[AssertionError]
-      }
-      "when parse -e" in {
-        CliOption.parse(List("-e")) must throwAn[AssertionError]
-      }
     }
 
     "parse -v a=b" in {
-      CliOption.parse(List("-v", "a=b")) mustEqual CliOption(Nil, List("var a = b"), Nil, Nil, false)
+      CliOption.parse(List("-v", "a=b")) mustEqual CliOption(Nil, "var a = b", false)
     }
     "parse -v@str a=b" in {
-      CliOption.parse(List("-v@str", "a=b")) mustEqual CliOption(Nil, List("var a = \"b\""), Nil, Nil, false)
+      CliOption.parse(List("-v@str", "a=b")) mustEqual CliOption(Nil, "var a = \"b\"", false)
     }
     "parse -v@rawstr a=b" in {
-      CliOption.parse(List("-v@rawstr", "a=b")) mustEqual CliOption(Nil, List("var a = \"\"\"b\"\"\""), Nil, Nil, false)
+      CliOption.parse(List("-v@rawstr", "a=b")) mustEqual CliOption(Nil, "var a = \"\"\"b\"\"\"", false)
     }
     "parse -v@char a=b" in {
-      CliOption.parse(List("-v@char", "a=b")) mustEqual CliOption(Nil, List("var a = 'b'"), Nil, Nil, false)
-    }
-    "parse -b a" in {
-      CliOption.parse(List("-b", "a")) mustEqual CliOption(Nil, List("a"), Nil, Nil, false)
-    }
-    "parse -e a" in {
-      CliOption.parse(List("-e", "a")) mustEqual CliOption(Nil, Nil, Nil, List("a"), false)
+      CliOption.parse(List("-v@char", "a=b")) mustEqual CliOption(Nil, "var a = 'b'", false)
     }
     "parse a" in {
-      CliOption.parse(List("a")) mustEqual CliOption(Nil, Nil, List("a"), Nil, false)
+      CliOption.parse(List("a")) mustEqual CliOption(Nil, "a", false)
     }
     "parse a b" in {
-      CliOption.parse(List("a", "b")) mustEqual CliOption(List("b"), Nil, List("a"), Nil, false)
+      CliOption.parse(List("a", "b")) mustEqual CliOption(List("b"), "a", false)
     }
     "parse --" in {
-      CliOption.parse(List("--")) mustEqual CliOption(Nil, Nil, Nil, Nil, false)
+      CliOption.parse(List("--")) mustEqual CliOption(Nil, "", false)
     }
     "parse --diag" in {
-      CliOption.parse(List("--diag")) mustEqual CliOption(Nil, Nil, Nil, Nil, true)
+      CliOption.parse(List("--diag")) mustEqual CliOption(Nil, "", true)
     }
     "parse -f" in {
-      "parse -b" in {
-        val temp = Path.createTempFile()
-        temp.write(List("-b foo", "-b bar", "-b baz") mkString "\n")
-        CliOption.parse(List("-f", temp.path)) mustEqual CliOption(Nil, List("foo", "bar", "baz"), Nil, Nil, false)
-      }
-      "parse -e" in {
-        val temp = Path.createTempFile()
-        temp.write(List("-e foo", "-e bar", "-e baz") mkString "\n")
-        CliOption.parse(List("-f", temp.path)) mustEqual CliOption(Nil, Nil, Nil, List("foo", "bar", "baz"), false)
-      }
       "parse scripts" in {
-        val temp = Path.createTempFile()
-        temp.write(List("foo", "bar", "baz") mkString "\n")
-        CliOption.parse(List("-f", temp.path)) mustEqual CliOption(Nil, Nil, List("foo", "bar", "baz"), Nil, false)
+        val f1 = Path.createTempFile()
+        f1.write(List("a", "b", "c") mkString "\n")
+        CliOption.parse(List("-f", f1.path)) mustEqual CliOption(Nil, "a\nb\nc", false)
       }
       "parse all type" in {
-        val temp = Path.createTempFile()
-        temp.write(List("-b b1", "-b b2", "-b b3", "s1", "s2", "s3", "-e e1", "-e e2", "-e e3") mkString "\n")
-        CliOption.parse(List("-f", temp.path)) mustEqual
-          CliOption(Nil, List("b1", "b2", "b3"), List("s1", "s2", "s3"), List("e1", "e2", "e3"), false)
-      }
-      "marge with -b" in {
-        val temp = Path.createTempFile()
-        temp.write(List("-b b3", "-b b4") mkString "\n")
-        CliOption.parse(List("-b", "b1", "-b", "b2", "-f", temp.path)) mustEqual
-          CliOption(Nil, List("b1", "b2", "b3", "b4"), Nil, Nil, false)
-      }
-      "marge with -e" in {
-        val temp = Path.createTempFile()
-        temp.write(List("-e e1", "-e e2") mkString "\n")
-        CliOption.parse(List("-e", "e3", "-e", "e4", "-f", temp.path)) mustEqual
-          CliOption(Nil, Nil, Nil, List("e1", "e2", "e3", "e4"), false)
+        val f1 = Path.createTempFile()
+        f1.write("a")
+        val f2 = Path.createTempFile()
+        f2.write("b")
+        CliOption.parse(List("-f", f1.path, "-f", f2.path, "arg1", "arg2")) mustEqual
+          CliOption(List("arg1", "arg2"), "a\nb", false)
       }
     }
     "parse -- a" in {
-      CliOption.parse(List("--", "a")) mustEqual CliOption(List("a"), Nil, Nil, Nil, false)
+      CliOption.parse(List("--", "a")) mustEqual CliOption(List("a"), "", false)
     }
   }
 }

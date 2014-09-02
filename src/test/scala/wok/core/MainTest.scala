@@ -19,46 +19,15 @@ class MainTest extends SpecificationWithJUnit {
       }
     }
 
-    "execute begin" in new scope {
-      val out = new TestOutputStream()
-      Stdio.withOut(out) {
-        Main.main(Array("-b" ,"print(\"a\")"))
-      }
-      out.toString mustEqual "a"
-    }
-
     "execute script" in new scope {
       val in = new TestInputStream("a b c")
       val out = new TestOutputStream()
       Stdio.withIn(in) {
         Stdio.withOut(out) {
-          Main.main(Array("foreach { row => print(row: _*) }"))
+          Main.main(Array("In { _ foreach { row => print(row: _*) }}"))
         }
       }
       out.toString mustEqual "a b c"
-    }
-
-    "execute end" in new scope {
-      val out = new TestOutputStream()
-      Stdio.withOut(out) {
-        Main.main(Array("-e" ,"print(\"a\")"))
-      }
-      out.toString mustEqual "a"
-    }
-
-    "execute begin, script, end" in new scope {
-      val in = new TestInputStream("b")
-      val out = new TestOutputStream()
-      Stdio.withIn(in) {
-        Stdio.withOut(out) {
-          Main.main(Array(
-              "-b", "print(args(0))",
-              "-e", "print(args(1))",
-              "foreach { row => print(row: _*) }",
-              "a", "c"))
-        }
-      }
-      out.toString mustEqual "abc"
     }
 
     "do diagnosis with no error" in new scope {
@@ -83,8 +52,9 @@ class MainTest extends SpecificationWithJUnit {
           "|10| import scalax.file.ImplicitConversions.string2path",
           "|11| ",
           "|12| class Wok(override val args: List[String]) extends AbstractWok {",
-          "|13|   def runScript(): Unit = {}",
-          "|14| }",
+          "|13| def runScript(): Unit = {",
+          "|14| ",
+          "|15| }}",
           ""
         ).mkString(System.lineSeparator())
     }
@@ -92,22 +62,16 @@ class MainTest extends SpecificationWithJUnit {
     "do diagnosis with error" in new scope {
       val out = new TestOutputStream()
       Console.withOut(out) {
-        Main.main(Array("--diag", "-b" ,"foo", "-b", "bar", "baz"))
+        Main.main(Array("--diag", "foo"))
       }
       out.toString mustEqual
         List(
           "The results of diagnosis are:",
-          "Errors: 3, Warning: 0",
+          "Errors: 1, Warning: 0",
           "",
           "14: ERROR: not found: value foo",
-          "    foo",
-          "    ^",
-          "15: ERROR: not found: value bar",
-          "    bar",
-          "    ^",
-          "23: ERROR: value baz is not a member of Iterator[wok.csv.Row]",
-          "        .map { row => currentRow = Some(row); row } baz",
-          "                                                    ^",
+          "foo",
+          "^",
           "",
           "| 1| package wok",
           "| 2| ",
@@ -121,21 +85,9 @@ class MainTest extends SpecificationWithJUnit {
           "|10| import scalax.file.ImplicitConversions.string2path",
           "|11| ",
           "|12| class Wok(override val args: List[String]) extends AbstractWok {",
-          "|13|   def runScript(): Unit = {",
-          "|14|     foo",
-          "|15|     bar",
-          "|16|     ;{",
-          "|17|       var currentRow: Option[Row] = None",
-          "|18|       def NF = currentRow.get.size",
-          "|19|       def NR = currentRow.get.id",
-          "|20|       def FT = currentRow.get.sep",
-          "|21|       def RT = currentRow.get.term",
-          "|22|       Stdin #> { _.csv",
-          "|23|         .map { row => currentRow = Some(row); row } baz",
-          "|24|       }",
-          "|25|     };",
-          "|26|   }",
-          "|27| }",
+          "|13| def runScript(): Unit = {",
+          "|14| foo",
+          "|15| }}",
           ""
         ).mkString(System.lineSeparator())
     }
@@ -145,23 +97,17 @@ class MainTest extends SpecificationWithJUnit {
       val in = new TestInputStream("a")
       Stdio.withIn(in) {
         Console.withErr(out) {
-          Main.main(Array("-b" ,"foo", "-b", "bar", "baz")) must throwAn(new AttemptToExitException(1))
+          Main.main(Array("foo")) must throwAn(new AttemptToExitException(1))
         }
       }
       out.toString mustEqual
         List(
           "Compilation failed. The details are:",
-          "Errors: 3, Warning: 0",
+          "Errors: 1, Warning: 0",
           "",
           "14: ERROR: not found: value foo",
-          "    foo",
-          "    ^",
-          "15: ERROR: not found: value bar",
-          "    bar",
-          "    ^",
-          "23: ERROR: value baz is not a member of Iterator[wok.csv.Row]",
-          "        .map { row => currentRow = Some(row); row } baz",
-          "                                                    ^",
+          "foo",
+          "^",
           "",
           "| 1| package wok",
           "| 2| ",
@@ -175,21 +121,9 @@ class MainTest extends SpecificationWithJUnit {
           "|10| import scalax.file.ImplicitConversions.string2path",
           "|11| ",
           "|12| class Wok(override val args: List[String]) extends AbstractWok {",
-          "|13|   def runScript(): Unit = {",
-          "|14|     foo",
-          "|15|     bar",
-          "|16|     ;{",
-          "|17|       var currentRow: Option[Row] = None",
-          "|18|       def NF = currentRow.get.size",
-          "|19|       def NR = currentRow.get.id",
-          "|20|       def FT = currentRow.get.sep",
-          "|21|       def RT = currentRow.get.term",
-          "|22|       Stdin #> { _.csv",
-          "|23|         .map { row => currentRow = Some(row); row } baz",
-          "|24|       }",
-          "|25|     };",
-          "|26|   }",
-          "|27| }",
+          "|13| def runScript(): Unit = {",
+          "|14| foo",
+          "|15| }}",
           ""
       ).mkString(System.lineSeparator())
     }

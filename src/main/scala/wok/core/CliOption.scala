@@ -47,7 +47,10 @@ object CliOption {
             assume(args.size > i+1, "'-f' option requires an argument")
             val f = Path.fromString(args(i+1))
             assume(f.exists, s"'$f' doesn't exist")
-            script.append(f.string)
+            script.append(f.string match {
+              case s if s.startsWith("#") => "//" + s
+              case s => s
+            })
             i += 2
           case "--" =>
             i += 1

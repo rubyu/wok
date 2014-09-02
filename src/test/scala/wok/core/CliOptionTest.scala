@@ -57,18 +57,26 @@ class CliOptionTest extends SpecificationWithJUnit {
       CliOption.parse(List("--diag")) mustEqual CliOption(Nil, "", true)
     }
     "parse -f" in {
-      "parse scripts" in {
+      "parse script" in {
         val f1 = Path.createTempFile()
         f1.write(List("a", "b", "c") mkString "\n")
         CliOption.parse(List("-f", f1.path)) mustEqual CliOption(Nil, "a\nb\nc", false)
       }
-      "parse all type" in {
+      "parse scripts and args" in {
         val f1 = Path.createTempFile()
         f1.write("a")
         val f2 = Path.createTempFile()
         f2.write("b")
         CliOption.parse(List("-f", f1.path, "-f", f2.path, "arg1", "arg2")) mustEqual
           CliOption(List("arg1", "arg2"), "a\nb", false)
+      }
+      "comment out shebang" in {
+        val f1 = Path.createTempFile()
+        f1.write("#")
+        val f2 = Path.createTempFile()
+        f2.write("a")
+        CliOption.parse(List("-f", f1.path, "-f", f2.path)) mustEqual
+          CliOption(Nil, "//#\na", false)
       }
     }
     "parse -- a" in {

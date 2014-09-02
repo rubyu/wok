@@ -7,7 +7,7 @@ import scalax.io.Codec
 import scalax.file.Path
 import wok.core.{ThreadSafeVariable => ThreadSafe, ThreadSafeExecutor}
 import wok.core.Stdio.{in => Stdin, out => Stdout}
-import wok.csv.{Row, Writer, Reader, Quote}
+import wok.csv.{Writer, Reader, Quote}
 
 
 trait AbstractWok {
@@ -25,11 +25,12 @@ trait AbstractWok {
   lazy val _ARGC = new ThreadSafe[Int](args.size)
   val _ARGIND = new ThreadSafe[Int](0)
   val _FILENAME = new ThreadSafe[String]("")
-  val _FNR = new ThreadSafe[Long](0)
-  val _NR = new ThreadSafe[Long](0)
+  val _FNR = new ThreadSafe[Int](0)
+  val _NR = new ThreadSafe[Int](0)
   val _NF = new ThreadSafe[Int](0)
   val _FT = new ThreadSafe[List[String]](Nil)
   val _RT = new ThreadSafe[String]("")
+  val _ROW = new ThreadSafe[List[String]](Nil)
   val _READER = new ThreadSafe[Reader](Reader()) withCopy(v => v.copy())
   val _WRITER = new ThreadSafe[Writer](Writer()) withCopy(v => v.copy())
 
@@ -42,6 +43,8 @@ trait AbstractWok {
   def NF = _NF.value
   def FT = _FT.value
   def RT = _RT.value
+  def ROW = _ROW.value
+  def $0 = FT .zipWithIndex .map {case (s, i) => ROW(i) + s } .flatten .mkString + ROW.last + RT
   def READER = _READER.value
   def WRITER = _WRITER.value
 
@@ -72,8 +75,8 @@ trait AbstractWok {
   def OCD_=(c: Codec): Unit = WRITER.OCD(c)
 
   trait InputProcessor[-T] {
-    def process[A](xs: T *)(f: Iterator[Row] => A): A
-    def process[A](files: List[String], streams: List[InputStream])(f: Iterator[Row] => A): A = {
+    def process[A](xs: T *)(f: Iterator[List[String]] => A): A
+    def process[A](files: List[String], streams: List[InputStream])(f: Iterator[List[String]] => A): A = {
       // backup dynamic variables
       val __ARGV = ARGV
       val __ARGC = ARGC
@@ -106,10 +109,11 @@ trait AbstractWok {
           rows map { row =>
             _NR.value += 1
             _FNR.value = row.id
-            _NF.value = row.size
+            _NF.value = row.get.size
             _FT.value = row.sep
             _RT.value = row.term
-            row
+            _ROW.value = row.get
+            row.get
           }
         }
       .flatten
@@ -133,23 +137,24 @@ trait AbstractWok {
   }
 
   implicit object StreamInputProcessor extends InputProcessor[InputStream] {
-    def process[A](streams: InputStream *)(f: Iterator[Row] => A): A =
+    def process[A](streams: InputStream *)(f: Iterator[List[String]] => A): A =
       process(streams map (x => "-") toList, streams.toList)(f)
   }
 
   implicit object PathStringInputProcessor extends InputProcessor[String] {
-    def process[A](files: String *)(f: Iterator[Row] => A): A =
+    def process[A](files: String *)(f: Iterator[List[String]] => A): A =
       process(files.toList, files map (file => Path.fromString(file).inputStream.open().get) toList)(f)
   }
 
   object In {
-    def apply[A](f: Iterator[Row] => A): A = {
+    def apply[A](f: Iterator[List[String]] => A): A = {
       if (ARGC == 0)
         from(Stdin.inputStream.open().get)(f)
       else
         from(ARGV: _*)(f)
     }
-    def from[T: InputProcessor, A](xs: T *)(f: Iterator[Row] => A): A = implicitly[InputProcessor[T]].process(xs: _*)(f)
+    def from[T: InputProcessor, A](xs: T *)(f: Iterator[List[String]] => A): A =
+      implicitly[InputProcessor[T]].process(xs: _*)(f)
   }
 
   implicit val executionContext = scala.concurrent.ExecutionContext.fromExecutorService(new ThreadSafeExecutor)

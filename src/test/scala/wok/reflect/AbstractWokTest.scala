@@ -92,7 +92,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
       {
         val (row, fs, ofs) = result(0)
         row.size mustEqual 3
-        row.source mustEqual "a b c"
         fs.toString mustEqual "="
         ofs.toString mustEqual "="
       }
@@ -100,7 +99,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
       {
         val (row, fs, ofs) = result(1)
         row.size mustEqual 1
-        row.source mustEqual "d e f"
         fs.toString mustEqual "="
         ofs.toString mustEqual "="
       }
@@ -125,14 +123,12 @@ class AbstractWokTest extends SpecificationWithJUnit {
       {
         val (row, fs) = result(0)
         row.size mustEqual 3
-        row.source mustEqual "a b c"
         fs.toString mustEqual "[ \\t]+"
       }
 
       {
         val (row, fs) = result(1)
         row.size mustEqual 1
-        row.source mustEqual "d e f"
         fs.toString mustEqual "="
       }
     }
@@ -141,7 +137,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         def runScript(){}
         def in = In.from(p1.path, p2.path) {
           _ map { row =>
-            (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT)
+            (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT, $0)
           } toList
         }
       }
@@ -149,9 +145,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       result.size mustEqual 2
 
       {
-        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt) = result(0)
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt, source) = result(0)
         row.size mustEqual 3
-        row.source mustEqual "a b c"
         argv mustEqual List(p1.path, p2.path)
         argc mustEqual 2
         argind mustEqual 0
@@ -161,12 +156,12 @@ class AbstractWokTest extends SpecificationWithJUnit {
         nf mustEqual 3
         ft mustEqual List(" ", " ")
         rt mustEqual ""
+        source mustEqual "a b c"
       }
 
       {
-        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt) = result(1)
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt, source) = result(1)
         row.size mustEqual 3
-        row.source mustEqual "d e f"
         argv mustEqual List(p1.path, p2.path)
         argc mustEqual 2
         argind mustEqual 1
@@ -176,6 +171,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         nf mustEqual 3
         ft mustEqual List(" ", " ")
         rt mustEqual ""
+        source mustEqual "d e f"
       }
     }
   }
@@ -199,7 +195,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
       {
         val (row, fs, ofs) = result(0)
         row.size mustEqual 3
-        row.source mustEqual "a b c"
         fs.toString mustEqual "="
         ofs.toString mustEqual "="
       }
@@ -207,7 +202,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
       {
         val (row, fs, ofs) = result(1)
         row.size mustEqual 1
-        row.source mustEqual "d e f"
         fs.toString mustEqual "="
         ofs.toString mustEqual "="
       }
@@ -234,14 +228,12 @@ class AbstractWokTest extends SpecificationWithJUnit {
       {
         val (row, fs) = result(0)
         row.size mustEqual 3
-        row.source mustEqual "a b c"
         fs.toString mustEqual "[ \\t]+"
       }
 
       {
         val (row, fs) = result(1)
         row.size mustEqual 1
-        row.source mustEqual "d e f"
         fs.toString mustEqual "="
       }
     }
@@ -252,7 +244,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         def runScript(){}
         def in = In.from(s1, s2) {
           _ map { row =>
-            (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT)
+            (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT, $0)
           } toList
         }
       }
@@ -260,9 +252,8 @@ class AbstractWokTest extends SpecificationWithJUnit {
       result.size mustEqual 2
 
       {
-        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt) = result(0)
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt, source) = result(0)
         row.size mustEqual 3
-        row.source mustEqual "a b c"
         argv mustEqual List("-", "-")
         argc mustEqual 2
         argind mustEqual 0
@@ -272,12 +263,12 @@ class AbstractWokTest extends SpecificationWithJUnit {
         nf mustEqual 3
         ft mustEqual List(" ", " ")
         rt mustEqual ""
+        source mustEqual "a b c"
       }
 
       {
-        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt) = result(1)
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt, source) = result(1)
         row.size mustEqual 3
-        row.source mustEqual "d e f"
         argv mustEqual List("-", "-")
         argc mustEqual 2
         argind mustEqual 1
@@ -287,6 +278,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         nf mustEqual 3
         ft mustEqual List(" ", " ")
         rt mustEqual ""
+        source mustEqual "d e f"
       }
     }
   }

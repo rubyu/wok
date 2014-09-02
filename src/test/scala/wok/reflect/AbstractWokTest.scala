@@ -31,7 +31,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
         def runScript() {}
         def value = Future { FILENAME }
       }
-      wok._FILENAME.value = "a"
+      wok._TS1.value = wok._TS1.value.copy(filename = "a")
       val v1 = wok.FILENAME
       val v2 = Await.result(wok.value, Duration(1, SECONDS))
       v1 eq v2 must beTrue

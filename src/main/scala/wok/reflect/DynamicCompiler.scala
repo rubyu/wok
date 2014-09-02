@@ -38,7 +38,7 @@ object DynamicCompiler {
       |import wok.reflect.AbstractWok
       |import wok.reflect.Helpers._
       |import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}
-      |import wok.csv.{Quote, Reader, Row, Writer}
+      |import wok.csv.{Quote, Row}
       |import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}
       |import scalax.io.{Codec, Resource}
       |import scalax.file.Path

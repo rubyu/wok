@@ -19,7 +19,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "import wok.reflect.AbstractWok",
             "import wok.reflect.Helpers._",
             "import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}",
-            "import wok.csv.{Quote, Reader, Row, Writer}",
+            "import wok.csv.{Quote, Row}",
             "import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}",
             "import scalax.io.{Codec, Resource}",
             "import scalax.file.Path",
@@ -41,7 +41,7 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
             "import wok.reflect.AbstractWok",
             "import wok.reflect.Helpers._",
             "import wok.core.Stdio.{in => Stdin, out => Stdout, err => Stderr}",
-            "import wok.csv.{Quote, Reader, Row, Writer}",
+            "import wok.csv.{Quote, Row}",
             "import scala.sys.patched.process.{stringToProcess, stringSeqToProcess}",
             "import scalax.io.{Codec, Resource}",
             "import scalax.file.Path",
@@ -209,28 +209,6 @@ class DynamicCompilerTest extends SpecificationWithJUnit {
           }
         }
         out.toString mustEqual "a\\ b\\ c"
-      }
-
-      "Reader" in new scope {
-        Stdio.withIn(new TestInputStream("a b c")) {
-          Stdio.withOut(out) {
-            DynamicCompiler
-              .compile("Stdin #> { in => Reader().open(in) foreach { row => print(row: _*) } }")
-              ._2.create(Nil)
-              .runScript()
-          }
-        }
-        out.toString mustEqual "a b c"
-      }
-
-      "Writer" in new scope {
-        Stdio.withOut(out) {
-          DynamicCompiler
-            .compile("print(\"a\")")
-            ._2.create(Nil)
-            .runScript()
-        }
-        out.toString mustEqual "a"
       }
 
       "Codec" in new scope {

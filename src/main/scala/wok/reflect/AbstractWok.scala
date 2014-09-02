@@ -2,11 +2,10 @@
 package wok.reflect
 
 import java.io.InputStream
-import java.util.concurrent.ForkJoinPool
 import util.matching.Regex
 import scalax.io.Codec
 import scalax.file.Path
-import wok.core.{ThreadSafeVariable => ThreadSafe}
+import wok.core.{ThreadSafeVariable => ThreadSafe, ThreadSafeExecutor}
 import wok.core.Stdio.{in => Stdin, out => Stdout}
 import wok.csv.{Row, Writer, Reader, Quote}
 
@@ -153,36 +152,5 @@ trait AbstractWok {
     def from[T: InputProcessor, A](xs: T *)(f: Iterator[Row] => A): A = implicitly[InputProcessor[T]].process(xs: _*)(f)
   }
 
-  class ThreadSafeExecutor extends ForkJoinPool {
-    private val threadClass = classOf[Thread]
-    private val threadLocalClass = classOf[ThreadLocal[_]]
-    private val threadLocalMapClass = ClassLoader.getSystemClassLoader.loadClass("java.lang.ThreadLocal$ThreadLocalMap")
-
-    private val threadLocals = threadClass.getDeclaredField("threadLocals")
-    threadLocals.setAccessible(true)
-
-    private val inheritableThreadLocals = threadClass.getDeclaredField("inheritableThreadLocals")
-    inheritableThreadLocals.setAccessible(true)
-
-    private val createInheritedMap = threadLocalClass.getDeclaredMethod("createInheritedMap", threadLocalMapClass)
-    createInheritedMap.setAccessible(true)
-
-    override def execute(task: Runnable) {
-      val parent = Thread.currentThread()
-      super.execute(new Runnable {
-        override def run() {
-          val current = Thread.currentThread()
-          // initialize threadLocals
-          threadLocals.set(current, null)
-          // initialize inheritableThreadLocals
-          val parentMap = inheritableThreadLocals.get(parent)
-          val currentMap = createInheritedMap.invoke(current, parentMap)
-          inheritableThreadLocals.set(current, currentMap)
-
-          task.run()
-        }
-      })
-    }
-  }
   implicit val executionContext = scala.concurrent.ExecutionContext.fromExecutorService(new ThreadSafeExecutor)
 }

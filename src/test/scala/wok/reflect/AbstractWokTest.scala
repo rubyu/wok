@@ -16,6 +16,18 @@ import scalax.io.{StandardOpenOption, Codec}
 
 class AbstractWokTest extends SpecificationWithJUnit {
 
+  "AbstractWok.$0" should {
+    "return the source string of row" in {
+      Stdio.withIn(new TestInputStream("a b c\nd e f")) {
+        val wok = new AbstractWok {
+          def runScript(){}
+          def in = In { _ map (_ => $0) toList }
+        }
+        wok.in mustEqual List("a b c", "d e f")
+      }
+    }
+  }
+
   "ThreadSafeVariables" should {
     "pass value to child thread" in {
       val wok = new AbstractWok {

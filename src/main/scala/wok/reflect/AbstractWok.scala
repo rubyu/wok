@@ -38,7 +38,7 @@ trait AbstractWok {
   def FT = _TS2.value.ft
   def RT = _TS2.value.rt
   def ROW = _TS2.value.row
-  def $0 = FT .zipWithIndex .map {case (s, i) => ROW(i) + s } .flatten .mkString + ROW.last + RT
+  def $0 = FT .zipWithIndex .map {case (s, i) => ROW(i) + s } .flatten .mkString + ROW.last
 
   def FS: Regex = READER.FS
   def RS: Regex = READER.RS

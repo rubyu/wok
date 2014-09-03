@@ -6,18 +6,286 @@ import java.nio.charset.StandardCharsets
 import org.specs2.mutable._
 import org.specs2.specification.Scope
 import wok.Helpers._
-import wok.csv.{Quote, Writer, Reader}
+import wok.csv.Quote
 import wok.core.Stdio
-import java.io._
+import scala.concurrent.duration.{Duration, SECONDS}
+import scala.concurrent.{Await, Future}
 import scalax.file.Path
 import scalax.io.{StandardOpenOption, Codec}
 
 
 class AbstractWokTest extends SpecificationWithJUnit {
+
+  "ThreadSafeVariables" should {
+    "pass value to child thread" in {
+      val wok = new AbstractWok {
+        def runScript() {}
+        def value = Future { FILENAME }
+      }
+      val v1 = wok.FILENAME
+      val v2 = Await.result(wok.value, Duration(1, SECONDS))
+      v1 eq v2 must beTrue
+    }
+    "pass value to child thread when a change given" in {
+      val wok = new AbstractWok {
+        def runScript() {}
+        def value = Future { FILENAME }
+      }
+      wok._TS1.value = wok._TS1.value.copy(filename = "a")
+      val v1 = wok.FILENAME
+      val v2 = Await.result(wok.value, Duration(1, SECONDS))
+      v1 eq v2 must beTrue
+    }
+    "pass copied value to chid thread" in {
+      val wok = new AbstractWok {
+        def runScript() {}
+        def value = Future { READER }
+      }
+      val v1 = wok.READER
+      val v2 = Await.result(wok.value, Duration(1, SECONDS))
+      v1 ne v2 must beTrue
+    }
+  }
+
+  "AbstractWok.In" should {
+    "read data from Stdin when no argument given" in {
+      Stdio.withIn(new TestInputStream("a b c")) {
+        val wok = new AbstractWok {
+          def runScript(){}
+          def in = In { _ map (_ mkString) mkString }
+        }
+        wok.in mustEqual "abc"
+      }
+    }
+    "read data from files when arguments given" in {
+      val f1 = Path.createTempFile()
+      f1.write("a b c")
+      val f2 = Path.createTempFile()
+      f2.write("d e f")
+      val wok = new AbstractWok {
+        override val args = List(f1.path, f2.path)
+        def runScript(){}
+        def in = In { _ map (_ mkString) mkString }
+      }
+      wok.in mustEqual "abcdef"
+    }
+  }
+
+  "PathStringInputProcessor.process" should {
+    val p1 = Path.createTempFile()
+    p1.write("a b c")
+    val p2 = Path.createTempFile()
+    p2.write("d e f")
+    "protect inherited mutable variables" in {
+      val wok = new AbstractWok {
+        def runScript(){}
+        def in = In.from(p1.path, p2.path) {
+          _ map { row =>
+            FS = "="
+            OFS = "="
+            (row, FS, OFS)
+          } toList
+        }
+      }
+      val result = wok.in
+
+      {
+        val (row, fs, ofs) = result(0)
+        row.size mustEqual 3
+        fs.toString mustEqual "="
+        ofs.toString mustEqual "="
+      }
+
+      {
+        val (row, fs, ofs) = result(1)
+        row.size mustEqual 1
+        fs.toString mustEqual "="
+        ofs.toString mustEqual "="
+      }
+
+      wok.FS.toString mustEqual "[ \\t]+"
+      wok.OFS.toString mustEqual " "
+    }
+    "provide access to Reader's property" in {
+      val wok = new AbstractWok {
+        def runScript(){}
+        def in = In.from(p1.path, p2.path) {
+          _ map { row =>
+            try {
+              (row, FS)
+            }
+            finally FS = "="
+          } toList
+        }
+      }
+      val result = wok.in
+
+      {
+        val (row, fs) = result(0)
+        row.size mustEqual 3
+        fs.toString mustEqual "[ \\t]+"
+      }
+
+      {
+        val (row, fs) = result(1)
+        row.size mustEqual 1
+        fs.toString mustEqual "="
+      }
+    }
+    "provide immutable variables" in {
+      val wok = new AbstractWok {
+        def runScript(){}
+        def in = In.from(p1.path, p2.path) {
+          _ map { row =>
+            (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT, $0)
+          } toList
+        }
+      }
+      val result = wok.in
+      result.size mustEqual 2
+
+      {
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt, source) = result(0)
+        row.size mustEqual 3
+        argv mustEqual List(p1.path, p2.path)
+        argc mustEqual 2
+        argind mustEqual 0
+        filename mustEqual p1.path
+        fnr mustEqual 0
+        nr mustEqual 0
+        nf mustEqual 3
+        ft mustEqual List(" ", " ")
+        rt mustEqual ""
+        source mustEqual "a b c"
+      }
+
+      {
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt, source) = result(1)
+        row.size mustEqual 3
+        argv mustEqual List(p1.path, p2.path)
+        argc mustEqual 2
+        argind mustEqual 1
+        filename mustEqual p2.path
+        fnr mustEqual 0
+        nr mustEqual 1
+        nf mustEqual 3
+        ft mustEqual List(" ", " ")
+        rt mustEqual ""
+        source mustEqual "d e f"
+      }
+    }
+  }
+
+  "StreamInputProcessor.process" should {
+    "protect inherited mutable variables" in {
+      val s1 = new TestInputStream("a b c")
+      val s2 = new TestInputStream("d e f")
+      val wok = new AbstractWok {
+        def runScript(){}
+        def in = In.from(s1, s2) {
+          _ map { row =>
+            FS = "="
+            OFS = "="
+            (row, FS, OFS)
+          } toList
+        }
+      }
+      val result = wok.in
+
+      {
+        val (row, fs, ofs) = result(0)
+        row.size mustEqual 3
+        fs.toString mustEqual "="
+        ofs.toString mustEqual "="
+      }
+
+      {
+        val (row, fs, ofs) = result(1)
+        row.size mustEqual 1
+        fs.toString mustEqual "="
+        ofs.toString mustEqual "="
+      }
+
+      wok.FS.toString mustEqual "[ \\t]+"
+      wok.OFS.toString mustEqual " "
+    }
+    "provide access to Reader's property" in {
+      val s1 = new TestInputStream("a b c")
+      val s2 = new TestInputStream("d e f")
+      val wok = new AbstractWok {
+        def runScript(){}
+        def in = In.from(s1, s2) {
+          _ map { row =>
+            try {
+              (row, FS)
+            }
+            finally FS = "="
+          } toList
+        }
+      }
+      val result = wok.in
+
+      {
+        val (row, fs) = result(0)
+        row.size mustEqual 3
+        fs.toString mustEqual "[ \\t]+"
+      }
+
+      {
+        val (row, fs) = result(1)
+        row.size mustEqual 1
+        fs.toString mustEqual "="
+      }
+    }
+    "provide immutable variables" in {
+      val s1 = new TestInputStream("a b c")
+      val s2 = new TestInputStream("d e f")
+      val wok = new AbstractWok {
+        def runScript(){}
+        def in = In.from(s1, s2) {
+          _ map { row =>
+            (row, ARGV, ARGC, ARGIND, FILENAME, FNR, NR, NF, FT, RT, $0)
+          } toList
+        }
+      }
+      val result = wok.in
+      result.size mustEqual 2
+
+      {
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt, source) = result(0)
+        row.size mustEqual 3
+        argv mustEqual List("-", "-")
+        argc mustEqual 2
+        argind mustEqual 0
+        filename mustEqual "-"
+        fnr mustEqual 0
+        nr mustEqual 0
+        nf mustEqual 3
+        ft mustEqual List(" ", " ")
+        rt mustEqual ""
+        source mustEqual "a b c"
+      }
+
+      {
+        val (row, argv, argc, argind, filename, fnr, nr, nf, ft, rt, source) = result(1)
+        row.size mustEqual 3
+        argv mustEqual List("-", "-")
+        argc mustEqual 2
+        argind mustEqual 1
+        filename mustEqual "-"
+        fnr mustEqual 0
+        nr mustEqual 1
+        nf mustEqual 3
+        ft mustEqual List(" ", " ")
+        rt mustEqual ""
+        source mustEqual "d e f"
+      }
+    }
+  }
+
   "AbstractWok" should {
 
     class Wok extends AbstractWok {
-      val args = List()
       def runScript(){}
     }
 
@@ -25,31 +293,41 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "FS" in {
         val wok = new Wok()
         wok.FS.toString mustEqual "[ \\t]+"
-        wok.FS("a".r).FS.toString mustEqual "a"
-        wok.FS("a").FS.toString mustEqual "a"
-        wok.FS("").FS.toString mustEqual "(?!.)."
-        wok.FS('a').FS.toString mustEqual "a"
+        wok.FS = "a".r
+        wok.FS.toString mustEqual "a"
+        wok.FS = "a"
+        wok.FS.toString mustEqual "a"
+        wok.FS = ""
+        wok.FS.toString mustEqual "(?!.)."
+        wok.FS = 'a'
+        wok.FS.toString mustEqual "a"
       }
 
       "RS" in {
         val wok = new Wok()
         wok.RS.toString mustEqual "\\r\\n|\\r|\\n"
-        wok.RS("a".r).RS.toString mustEqual "a"
-        wok.RS("a").RS.toString mustEqual "a"
-        wok.RS("").RS.toString mustEqual "(?!.)."
-        wok.RS('a').RS.toString mustEqual "a"
+        wok.RS = "a".r
+        wok.RS.toString mustEqual "a"
+        wok.RS = "a"
+        wok.RS.toString mustEqual "a"
+        wok.RS = ""
+        wok.RS.toString mustEqual "(?!.)."
+        wok.RS = 'a'
+        wok.RS.toString mustEqual "a"
       }
 
       "FQ" in {
         val wok = new Wok()
         wok.FQ mustEqual Quote.None()
-        wok.FQ(Quote All()).FQ mustEqual Quote.All()
+        wok.FQ = Quote All()
+        wok.FQ mustEqual Quote.All()
       }
 
       "CD" in {
         val wok = new Wok()
         wok.CD mustEqual Codec.default
-        wok.CD(Codec.ISO8859).CD mustEqual Codec.ISO8859
+        wok.CD = Codec.ISO8859
+        wok.CD mustEqual Codec.ISO8859
       }
     }
 
@@ -57,47 +335,33 @@ class AbstractWokTest extends SpecificationWithJUnit {
       "OFS" in {
         val wok = new Wok()
         wok.OFS mustEqual " "
-        wok.OFS("a").OFS mustEqual "a"
-        wok.OFS('a').OFS mustEqual "a"
+        wok.OFS = "a"
+        wok.OFS mustEqual "a"
+        wok.OFS = 'a'
+        wok.OFS mustEqual "a"
       }
 
       "ORS" in {
         val wok = new Wok()
         wok.ORS mustEqual "\n"
-        wok.ORS("a").ORS mustEqual "a"
-        wok.ORS('a').ORS mustEqual "a"
+        wok.ORS = "a"
+        wok.ORS mustEqual "a"
+        wok.ORS = 'a'
+        wok.ORS mustEqual "a"
       }
 
       "OFQ" in {
         val wok = new Wok()
         wok.OFQ mustEqual Quote.None()
-        wok.OFQ(Quote All()).OFQ mustEqual Quote.All()
+        wok.OFQ = Quote All()
+        wok.OFQ mustEqual Quote.All()
       }
 
       "OCD" in {
         val wok = new Wok()
         wok.OCD mustEqual Codec.default
-        wok.OCD(Codec.ISO8859).OCD mustEqual Codec.ISO8859
-      }
-    }
-
-    "privide a function InputStream.csv" in {
-      import Helpers.ExtendedInputStream
-
-      "open an InputStream" in {
-        val in = new TestInputStream("a b c")
-        val wok = new Wok {
-          def open = in.csv
-        }
-        wok.open.next mustEqual List("a", "b", "c")
-      }
-
-      "open an InputStream with Reader" in {
-        val in = new TestInputStream("a-b-c")
-        val wok = new Wok {
-          def open = in.csv(Reader.FS("-"))
-        }
-        wok.open.next mustEqual List("a", "b", "c")
+        wok.OCD = Codec.ISO8859
+        wok.OCD mustEqual Codec.ISO8859
       }
     }
 
@@ -106,6 +370,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       trait scope extends Scope {
         val out = new TestOutputStream()
+
         def result = new String(out.toByteArray, StandardCharsets.UTF_8)
       }
 
@@ -156,54 +421,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
         result mustEqual "ab"
       }
-
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
-      }
     }
 
     "add a extended function !< to Path" in {
@@ -211,6 +428,7 @@ class AbstractWokTest extends SpecificationWithJUnit {
 
       trait scope extends Scope {
         val out = Path.createTempFile().!<
+
         def result = out.string
       }
 
@@ -260,54 +478,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
           out.print("b")
         }
         result mustEqual "ab"
-      }
-
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
       }
     }
 
@@ -367,53 +537,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
         result mustEqual "ab"
       }
 
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
-      }
     }
 
     "add a extended function !< to String" in {
@@ -471,54 +594,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
         }
         result mustEqual "ab"
       }
-
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
-      }
     }
 
     "add a extended function !<< to String" in {
@@ -575,54 +650,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
           out.print("b")
         }
         result mustEqual "ab"
-      }
-
-      "println() with Writer" in new scope {
-        new Wok {
-          out.println()(Writer OFQ(Quote All()))
-          out.println()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        new Wok {
-          out.printf()(Writer OFQ(Quote All()))
-          out.printf()(Writer OFQ(Quote All()))
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        new Wok {
-          out.print()(Writer OFQ(Quote All()))
-          out.print()(Writer OFQ(Quote All()))
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        new Wok {
-          out.println("a")(Writer OFQ(Quote All()))
-          out.println("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        new Wok {
-          out.printf("a")(Writer OFQ(Quote All()))
-          out.printf("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        new Wok {
-          out.print("a")(Writer OFQ(Quote All()))
-          out.print("b")(Writer OFQ(Quote All()))
-        }
-        result mustEqual "\"a\"\"b\""
       }
     }
 
@@ -691,66 +718,6 @@ class AbstractWokTest extends SpecificationWithJUnit {
           }
         }
         result mustEqual "ab"
-      }
-
-      "println() with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            println()(Writer OFQ (Quote All()))
-            println()(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "\n\n"
-      }
-
-      "printf() with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            printf()(Writer OFQ (Quote All()))
-            printf()(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "  "
-      }
-
-      "print() with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            print()(Writer OFQ (Quote All()))
-            print()(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual ""
-      }
-
-      "println(Any) with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            println("a")(Writer OFQ (Quote All()))
-            println("b")(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "\"a\"\n\"b\"\n"
-      }
-
-      "printf(Any) with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            printf("a")(Writer OFQ (Quote All()))
-            printf("b")(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "\"a\" \"b\" "
-      }
-
-      "print(Any) with Writer" in new scope {
-        Stdio.withOut(out) {
-          new Wok {
-            print("a")(Writer OFQ (Quote All()))
-            print("b")(Writer OFQ (Quote All()))
-          }
-        }
-        result mustEqual "\"a\"\"b\""
       }
     }
 

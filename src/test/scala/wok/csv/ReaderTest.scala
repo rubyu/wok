@@ -43,8 +43,8 @@ class ReaderTest extends SpecificationWithJUnit {
       reader
         .open(new TestInputStream("a1\ta2\ta3\nb1\tb2\tb3"))
         .toList mustEqual List(
-        new Row(reader, 0, List("a1", "a2", "a3"), List("\t", "\t"), "\n", "a1\ta2\ta3\n"),
-        new Row(reader, 1, List("b1", "b2", "b3"), List("\t", "\t"), "", "b1\tb2\tb3"))
+        Row(0, List("a1", "a2", "a3"), List("\t", "\t"), "\n"),
+        Row(1, List("b1", "b2", "b3"), List("\t", "\t"), ""))
     }
 
     "have a Regex does not match to any string as FS when a empty string given" in {
@@ -55,8 +55,8 @@ class ReaderTest extends SpecificationWithJUnit {
       reader
         .open(new TestInputStream("a1\ta2\nb1\tb2"))
         .toList mustEqual List(
-        new Row(reader, 0, List("a1\ta2"), Nil, "\n", "a1\ta2\n"),
-        new Row(reader, 1, List("b1\tb2"), Nil, "", "b1\tb2"))
+        Row(0, List("a1\ta2"), Nil, "\n"),
+        Row(1, List("b1\tb2"), Nil, ""))
     }
 
     "have a Regex does not match to any string as RS when a empty string given" in {
@@ -66,7 +66,7 @@ class ReaderTest extends SpecificationWithJUnit {
         .FQ(Quote None())
       reader.open(new TestInputStream("a1\ta2\nb1\tb2"))
         .toList mustEqual List(
-        new Row(reader, 0, List("a1", "a2\nb1", "b2"), List("\t", "\t"), "", "a1\ta2\nb1\tb2"))
+        Row(0, List("a1", "a2\nb1", "b2"), List("\t", "\t"), ""))
     }
 
     "be changed FS from inside Iterator" in {
@@ -78,8 +78,8 @@ class ReaderTest extends SpecificationWithJUnit {
         .open(new TestInputStream("a1\ta2\nb1 b2"))
         .map { row => reader.FS(" "); row }
         .toList mustEqual List(
-          new Row(reader, 0, List("a1", "a2"), Nil, "\n", "a1\ta2\n"),
-          new Row(reader, 1, List("b1", "b2"), Nil, "", "b1 b2")
+          Row(0, List("a1", "a2"), List("\t"), "\n"),
+          Row(1, List("b1", "b2"), List(" "), "")
         )
     }
 
@@ -92,9 +92,9 @@ class ReaderTest extends SpecificationWithJUnit {
         .open(new TestInputStream("a\nb c"))
         .map { row => reader.RS(" "); row }
         .toList mustEqual List(
-        new Row(reader, 0, List("a"), Nil, "\n", "a\n"),
-        new Row(reader, 1, List("b"), Nil, " ", "b "),
-        new Row(reader, 2, List("c"), Nil, "", "c")
+        new Row(0, List("a"), Nil, "\n"),
+        new Row(1, List("b"), Nil, " "),
+        new Row(2, List("c"), Nil, "")
       )
     }
 
@@ -107,8 +107,8 @@ class ReaderTest extends SpecificationWithJUnit {
         .open(new TestInputStream("\"a\"\n\"b\""))
         .map { row => reader.FQ(Quote Min()); row }
         .toList mustEqual List(
-        new Row(reader, 0, List("\"a\""), Nil, "\n", "\"a\"\n"),
-        new Row(reader, 1, List("b"), Nil, "", "\"b\"")
+        new Row(0, List("\"a\""), Nil, "\n"),
+        new Row(1, List("b"), Nil, "")
       )
     }
   }

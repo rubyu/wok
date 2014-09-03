@@ -2,22 +2,22 @@
 package wok.reflect
 
 import scalax.file.Path
-import wok.csv.{Row, Reader, Writer}
+import wok.csv.{Row, Reader}
 import scalax.file.defaultfs.{DefaultPath, RedirectModePath => RMPath, AppendModePath => AMPath}
 import scalax.io.managed.{OutputStreamResource, InputStreamResource}
-import scalax.io.{PrintableOutputStreamResource, StandardOpenOption, Codec}
+import scalax.io.{StandardOpenOption, Codec}
 import java.io.{OutputStream, InputStream}
 
 
 object Helpers {
   implicit class ExtendedInputStream(val in: InputStream) extends AnyVal {
-    def csv(implicit r: Reader): Iterator[Row] = r.open(in)
+    def csv(implicit wok: AbstractWok): Iterator[Row] = wok.READER.open(in)
   }
 
   implicit class ExtendedOutputStream(val out: OutputStream) extends AnyVal {
-    def print(x: Any *)(implicit w: Writer): Unit = w.write(out, x: _*)
-    def printf(x: Any *)(implicit w: Writer): Unit = w.writeField(out, x: _*)
-    def println(x: Any *)(implicit w: Writer): Unit = w.writeRow(out, x: _*)
+    def print(x: Any *)(implicit wok: AbstractWok): Unit = wok.WRITER.write(out, x: _*)
+    def printf(x: Any *)(implicit wok: AbstractWok): Unit = wok.WRITER.writeField(out, x: _*)
+    def println(x: Any *)(implicit wok: AbstractWok): Unit = wok.WRITER.writeRow(out, x: _*)
   }
 
   implicit class ExtendedInputStreamResource(val in: InputStreamResource[InputStream]) extends AnyVal {

@@ -51,9 +51,9 @@ In { _ foreach { row => println(row(0)) }}
 ```
 
 ```scala
-In { _
-  .filter (_ exists ("pattern".r.findFirstIn(_).isDefined))
-  .foreach (row => println(row: _*))
+In { _ foreach {
+  case row if row exists ("pattern".r.findFirstIn(_).isDefined) => println(row: _*)
+  case _ =>
 }
 ```
 
@@ -63,15 +63,15 @@ In { _
 
 ```bash
 # the following command is equivalent to 
-# val name = `value`
+# var name = `value`
 $ wok -v@char name=value
 
 # the following command is equivalent to 
-# val name = "value"
+# var name = "value"
 $ wok -v@str name=value
 
 # the following command is equivalent to 
-# val name = """value"""
+# var name = """value"""
 $ wok -v@rawstr name=value
 ```
 
@@ -79,7 +79,7 @@ $ wok -v@rawstr name=value
 
 ```scala 
 // setting Quote(mode=Min, quote='"') to Reader
-OQ = Quote.Min 
+OQ = Quote Min 
 
 // setting Quote(mode=All, quote='"', escape='\\') to Writer
 OFQ = Quote All Q('"') E('\\')

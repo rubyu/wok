@@ -1,72 +1,62 @@
 # WOK
 is a text processing tool inspired by AWK. It is @rubyu's holiday homework, summer 2014.
 
-
 ## WOK versus AWK
 
 ### Running a script
 
 ```bash
-$ awk 'BEGIN { print "hello!" }'
+$ wok 'print("hello!")'
 ```
 
 ```bash
-$ wok 'print("hello!")'
+$ awk 'BEGIN { print "hello!" }'
 ```
 
 ### Running a program file
 
 ```
-$ awk -f program-file input
+$ wok -f program-file input
 ```
 
 ```
-$ wok -f program-file input
+$ awk -f program-file input
 ```
 
 ### Variables
 
 ```
-$ awk -v name=value
-```
-
-```
 $ wok -v name=value
 ```
 
-### System variables
-
-```awk
-FS = "\t"
-
 ```
-
-```scala
-FS = "\t"
+$ awk -v name=value
 ```
-
 
 ### Operating fields
+
+```scala
+In { _ foreach { row => 
+  println(row(0)) 
+}}
+```
 
 ```awk
 { print $1 }
 ```
 
-```scala
-In { _ foreach { row => println(row(0)) }}
-```
-
 ### Filtering data
-
-```awk
-/pattern/ { print $0 }
-```
 
 ```scala
 In { _ foreach {
-  case row if row exists ("pattern".r.findFirstIn(_).isDefined) => println(row: _*)
+  case row if row exists ("pattern".r.findFirstIn(_).isDefined) => 
+    println(row: _*)
   case _ =>
 }
+```
+
+```awk
+/pattern/ { print $0 }
 ```
 
 ## Unique function to WOK 
@@ -74,42 +64,69 @@ In { _ foreach {
 ### Typed variables
 
 ```bash
-# the following command is equivalent to 
+# The following command is equivalent to 
 # var name = `value`
 $ wok -v@char name=value
 
-# the following command is equivalent to 
+# The following command is equivalent to 
 # var name = "value"
 $ wok -v@str name=value
 
-# the following command is equivalent to 
+# The following command is equivalent to 
 # var name = """value"""
 $ wok -v@rawstr name=value
 ```
 
-### Quote
+### Quoting
+
+The implimentation of `wok.csv` is compatible with Python's **loose** csv module. Quoting-mode, quote-char and escape-char can be set.
 
 ```scala 
-// setting Quote(mode=Min, quote='"') to Reader
+// Setting Quote(mode=Min, quote='"') to Reader
 OQ = Quote Min 
 
-// setting Quote(mode=All, quote='"', escape='\\') to Writer
+// Setting Quote(mode=All, quote='"', escape='\\') to Writer
 OFQ = Quote All Q('"') E('\\')
 ```
 
 ### Encoding 
 
 ```scala
-// setting Codec to Reader
+// Setting Codec to Reader
 CD = Codec("Windows-31J")
 
-// setting Codec to Writer
+// Setting Codec to Writer
 OCD = Codec("Windows-31J")
 ```
 
 ## Details
 
-### System variables
+### Built-in functions
+
+| Name | Type | Arguments | Note
+|------|------|------|
+| print | Unit | Any \* | print given data
+| printf | Unit | Any \* | print given data and OFS
+| println | Unit | Any \* | print given data and ORS
+| In | A | Iterator[List[String]] => A
+| FS | Unit | Regex |
+| FS | Unit | Char | 
+| FS | Unit | String | 
+| RS | Unit | Regex | 
+| RS | Unit | Char | 
+| RS | Unit | String | 
+| FQ |  Unit | Quote | 
+| CD |  Unit | Codec | 
+| OFS |  Unit | Regex | 
+| OFS |  Unit | Char | 
+| OFS |  Unit | String | 
+| ORS |  Unit | Regex | 
+| ORS |  Unit | Char | 
+| ORS |  Unit | String | 
+| OFQ |  Unit | Quote | 
+| OCD |  Unit | Codec | 
+
+### Built-in variables
 
 | Name | Type | Default Value |
 |------|------|------|
@@ -122,7 +139,8 @@ OCD = Codec("Windows-31J")
 | OFQ | Quote | Quote.None |
 | OCD | Codec | Codec("utf-8") |
 
-Note that the following system variables **cannot** be reassignment.
+### Built-in read-only variables
+Note that the following system variables **cannot** be reassigned.
 
 | Name | Type | Default Value |
 |------|------|------|
@@ -135,3 +153,44 @@ Note that the following system variables **cannot** be reassignment.
 | NF | Int | 0 |
 | FT | List[String] | Nil |
 | RT | String | "" |
+
+### Built-in classes
+| Name | Package |
+|------|------|
+| Stdin | wok.core.Stdio.in
+| Stdout | wok.core.Stdio.out
+| Stderr | wok.core.Stdio.err
+| Quote | wok.csv.Quote
+| Codec | scalax.io.Codec
+| Resource | scalax.io.Resource
+| Path | scalax.file.Path
+
+
+### Built-in implicit conversions
+
+| Target | Result |
+|------|------|
+| String | scalax.file.Path
+| String | scala.sys.patched.process.ProcessBuilder
+| Seq[String] | scala.sys.patched.process.ProcessBuilder
+
+### Built-in value classes
+
+| Target | Name | Type | Arguments | Note
+|-|-|-|-|
+|OutputStream | print | Unit | Any \* | print given data
+|OutputStream | printf | Unit | Any \* | print given data and OFS
+|OutputStream | println | Unit | Any \* | print given data and ORS
+|InputStreamResource | #> | A | InputStream => A |
+|OutputStreamResource | #< | A | OutputStream => A |
+|Path | #> | A | InputStream => A |
+|Path | !<< | AppendModePath |
+|Path | #<< | A | OutputStream => A |
+|Path | !< | RedirectModePath |
+|Path | #< | A | OutputStream => A |
+|String | #> | A | InputStream => A |
+|String | !<< | AppendModePath |
+|String | #<< | A | OutputStream => A |
+|String | !< | RedirectModePath |
+|String | #< | A | OutputStream => A |
+|ProcessBuilder | #> | wok.process.Result

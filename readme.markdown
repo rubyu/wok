@@ -104,7 +104,7 @@ OCD = Codec("Windows-31J")
 ### Built-in functions
 
 | Name | Type | Arguments | Note |
-|-|-|-|-|
+|------|------|-----------|------|
 | print | Unit | Any \* | print given data
 | printf | Unit | Any \* | print given data and OFS
 | println | Unit | Any \* | print given data and ORS
@@ -129,7 +129,7 @@ OCD = Codec("Windows-31J")
 ### Built-in variables
 
 | Name | Type | Default Value |
-|------|------|------|
+|------|------|---------------|
 | FS | Regex | "[ \t]+".r |
 | RS | Regex | "\r\n&#124;\r&#124;\n".r |
 | FQ | Quote | Quote.None |
@@ -143,7 +143,7 @@ OCD = Codec("Windows-31J")
 Note that the following system variables **cannot** be reassigned.
 
 | Name | Type | Default Value |
-|------|------|------|
+|------|------|---------------|
 | ARGV | List[String] | Nil |
 | ARGC | Int | 0 |
 | ARGIND | Int | 0 |
@@ -156,7 +156,7 @@ Note that the following system variables **cannot** be reassigned.
 
 ### Built-in classes
 | Name | Package |
-|------|------|
+|------|---------|
 | Stdin | wok.core.Stdio.in
 | Stdout | wok.core.Stdio.out
 | Stderr | wok.core.Stdio.err
@@ -169,7 +169,7 @@ Note that the following system variables **cannot** be reassigned.
 ### Built-in implicit conversions
 
 | Target | Result |
-|------|------|
+|--------|--------|
 | String | scalax.file.Path
 | String | scala.sys.patched.process.ProcessBuilder
 | Seq[String] | scala.sys.patched.process.ProcessBuilder
@@ -177,7 +177,7 @@ Note that the following system variables **cannot** be reassigned.
 ### Built-in value classes
 
 | Target | Name | Type | Arguments | Note |
-|-|-|-|-|-|
+|--------|------|------|-----------|------|
 |OutputStream | print | Unit | Any \* | print given data
 |OutputStream | printf | Unit | Any \* | print given data and OFS
 |OutputStream | println | Unit | Any \* | print given data and ORS
@@ -194,3 +194,4 @@ Note that the following system variables **cannot** be reassigned.
 |String | !< | RedirectModePath |
 |String | #< | A | OutputStream => A |
 |ProcessBuilder | #> | wok.process.Result
+

@@ -79,7 +79,7 @@ $ wok -v@rawstr name=value
 
 ### Quoting
 
-The implimentation of `wok.csv` is compatible with Python's **loose** csv module. Quoting-mode, quote-char and escape-char can be set.
+The implimentation of `wok.csv` is compatible with Python's **loose** csv module. Quoting-mode, quote-char and escape-char can be set to Reader and Writer.
 
 ```scala 
 // Setting Quote(mode=Min, quote='"') to Reader
@@ -93,10 +93,10 @@ OFQ = Quote All Q('"') E('\\')
 
 ```scala
 // Setting Codec to Reader
-CD = Codec("Windows-31J")
+CD = Codec("UTF-8")
 
 // Setting Codec to Writer
-OCD = Codec("Windows-31J")
+OCD = Codec("UTF-16")
 ```
 
 ## Details
@@ -194,4 +194,3 @@ Note that the following system variables **cannot** be reassigned.
 |String | !< | RedirectModePath |
 |String | #< | A | OutputStream => A |
 |ProcessBuilder | #> | wok.process.Result
-

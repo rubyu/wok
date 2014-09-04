@@ -103,8 +103,8 @@ OCD = Codec("Windows-31J")
 
 ### Built-in functions
 
-| Name | Type | Arguments | Note
-|------|------|------|
+| Name | Type | Arguments | Note |
+|-|-|-|-|
 | print | Unit | Any \* | print given data
 | printf | Unit | Any \* | print given data and OFS
 | println | Unit | Any \* | print given data and ORS
@@ -176,8 +176,8 @@ Note that the following system variables **cannot** be reassigned.
 
 ### Built-in value classes
 
-| Target | Name | Type | Arguments | Note
-|-|-|-|-|
+| Target | Name | Type | Arguments | Note |
+|-|-|-|-|-|
 |OutputStream | print | Unit | Any \* | print given data
 |OutputStream | printf | Unit | Any \* | print given data and OFS
 |OutputStream | println | Unit | Any \* | print given data and ORS

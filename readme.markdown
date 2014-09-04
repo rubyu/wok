@@ -34,6 +34,18 @@ $ awk -v name=value
 $ wok -v name=value
 ```
 
+### System variables
+
+```awk
+FS = "\t"
+
+```
+
+```scala
+FS = "\t"
+```
+
+
 ### Operating fields
 
 ```awk
@@ -94,3 +106,32 @@ CD = Codec("Windows-31J")
 // setting Codec to Writer
 OCD = Codec("Windows-31J")
 ```
+
+## Details
+
+### System variables
+
+| Name | Type | Default Value |
+|------|------|------|
+| FS | Regex | "[ \t]+".r |
+| RS | Regex | "\r\n&#124;\r&#124;\n".r |
+| FQ | Quote | Quote.None |
+| CD | Codec | Codec("utf-8") |
+| OFS | String | " " |
+| ORS | String | "\n" |
+| OFQ | Quote | Quote.None |
+| OCD | Codec | Codec("utf-8") |
+
+Note that the following system variables **cannot** be reassignment.
+
+| Name | Type | Default Value |
+|------|------|------|
+| ARGV | List[String] | Nil |
+| ARGC | Int | 0 |
+| ARGIND | Int | 0 |
+| FILENAME | String | "" |
+| NFR | Int | 0 |
+| NR | Int | 0 |
+| NF | Int | 0 |
+| FT | List[String] | Nil |
+| RT | String | "" |

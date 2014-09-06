@@ -112,6 +112,9 @@ OCD = Codec("UTF-16")
 
 ### Built-in variables
 
+All the variables in the following list can be reassinged, but you should be aware of this. 
+If you substitute new Codec to CD inside of an Iterator of Row, the change would not reflect to the Iterator. This is the only limitation to the reassginment of built-in valiables. 
+
 | Name | Type | Default Value |
 |------|------|---------------|
 | FS | Regex | Regex("[ \t]+") |
@@ -123,7 +126,9 @@ OCD = Codec("UTF-16")
 | OFQ | Quote | Quote.None |
 | OCD | Codec | Codec("utf-8") |
 
+
 ### Built-in read-only variables
+
 Note that the following system variables **cannot** be reassigned.
 
 | Name | Type | Default Value |

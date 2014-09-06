@@ -15,21 +15,21 @@ $ awk 'BEGIN { print "hello!" }'
 
 ### Running a program file
 
-```
+```bash
 $ wok -f program-file input
 ```
 
-```
+```bash
 $ awk -f program-file input
 ```
 
 ### Variables
 
-```
+```bash
 $ wok -v name=value
 ```
 
-```
+```bash
 $ awk -v name=value
 ```
 
@@ -79,7 +79,7 @@ $ wok -v@rawstr name=value
 
 ### Quoting
 
-The implimentation of `wok.csv` is compatible with Python's **loose** csv module. Quoting-mode, quote-char and escape-char can be set to Reader and Writer.
+The implimentation of `wok.csv` is compatible with Python's **loose** csv module, then, Quoting-mode, quote-char and escape-char can be set to Reader and Writer.
 
 ```scala 
 // Setting Quote(mode=Min, quote='"') to Reader
@@ -109,29 +109,13 @@ OCD = Codec("UTF-16")
 | printf | Unit | Any \* | print given data and OFS
 | println | Unit | Any \* | print given data and ORS
 | In | A | Iterator[List[String]] => A
-| FS | Unit | Regex |
-| FS | Unit | Char | 
-| FS | Unit | String | 
-| RS | Unit | Regex | 
-| RS | Unit | Char | 
-| RS | Unit | String | 
-| FQ |  Unit | Quote | 
-| CD |  Unit | Codec | 
-| OFS |  Unit | Regex | 
-| OFS |  Unit | Char | 
-| OFS |  Unit | String | 
-| ORS |  Unit | Regex | 
-| ORS |  Unit | Char | 
-| ORS |  Unit | String | 
-| OFQ |  Unit | Quote | 
-| OCD |  Unit | Codec | 
 
 ### Built-in variables
 
 | Name | Type | Default Value |
 |------|------|---------------|
-| FS | Regex | "[ \t]+".r |
-| RS | Regex | "\r\n&#124;\r&#124;\n".r |
+| FS | Regex | Regex("[ \t]+") |
+| RS | Regex | Regex("\r\n&#124;\r&#124;\n") |
 | FQ | Quote | Quote.None |
 | CD | Codec | Codec("utf-8") |
 | OFS | String | " " |
@@ -171,6 +155,7 @@ Note that the following system variables **cannot** be reassigned.
 | Target | Result |
 |--------|--------|
 | String | scalax.file.Path
+| Codec | Charset 
 | String | scala.sys.patched.process.ProcessBuilder
 | Seq[String] | scala.sys.patched.process.ProcessBuilder
 

@@ -207,4 +207,4 @@ Note that the following system variables **cannot** be reassigned.
 |String | #<< | A | OutputStream => A |
 |String | !< | RedirectModePath |
 |String | #< | A | OutputStream => A |
-|ProcessBuilder | #> | wok.process.Result
+|ProcessBuilder | !> | wok.process.Result

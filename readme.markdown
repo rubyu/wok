@@ -78,8 +78,8 @@ In { _ foreach { _ =>
 ```scala
 In { _ foreach { row =>
   val res = Seq("echo", row(0)) #| Seq("grep", "angel") !>
-  print(res.string)
-  print(res.code)
+  println(res.string)
+  println(res.code)
 }}
 ```
 

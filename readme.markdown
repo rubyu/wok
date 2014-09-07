@@ -52,11 +52,35 @@ In { _ foreach {
   case row if row exists ("pattern".r.findFirstIn(_).isDefined) => 
     println(row: _*)
   case _ =>
-}
+}}
 ```
 
 ```awk
 /pattern/ { print $0 }
+```
+
+### Printing to a file
+
+```scala
+val path = "list" !<
+In { _ foreach { _ =>
+  path.println(NF)
+}}
+```
+
+
+```awk
+{ print NF > "list" }
+```
+
+### Executing a system command
+
+```scala
+In { _ foreach { row =>
+  val res = Seq("echo", row(0)) #| Seq("grep", "angel") !>
+  print(res.string)
+  print(res.code)
+}}
 ```
 
 ## Unique function to WOK 
@@ -83,7 +107,7 @@ The implimentation of `wok.csv` is compatible with Python's **loose** csv module
 
 ```scala 
 // Setting Quote(mode=Min, quote='"') to Reader
-OQ = Quote Min 
+FQ = Quote Min 
 
 // Setting Quote(mode=All, quote='"', escape='\\') to Writer
 OFQ = Quote All Q('"') E('\\')
@@ -113,7 +137,7 @@ OCD = Codec("UTF-16")
 ### Built-in variables
 
 All the variables in the following list can be reassinged, but you should be aware of this. 
-If you substitute new Codec to CD inside of an Iterator of Row, the change would not reflect to the Iterator. This is the only limitation to the reassginment of built-in valiables. 
+If you substitute new Codec instance to CD inside of an Iterator of Row, the change would not reflect to the Iterator. This is the only limitation to the reassginment of built-in valiables. 
 
 | Name | Type | Default Value |
 |------|------|---------------|
